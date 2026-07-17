@@ -1,0 +1,67 @@
+/* ─── Feishu-style CSS Variables ─── */
+:root {
+  --feishu-bg: #FFFFFF;
+  --feishu-card-bg: #F2F3F5;
+  --feishu-card-hover: #EAEBED;
+  --feishu-accent: #3370FF;
+  --feishu-accent-light: #E8F3FF;
+  --feishu-text-primary: #1F2329;
+  --feishu-text-secondary: #8F959E;
+  --feishu-border: #E5E6EB;
+  --feishu-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --feishu-radius: 8px;
+  --feishu-line-height: 1.7;
+}
+
+.dark {
+  --feishu-bg: #1A1A1A;
+  --feishu-card-bg: #2A2A2A;
+  --feishu-card-hover: #333333;
+  --feishu-accent: #4D8BFF;
+  --feishu-accent-light: #1E2E4A;
+  --feishu-text-primary: #E5E5E5;
+  --feishu-text-secondary: #8B8B8B;
+  --feishu-border: #333333;
+  --feishu-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* ─── Typography Overrides ─── */
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: var(--feishu-line-height);
+  color: var(--feishu-text-primary);
+  background: var(--feishu-bg);
+}
+
+/* Make Nextra content area feel more Feishu-like */
+article h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+article h2 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-top: 2rem;
+}
+
+article h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+}
+
+/* Sidebar hover states */
+.nextra-sidebar-container a:hover {
+  background: var(--feishu-card-bg) !important;
+  border-radius: 6px;
+}
+
+.nextra-sidebar-container a[aria-current="true"] {
+  background: var(--feishu-accent-light) !important;
+  color: var(--feishu-accent) !important;
+  border-radius: 6px;
+  font-weight: 500;
+}

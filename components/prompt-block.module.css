@@ -1,0 +1,78 @@
+.card {
+  position: relative;
+  margin: 1.5rem 0;
+  padding: 16px 20px;
+  background: var(--feishu-card-bg);
+  border-left: 3px solid var(--feishu-accent);
+  border-radius: var(--feishu-radius);
+  font-size: 0.9375rem;
+  line-height: var(--feishu-line-height);
+  color: var(--feishu-text-primary);
+  transition: background 0.15s ease;
+}
+
+.card:hover {
+  background: var(--feishu-card-hover);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--feishu-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.emoji {
+  font-size: 1rem;
+}
+
+.copyBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid var(--feishu-border);
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: var(--feishu-text-secondary);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.card:hover .copyBtn {
+  opacity: 1;
+}
+
+.copyBtn:hover {
+  background: var(--feishu-accent);
+  color: #fff;
+  border-color: var(--feishu-accent);
+}
+
+/* Mobile: always show copy button */
+@media (hover: none) and (pointer: coarse) {
+  .copyBtn {
+    opacity: 1;
+  }
+}
+
+.content {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
