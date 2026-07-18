@@ -1,16 +1,15 @@
 #!/usr/bin/env npx tsx
 /**
- * Data import pipeline: awesome-gpt-image-2 → MDX + Supabase Storage
+ * Import pipeline: awesome-gpt-image-2 → MDX + Supabase Storage
  *
  * Usage:
- *   npx tsx scripts/import-cases.ts --source <path-to-awesome-gpt-image-2>
+ *   npx tsx scripts/import-cases.ts <path-to-awesome-gpt-image-2>
  *
- * Process:
- *   1. Parse docs/gallery-*.md to extract case data
- *   2. Load data/style-library.json for category/template mapping
- *   3. Filter cases matching our 3 target categories
- *   4. Process images: download → sharp thumbnails → upload to Supabase
- *   5. Generate content/{en,zh}/{category}/case-*.mdx files
+ * Steps:
+ *   1. Parse gallery markdown — extract case #, title, image, source, prompt
+ *   2. Classify by Chinese title keywords → photography / product / people
+ *   3. Resize images via sharp → upload thumbnails + full to Supabase
+ *   4. Generate content/{en,zh}/{category}/case-*.mdx
  */
 
 import fs from 'node:fs'
@@ -20,128 +19,132 @@ import sharp from 'sharp'
 
 // ─── Config ───────────────────────────────────────────────────
 
-const TARGET_CATEGORIES = ['cat-photography', 'cat-product', 'cat-character'] as const
-
-const CATEGORY_MAP: Record<string, { id: string; enName: string; zhName: string }> = {
-  'cat-photography': { id: 'photography', enName: 'Photography & Realism', zhName: '摄影与写实' },
-  'cat-product': { id: 'product', enName: 'Products & E-commerce', zhName: '产品与电商' },
-  'cat-character': { id: 'people', enName: 'Characters & People', zhName: '人物与角色' }
-}
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://wvzqfmvehnfdxjqcjjbb.supabase.co'
+const SUPABASE_URL = 'https://wvzqfmvehnfdxjqcjjbb.supabase.co'
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 const BUCKET = 'prompt-images'
 
+const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  photography: [
+    '摄影', '写真', '写实', '街拍', '自拍', '风景', '自然', '动物',
+    '植物', '花卉', '微距', '人像摄影', '产品摄影', '美食摄影',
+    '建筑摄影', '航拍', '水下', '黑白', '光影', '逆光',
+    '柔光', '特写', '镜头', '相机', '拍照', '照片',
+    '海滩', '沙漠', '极简', '氛围感', '质感', '生活感',
+    '纪实', '抓拍', '日常', '居家', '毛片', '胶片'
+  ],
+  product: [
+    '产品', '电商', '商品', '详情页', '展示', '包装', '广告',
+    '直播', '带货', '促销', '商业', '品牌展示', '样机',
+    '淘宝', '亚马逊', '产品图', '白底图', '场景图',
+    '老干妈', '咖啡', '手机', '耳机', '手表', '香水',
+    '化妆品', '口红', '护肤', '衣服', '鞋子', '包',
+    '界面', '交互', '登录页', '仪表盘', '中控', '后台',
+    'APP', 'UI', '网页', '网站', '深色模式', '浅色模式',
+    '数据看板', '原型', '线框图', '卡片', '列表',
+    '电商详情', '主图', '亚马逊', '速卖通'
+  ],
+  people: [
+    '人物', '角色', '人像', '肖像', '自拍', '全身', '半身',
+    '少女', '男孩', '女孩', '男人', '女人', '儿童', '老人',
+    '明星', '运动员', '模特', 'cosplay', '二次元', '动漫',
+    '赛博', '机甲', '战士', '法师', '精灵', '龙',
+    '皇帝', '贵妃', '将军', '武士', '忍者',
+    '特朗普', '马斯克', '明星', '演员', '歌手',
+    '工笔画', '水墨', '国风', '古装', '汉服', '旗袍',
+    '人物设定', '角色设定', '三视图', '表情包', '头像'
+  ]
+}
+
 // ─── Types ────────────────────────────────────────────────────
 
-interface GalleryCase {
+interface ParsedCase {
   caseNumber: number
   title: string
-  category: string
-  sourcePlatform: string
-  sourceAuthor: string
-  promptText: string
-  imagePath: string // e.g. ../data/images/case1.jpg
+  imagePath: string   // e.g. "../data/images/case1.jpg"
+  sourceRaw: string   // e.g. "小红书号4264014889" or "未提供"
+  promptText: string  // full prompt
+  category?: string   // photography | product | people
 }
 
-interface StyleLibrary {
-  version: number
-  categories: Array<{
-    id: string
-    value: string
-    title: { en: string; zh: string }
-    description: { en: string; zh: string }
-  }>
-  templates: Array<{
-    id: string
-    title: { en: string; zh: string }
-    category: string
-    styles: string[]
-    scenes: string[]
-    tags: string[]
-    useWhen: { en: string; zh: string }
-    guidance: { en: string[]; zh: string[] }
-    pitfalls: { en: string[]; zh: string[] }
-    exampleCases: number[]
-    cover: string
-  }>
-}
+// ─── Gallery Parser ───────────────────────────────────────────
 
-// ─── Parse Gallery Markdown ───────────────────────────────────
+function parseGallery(content: string): ParsedCase[] {
+  const results: ParsedCase[] = []
 
-function parseGalleryMarkdown(content: string): GalleryCase[] {
-  const cases: GalleryCase[] = []
+  // Split by case anchors: <a name="case-N"></a>
+  const blocks = content.split(/<a name="case-(\d+)"><\/a>/)
+  // blocks[0] = preamble, blocks[1] = case1 number, blocks[2] = case1 content,
+  // blocks[3] = case2 number, blocks[4] = case2 content, ...
 
-  // Each case starts with <a name="case-N"></a> and ends before the next <a> or at <hr>
-  const caseRegex = /<a name="case-(\d+)"><\/a>\s*\n\s*\n\s*###\s+(.+?)\n\s*\n\s*!\[(.+?)\]\((.+?)\)\s*\n\s*\n\s*\*?\*?来源：?\*?\*?\s*(.+?)\s*\n\s*\n\s*\*?\*?提示词：?\*?\*?\s*\n\s*\n\s*```text?\s*\n([\s\S]*?)```/g
-
-  let match: RegExpExecArray | null
-  while ((match = caseRegex.exec(content)) !== null) {
-    const [, numStr, title, , imagePath, sourceRaw, promptText] = match
+  for (let i = 1; i < blocks.length; i += 2) {
+    const numStr = blocks[i]
+    const body = blocks[i + 1] || ''
     const caseNumber = parseInt(numStr, 10)
-    const sourceClean = sourceRaw.replace(/\*+/g, '').trim()
-    const sourceParts = sourceClean.split(/[@小红书]/)
 
-    cases.push({
-      caseNumber,
-      title: title.trim(),
-      category: '', // will be filled from style-library
-      sourcePlatform: sourceClean.includes('小红书') || sourceClean.includes('小紅書') ? '小红书' : 'Unknown',
-      sourceAuthor: extractSourceId(sourceClean),
-      promptText: promptText.trim(),
-      imagePath: imagePath.trim()
-    })
-  }
+    // Title: ### 例 N：标题
+    const titleMatch = body.match(/###\s+例\s*\d+[：:]\s*(.+)/)
+    if (!titleMatch) continue
+    const title = titleMatch[1].trim()
 
-  return cases
-}
+    // Image: ![alt](path)
+    const imgMatch = body.match(/!\[.*?\]\((.+?)\)/)
+    const imagePath = imgMatch ? imgMatch[1].trim() : ''
 
-function extractSourceId(source: string): string {
-  // Extract numeric ID or handle from source string
-  const numMatch = source.match(/(\d{8,})/)
-  if (numMatch) return numMatch[1]
-  const handleMatch = source.match(/[号號]\s*(\S+)/)
-  if (handleMatch) return handleMatch[1]
-  if (source === '未提供' || source === 'Not provided') return ''
-  return source.trim().slice(0, 30)
-}
+    // Source: **来源：**  or **来源:**
+    const srcMatch = body.match(/\*\*来源[：:]\*\*\s*(.+)/)
+    let sourceRaw = srcMatch ? srcMatch[1].trim() : '未提供'
+    // Remove any trailing ** markers
+    sourceRaw = sourceRaw.replace(/\*+/g, '').trim()
 
-// ─── Category Matching ───────────────────────────────────────
-
-function matchCategories(
-  cases: GalleryCase[],
-  styleLibrary: StyleLibrary
-): Map<string, GalleryCase[]> {
-  // Build case number → case index
-  const caseMap = new Map<number, GalleryCase>()
-  for (const c of cases) {
-    caseMap.set(c.caseNumber, c)
-  }
-
-  // For each target category, find templates and their exampleCases
-  const result = new Map<string, GalleryCase[]>()
-  for (const targetCatId of TARGET_CATEGORIES) {
-    const matched: GalleryCase[] = []
-    const catInfo = styleLibrary.categories.find(c => c.id === targetCatId)
-    const catValue = catInfo?.value || ''
-
-    for (const template of styleLibrary.templates) {
-      if (template.category === catValue) {
-        for (const caseNum of template.exampleCases) {
-          const galCase = caseMap.get(caseNum)
-          if (galCase) {
-            galCase.category = targetCatId
-            if (!matched.some(c => c.caseNumber === caseNum)) {
-              matched.push(galCase)
-            }
-          }
-        }
+    // Prompt: **提示词[：:]** followed by ```text ... ```
+    const promptMatch = body.match(/\*\*提示词[：:]\*\*[\s\S]*?```(?:text)?\s*\n([\s\S]*?)```/)
+    let promptText = ''
+    if (promptMatch) {
+      promptText = promptMatch[1].trim()
+    } else {
+      // Fallback: try to grab everything after 提示词 until *** or next case
+      const fallMatch = body.match(/\*\*提示词[：:]\*\*\s*\n([\s\S]*?)(?:\*\*\*|---|<a name=)/)
+      if (fallMatch) {
+        promptText = fallMatch[1].trim()
+        // Strip code fences if present
+        promptText = promptText.replace(/^```(?:text)?\s*\n?/, '').replace(/\n?```\s*$/, '')
       }
     }
-    result.set(targetCatId, matched)
+
+    if (title && promptText) {
+      results.push({ caseNumber, title, imagePath, sourceRaw, promptText })
+    }
   }
 
-  return result
+  return results
+}
+
+// ─── Category Classifier ──────────────────────────────────────
+
+function classifyCase(c: ParsedCase): string {
+  const text = c.title + ' ' + c.promptText.slice(0, 200)
+
+  const scores: Record<string, number> = {}
+  for (const [cat, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    let score = 0
+    for (const kw of keywords) {
+      if (text.includes(kw)) score++
+    }
+    scores[cat] = score
+  }
+
+  // Find best match
+  let best = 'photography' // default
+  let bestScore = 0
+  for (const [cat, score] of Object.entries(scores)) {
+    if (score > bestScore) {
+      bestScore = score
+      best = cat
+    }
+  }
+
+  // If no keywords matched at all, default to photography
+  return bestScore > 0 ? best : 'photography'
 }
 
 // ─── Image Processing ─────────────────────────────────────────
@@ -149,30 +152,41 @@ function matchCategories(
 async function processImage(
   sourceDir: string,
   imagePath: string,
-  caseNumber: number
-): Promise<{ fullBuffer: Buffer; thumbBuffer: Buffer; ext: string }> {
-  // imagePath is like "../data/images/case1.jpg"
+): Promise<{ fullBuffer: Buffer; thumbBuffer: Buffer; ext: string } | null> {
   const filename = path.basename(imagePath)
   const fullPath = path.join(sourceDir, 'data', 'images', filename)
 
   if (!fs.existsSync(fullPath)) {
-    throw new Error(`Image not found: ${fullPath}`)
+    // Try with different extensions
+    const base = filename.replace(/\.[^.]+$/, '')
+    for (const ext of ['.jpg', '.png', '.jpeg', '.webp']) {
+      const altPath = path.join(sourceDir, 'data', 'images', base + ext)
+      if (fs.existsSync(altPath)) {
+        return processImageFromPath(altPath)
+      }
+    }
+    return null
   }
 
-  const inputBuffer = fs.readFileSync(fullPath)
-  const ext = path.extname(filename).replace('.', '') || 'jpg'
-  const metadata = await sharp(inputBuffer).metadata()
+  return processImageFromPath(fullPath)
+}
 
-  // Full image: optimize but keep quality
+async function processImageFromPath(
+  filePath: string
+): Promise<{ fullBuffer: Buffer; thumbBuffer: Buffer; ext: string }> {
+  const inputBuffer = fs.readFileSync(filePath)
+  const ext = path.extname(filePath).replace('.', '') || 'jpg'
+
+  // Full: resize to max 1920px, keep quality
   const fullBuffer = await sharp(inputBuffer)
     .resize({ width: 1920, withoutEnlargement: true })
     [ext === 'png' ? 'png' : 'jpeg']({ quality: 85 })
     .toBuffer()
 
-  // Thumbnail: 800px wide WebP
+  // Thumb: 600px WebP
   const thumbBuffer = await sharp(inputBuffer)
-    .resize({ width: 800, withoutEnlargement: true })
-    .webp({ quality: 80 })
+    .resize({ width: 600, withoutEnlargement: true })
+    .webp({ quality: 75 })
     .toBuffer()
 
   return { fullBuffer, thumbBuffer, ext }
@@ -180,282 +194,178 @@ async function processImage(
 
 // ─── Supabase Upload ──────────────────────────────────────────
 
-async function uploadToSupabase(
+async function uploadBuffer(
   supabase: ReturnType<typeof createClient>,
   buffer: Buffer,
   remotePath: string,
   contentType: string
-): Promise<string> {
-  const { data, error } = await supabase.storage
+): Promise<void> {
+  const { error } = await supabase.storage
     .from(BUCKET)
-    .upload(remotePath, buffer, {
-      contentType,
-      upsert: true
-    })
+    .upload(remotePath, buffer, { contentType, upsert: true })
 
   if (error) {
-    throw new Error(`Upload failed for ${remotePath}: ${error.message}`)
+    throw new Error(`Upload failed: ${error.message}`)
   }
-
-  return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${remotePath}`
 }
 
 // ─── MDX Generation ───────────────────────────────────────────
 
-function slugify(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9一-鿿]+/g, '-')
+function slugify(title: string, caseNum: number): string {
+  const base = title
+    .replace(/[^\w一-鿿-]/g, '-')
+    .replace(/-+/g, '-')
     .replace(/^-|-$/g, '')
-    .slice(0, 60)
+    .slice(0, 40)
+  return `case-${caseNum}-${base}`
 }
 
-function generateMdx(caseData: GalleryCase, lang: 'en' | 'zh', thumbFilename: string): string {
-  const catInfo = CATEGORY_MAP[caseData.category]
-  const title = lang === 'zh'
-    ? caseData.title // Chinese title from source
-    : translateTitle(caseData.title)
-
-  const tags = extractTags(caseData.promptText, lang)
-
-  const mdx = `---
-title: "${title}"
-category: ${catInfo.id}
-tags: [${tags.join(', ')}]
-emoji: "${getEmoji(catInfo.id)}"
-cover: ${thumbFilename}
-images:
-  - case${caseData.caseNumber}_full.${getExt(caseData.imagePath)}
-source:
-  platform: ${caseData.sourcePlatform}
-  author: "${caseData.sourceAuthor}"
----
-
-<CaseHeader
-  emoji="${getEmoji(catInfo.id)}"
-  title="${title}"
-  tags={[${tags.map(t => `"${t}"`).join(', ')}]}
-  source={{platform: "${caseData.sourcePlatform}", author: "${caseData.sourceAuthor}"}}
-/>
-
-<ImageGallery images={["case${caseData.caseNumber}_full.${getExt(caseData.imagePath)}"]} alt="${title}" />
-
-## ${lang === 'zh' ? '提示词' : 'Prompt'}
-
-<PromptBlock emoji="💬">
-{\`${caseData.promptText}\`}
-</PromptBlock>
-`
-
-  return mdx
-}
-
-function translateTitle(cnTitle: string): string {
-  // Simple placeholder — replace with LLM call in production
-  const known: Record<string, string> = {
-    '城市生命系统图谱': 'Urban Metabolism Atlas',
-    '足球主题电影海报': 'Football Theme Movie Poster',
-    '老干妈风味': 'Trump Selling Lao Gan Ma on TikTok Live',
-    '极致特写美妆': 'Extreme Close-up Beauty',
-    '奢侈品编辑人像': 'Luxury Editorial Portrait',
-    '极简电水壶': 'Minimalist Electric Kettle',
-    '主题海报版式设计': 'Epic Narrative Theme Poster',
-    'Ailln AI 社媒截图': 'Ailln AI Social Post',
-    '信息图可视化设计': 'Infographic Visualization Design',
-    '社媒界面截图': 'Social Media UI Screenshot'
-  }
-  return known[cnTitle] || cnTitle
-}
-
-function getEmoji(categoryId: string): string {
-  const emojis: Record<string, string> = {
+function generateMdx(c: ParsedCase, lang: 'en' | 'zh'): string {
+  const catEmojis: Record<string, string> = {
     photography: '📷',
     product: '🛍️',
     people: '🧍'
   }
-  return emojis[categoryId] || '📄'
-}
+  const emoji = catEmojis[c.category || 'photography'] || '📄'
 
-function getExt(imagePath: string): string {
-  const ext = path.extname(imagePath).replace('.', '')
-  return ext || 'jpg'
-}
+  const title = c.title
+  const ext = path.extname(c.imagePath).replace('.', '') || 'jpg'
+  const thumbFile = `case${c.caseNumber}_thumb.webp`
+  const fullFile = `case${c.caseNumber}_full.${ext}`
 
-function extractTags(prompt: string, _lang: 'en' | 'zh'): string[] {
-  const tags: string[] = []
-  const lower = prompt.toLowerCase()
+  // Escape backticks in prompt for JSX template literal
+  const escapedPrompt = c.promptText
+    .replace(/\\/g, '\\\\')
+    .replace(/`/g, '\\`')
+    .replace(/\$/g, '\\$')
 
-  if (lower.includes('8k') || lower.includes('4k')) tags.push('High-Res')
-  if (lower.includes('poster') || prompt.includes('海报')) tags.push('Poster')
-  if (lower.includes('photorealistic') || prompt.includes('写实')) tags.push('Realistic')
-  if (lower.includes('cinematic') || prompt.includes('电影')) tags.push('Cinematic')
-  if (lower.includes('3d') || lower.includes('isometric')) tags.push('3D')
-  if (lower.includes('dark mode') || prompt.includes('深色')) tags.push('Dark UI')
-  if (tags.length === 0) tags.push('GPT-Image-2')
+  const sourcePlatform = c.sourceRaw.includes('小红书') ? '小红书' : 'Unknown'
+  const sourceAuthor = c.sourceRaw
+    .replace(/小红书[号號]?\s*/g, '')
+    .replace(/\[.*?\]\(.*?\)/g, '')  // remove markdown links
+    .replace(/[<>\[\]()\\"{}|]/g, '') // strip YAML-unsafe chars
+    .replace(/https?:\/\/\S+/g, '')
+    .trim()
+    .slice(0, 50)
+    || 'unknown'
 
-  return tags
+  return `---
+title: "${title.replace(/"/g, '\\"')}"
+category: ${c.category || 'photography'}
+tags: []
+emoji: "${emoji}"
+cover: ${thumbFile}
+images:
+  - ${fullFile}
+source:
+  platform: ${sourcePlatform}
+  author: "${sourceAuthor}"
+---
+
+<CaseHeader
+  emoji="${emoji}"
+  title="${title.replace(/"/g, '\\"')}"
+  tags={[]}
+  source={{platform: "${sourcePlatform}", author: "${sourceAuthor}"}}
+/>
+
+<ImageGallery images={["${fullFile}"]} alt="${title.replace(/"/g, '\\"')}" />
+
+## ${lang === 'zh' ? '提示词' : 'Prompt'}
+
+<PromptBlock emoji="💬">
+{\`${escapedPrompt}\`}
+</PromptBlock>
+`
 }
 
 // ─── Main ─────────────────────────────────────────────────────
 
 async function main() {
-  const args = process.argv.slice(2)
-  const sourceIdx = args.indexOf('--source')
-  if (sourceIdx === -1) {
-    console.error('Usage: npx tsx scripts/import-cases.ts --source <path-to-awesome-gpt-image-2>')
-    process.exit(1)
-  }
-
-  const sourceDir = args[sourceIdx + 1]
+  const sourceDir = process.argv[2]
   if (!sourceDir || !fs.existsSync(sourceDir)) {
-    console.error(`Source directory not found: ${sourceDir}`)
+    console.error('Usage: npx tsx scripts/import-cases.ts <path-to-awesome-gpt-image-2>')
     process.exit(1)
   }
 
-  // 1. Parse gallery files
-  console.log('📖 Parsing gallery markdown files...')
-  const allCases: GalleryCase[] = []
+  // ── 1. Parse ──
+  console.log('📖 Parsing gallery files...')
+  const allCases: ParsedCase[] = []
   for (const part of ['docs/gallery-part-1.md', 'docs/gallery-part-2.md', 'docs/gallery.md']) {
-    const filePath = path.join(sourceDir, part)
-    if (fs.existsSync(filePath)) {
-      const content = fs.readFileSync(filePath, 'utf-8')
-      const parsed = parseGalleryMarkdown(content)
-      allCases.push(...parsed)
-      console.log(`  ${part}: ${parsed.length} cases`)
-    }
+    const fp = path.join(sourceDir, part)
+    if (!fs.existsSync(fp)) continue
+    const parsed = parseGallery(fs.readFileSync(fp, 'utf-8'))
+    allCases.push(...parsed)
+    console.log(`  ${part}: ${parsed.length} cases`)
   }
-  console.log(`Total cases parsed: ${allCases.length}`)
+  console.log(`  Total parsed: ${allCases.length}`)
 
-  // 2. Load style library
-  const stylePath = path.join(sourceDir, 'data', 'style-library.json')
-  if (!fs.existsSync(stylePath)) {
-    console.error('style-library.json not found in source directory')
+  // ── 2. Classify ──
+  console.log('\n🏷️  Classifying...')
+  const categorized = new Map<string, ParsedCase[]>()
+  for (const c of allCases) {
+    c.category = classifyCase(c)
+    if (!categorized.has(c.category)) categorized.set(c.category, [])
+    categorized.get(c.category)!.push(c)
+  }
+  for (const [cat, cases] of categorized) {
+    console.log(`  ${cat}: ${cases.length} cases`)
+  }
+
+  // ── 3. Init Supabase ──
+  if (!SUPABASE_KEY) {
+    console.error('\n❌ SUPABASE_SERVICE_ROLE_KEY not set. Set it in .env.local.')
     process.exit(1)
   }
-  const styleLibrary: StyleLibrary = JSON.parse(fs.readFileSync(stylePath, 'utf-8'))
-  console.log(`Style library loaded: ${styleLibrary.categories.length} categories, ${styleLibrary.templates.length} templates`)
-
-  // 3. Filter by category
-  const categorized = matchCategories(allCases, styleLibrary)
-  const totalMatched = Array.from(categorized.values()).reduce((sum, arr) => sum + arr.length, 0)
-  console.log(`\n📊 Category matching results:`)
-  for (const [catId, cases] of categorized) {
-    const info = CATEGORY_MAP[catId]
-    console.log(`  ${info.zhName}: ${cases.length} cases`)
-  }
-  console.log(`Total matched: ${totalMatched}`)
-
-  if (totalMatched === 0) {
-    console.log('No cases matched. Check category mappings.')
-    return
-  }
-
-  // 4. Initialize Supabase
-  if (!SUPABASE_KEY) {
-    console.warn('\n⚠️  SUPABASE_SERVICE_ROLE_KEY not set. Skipping image upload. Set the env var to upload images.')
-    console.log('Skipping image processing — generating MDX files only.')
-    await generateMdxFilesOnly(categorized, sourceDir)
-    return
-  }
-
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+  console.log('\n☁️  Supabase ready, bucket:', BUCKET)
 
-  // 5. Ensure storage bucket exists
-  console.log('\n☁️  Checking Supabase storage...')
-  const { data: buckets } = await supabase.storage.listBuckets()
-  const bucketExists = buckets?.some(b => b.name === BUCKET)
-  if (!bucketExists) {
-    const { error: createErr } = await supabase.storage.createBucket(BUCKET, {
-      public: true,
-      fileSizeLimit: 10_485_760 // 10MB
-    })
-    if (createErr) {
-      console.error(`Failed to create bucket ${BUCKET}:`, createErr.message)
-      process.exit(1)
-    }
-    console.log(`Created bucket: ${BUCKET}`)
-  } else {
-    console.log(`Bucket ${BUCKET} exists`)
-  }
-
-  // 6. Process and upload each case
-  console.log('\n🖼️  Processing images...')
-  let processed = 0
+  // ── 4. Process ──
+  console.log('\n🖼️  Processing & uploading...')
+  let done = 0
   let skipped = 0
-  let errors = 0
+  let errs = 0
 
-  for (const [catId, cases] of categorized) {
-    const catInfo = CATEGORY_MAP[catId]
-    const contentEnDir = path.join('content', 'en', catInfo.id)
-    const contentZhDir = path.join('content', 'zh', catInfo.id)
+  for (const [cat, cases] of categorized) {
+    const dirEn = path.join('content', 'en', cat)
+    const dirZh = path.join('content', 'zh', cat)
+    fs.mkdirSync(dirEn, { recursive: true })
+    fs.mkdirSync(dirZh, { recursive: true })
 
-    for (const caseData of cases) {
-      const slug = slugify(caseData.title)
-      const ext = getExt(caseData.imagePath)
-      const thumbFile = `case${caseData.caseNumber}_thumb.webp`
-      const fullFile = `case${caseData.caseNumber}_full.${ext}`
+    for (const c of cases) {
+      const slug = slugify(c.title, c.caseNumber)
+      const ext = path.extname(c.imagePath).replace('.', '') || 'jpg'
+      const thumbFile = `case${c.caseNumber}_thumb.webp`
+      const fullFile = `case${c.caseNumber}_full.${ext}`
+
+      process.stdout.write(`  [${cat}] case ${c.caseNumber}: ${c.title.slice(0, 40)}... `)
 
       try {
-        // Process image
-        const { fullBuffer, thumbBuffer } = await processImage(
-          sourceDir,
-          caseData.imagePath,
-          caseData.caseNumber
-        )
+        const imgResult = await processImage(sourceDir, c.imagePath)
+        if (!imgResult) {
+          console.log('⚠️  image missing, skipping')
+          skipped++
+          continue
+        }
 
-        // Upload
-        console.log(`  Uploading case ${caseData.caseNumber}: ${caseData.title}`)
-        await uploadToSupabase(supabase, thumbBuffer, `thumbnails/${thumbFile}`, 'image/webp')
-        await uploadToSupabase(supabase, fullBuffer, `full/${fullFile}`, `image/${ext === 'png' ? 'png' : 'jpeg'}`)
+        await uploadBuffer(supabase, imgResult.thumbBuffer, `thumbnails/${thumbFile}`, 'image/webp')
+        await uploadBuffer(supabase, imgResult.fullBuffer, `full/${fullFile}`, `image/${ext === 'png' ? 'png' : 'jpeg'}`)
 
-        // Generate MDX
-        const mdxEn = generateMdx(caseData, 'en', thumbFile)
-        const mdxZh = generateMdx(caseData, 'zh', thumbFile)
+        const mdxEn = generateMdx(c, 'en')
+        const mdxZh = generateMdx(c, 'zh')
+        fs.writeFileSync(path.join(dirEn, `${slug}.mdx`), mdxEn, 'utf-8')
+        fs.writeFileSync(path.join(dirZh, `${slug}.mdx`), mdxZh, 'utf-8')
 
-        fs.writeFileSync(path.join(contentEnDir, `case-${slug}.mdx`), mdxEn, 'utf-8')
-        fs.writeFileSync(path.join(contentZhDir, `case-${slug}.mdx`), mdxZh, 'utf-8')
-
-        processed++
-        console.log(`    ✅ Done`)
+        console.log('✅')
+        done++
       } catch (err) {
-        console.error(`    ❌ Error: ${(err as Error).message}`)
-        errors++
+        console.log(`❌ ${(err as Error).message}`)
+        errs++
       }
     }
   }
 
-  console.log(`\n📦 Import summary:`)
-  console.log(`  Processed: ${processed}`)
-  console.log(`  Skipped:   ${skipped}`)
-  console.log(`  Errors:    ${errors}`)
+  console.log(`\n📦 Done! Processed: ${done} | Skipped: ${skipped} | Errors: ${errs}`)
 }
 
-async function generateMdxFilesOnly(
-  categorized: Map<string, GalleryCase[]>,
-  sourceDir: string
-) {
-  for (const [catId, cases] of categorized) {
-    const catInfo = CATEGORY_MAP[catId]
-    const contentEnDir = path.join('content', 'en', catInfo.id)
-    const contentZhDir = path.join('content', 'zh', catInfo.id)
-    fs.mkdirSync(contentEnDir, { recursive: true })
-    fs.mkdirSync(contentZhDir, { recursive: true })
-
-    for (const caseData of cases) {
-      const slug = slugify(caseData.title)
-      const thumbFile = `case${caseData.caseNumber}_thumb.webp`
-
-      const mdxEn = generateMdx(caseData, 'en', thumbFile)
-      const mdxZh = generateMdx(caseData, 'zh', thumbFile)
-
-      fs.writeFileSync(path.join(contentEnDir, `case-${slug}.mdx`), mdxEn, 'utf-8')
-      fs.writeFileSync(path.join(contentZhDir, `case-${slug}.mdx`), mdxZh, 'utf-8')
-    }
-  }
-  console.log('MDX files generated (images not uploaded).')
-}
-
-main().catch(err => {
-  console.error('Import failed:', err)
-  process.exit(1)
-})
+main().catch(err => { console.error('Import failed:', err); process.exit(1) })

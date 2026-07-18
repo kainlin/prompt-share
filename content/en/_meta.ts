@@ -3,16 +3,7 @@ export default {
     type: 'page',
     title: 'Home'
   },
-  photography: {
-    type: 'page',
-    title: '📷 Photography & Realism'
-  },
-  product: {
-    type: 'page',
-    title: '🛍️ Products & E-commerce'
-  },
-  people: {
-    type: 'page',
-    title: '🧍 Characters & People'
-  }
+  photography: '📷 Photography & Realism',
+  product: '🛍️ Products & E-commerce',
+  people: '🧍 Characters & People'
 }
