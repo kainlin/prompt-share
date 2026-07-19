@@ -16,8 +16,8 @@ interface ParsedArgument {
   defaultValue: string
 }
 
-// Regex to find {argument name="..." default="..."}
-const ARG_REGEX = /\{argument\s+name="([^"]+)"\s+default="([^"]+)"\}/g
+// Regex to find {argument name="..." default="..."} supporting optional backslashes before quotes
+const ARG_REGEX = /\{argument\s+name=\\?"((?:[^"\\]|\\.)*)\\?"\s+default=\\?"((?:[^"\\]|\\.)*)\\?"\}/g
 
 export function PromptBlock({
   children,
