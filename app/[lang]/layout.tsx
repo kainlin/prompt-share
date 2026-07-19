@@ -6,6 +6,7 @@ import { getDictionary } from '../../dictionaries/get-dictionary'
 import { SITE_TITLE, SITE_DESCRIPTION } from '../../lib/constants'
 import type { Metadata } from 'next'
 import { Providers } from '../../components/providers'
+import 'nextra-theme-docs/style.css'
 import './globals.css'
 
 export const metadata: Metadata = {

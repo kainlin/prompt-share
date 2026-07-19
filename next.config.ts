@@ -3,7 +3,8 @@ import nextra from 'nextra'
 const withNextra = nextra({
   defaultShowCopyCode: true,
   contentDirBasePath: '/',
-  search: { codeblocks: false }
+  search: { codeblocks: false },
+  unstable_shouldAddLocaleToLinks: true
 })
 
 export default withNextra({

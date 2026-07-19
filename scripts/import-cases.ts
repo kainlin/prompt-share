@@ -14,7 +14,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import sharp from 'sharp'
 
 // ─── Config ───────────────────────────────────────────────────
@@ -195,7 +195,7 @@ async function processImageFromPath(
 // ─── Supabase Upload ──────────────────────────────────────────
 
 async function uploadBuffer(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   buffer: Buffer,
   remotePath: string,
   contentType: string
