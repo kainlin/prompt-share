@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+  tenants   Tenant[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tenant {
+  id           String       @id @default(uuid())
+  slug         String       @unique
+  displayName  String
+  bio          String?
+  avatarUrl    String?
+  ownerId      String
+  owner        User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  cases        PromptCase[]
+  subscriptions Subscription[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model PromptCase {
+  id             String   @id @default(uuid())
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title          String
+  slug           String
+  category       String   @default("photography")
+  tags           String[] @default([])
+  emoji          String   @default("📷")
+  coverImageUrl  String
+  images         String[]
+  promptText     String
+  sourcePlatform String?
+  sourceAuthor   String?
+  published      Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([tenantId, slug])
+}
+
+model Subscription {
+  id               String    @id @default(uuid())
+  userId           String
+  tenantId         String
+  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  stripeSessionId  String    @unique
+  stripeCustomerId String?
+  status           String    @default("active")
+  plan             String    @default("monthly")
+  createdAt        DateTime  @default(now())
+  expiresAt        DateTime?
+
+  @@index([userId, tenantId])
+}

@@ -1,0 +1,8 @@
+/* Cloud-specific overrides */
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--feishu-text-primary);
+  background: var(--feishu-bg);
+}
+
+a { color: var(--feishu-accent); }

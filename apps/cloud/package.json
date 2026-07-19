@@ -1,36 +1,33 @@
 {
-  "name": "prompt-share",
+  "name": "@prompt-share/cloud",
   "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "apps/*"
-  ],
   "scripts": {
+    "dev": "next dev",
     "build": "next build",
-    "dev": "next",
-    "dev:cloud": "npm -w @prompt-share/cloud run dev",
-    "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
     "start": "next start",
-    "import": "npx tsx scripts/import-cases.ts"
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@prisma/client": "^6.0.0",
     "@prompt-share/i18n": "*",
     "@prompt-share/styles": "*",
     "@prompt-share/ui": "*",
+    "@stripe/stripe-js": "^5.0.0",
+    "@supabase/ssr": "^0.6.0",
     "@supabase/supabase-js": "^2.49.0",
     "next": "16.0.7",
-    "nextra": "4.6.0",
-    "nextra-theme-docs": "4.6.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "sharp": "^0.34.0"
+    "stripe": "^17.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/react": "^19.1.8",
-    "pagefind": "^1.3.0",
-    "tsx": "^4.19.0",
+    "prisma": "^6.0.0",
     "typescript": "^5.7.0"
   }
 }
