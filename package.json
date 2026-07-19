@@ -12,7 +12,10 @@
     "dev:cloud": "npm -w @prompt-share/cloud run dev",
     "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
     "start": "next start",
-    "import": "npx tsx scripts/import-cases.ts"
+    "import": "npx tsx scripts/import-cases.ts",
+    "test": "npm -w @prompt-share/ui run test && npm -w @prompt-share/cloud run test",
+    "test:ui": "npm -w @prompt-share/ui run test",
+    "test:cloud": "npm -w @prompt-share/cloud run test"
   },
   "dependencies": {
     "@prompt-share/i18n": "*",

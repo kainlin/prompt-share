@@ -77,6 +77,26 @@
   line-height: 1.65;
 }
 
+.promptToken {
+  display: inline;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  font-weight: 500;
+}
+
+.promptToken:hover {
+  background: var(--feishu-accent-light);
+  color: var(--feishu-accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.promptComma {
+  color: var(--feishu-text-secondary);
+  font-weight: normal;
+}
+
 /* ─── Premium Split Editor Styles ─── */
 .editorCard {
   margin: 2rem 0;

@@ -110,6 +110,44 @@ export function PromptBlock({
     }
   }
 
+  // Format comma-separated prompt tokens for interactive hover effect
+  const renderFormattedPrompt = (text: string) => {
+    const trimmed = text.trim()
+    const isJson = trimmed.startsWith('{') && trimmed.endsWith('}')
+    
+    if (isJson) {
+      return <span>{text}</span>
+    }
+    
+    const parts = text.split(',')
+    if (parts.length <= 2) {
+      return <span>{text}</span>
+    }
+    
+    return parts.map((part, index) => {
+      const isLast = index === parts.length - 1
+      const trimmedPart = part.trim()
+      if (!trimmedPart) return null
+      
+      const leadingSpace = part.startsWith(' ') || part.startsWith('\n') ? ' ' : ''
+      const trailingSpace = part.endsWith(' ') ? ' ' : ''
+      
+      return (
+        <span key={index}>
+          {leadingSpace}
+          <span 
+            className={styles.promptToken}
+            title="提示词修饰符 (Modifier)"
+          >
+            {trimmedPart}
+          </span>
+          {!isLast && <span className={styles.promptComma}>,</span>}
+          {trailingSpace}
+        </span>
+      )
+    })
+  }
+
   // If no arguments, fallback to normal block
   if (args.length === 0) {
     return (
@@ -123,7 +161,7 @@ export function PromptBlock({
             📋 Copy
           </button>
         </div>
-        <div className={styles.content}>{children}</div>
+        <div className={styles.content}>{renderFormattedPrompt(children)}</div>
       </div>
     )
   }

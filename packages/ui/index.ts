@@ -6,6 +6,7 @@ export { CaseHeader } from './case-header'
 export { Providers } from './providers'
 export { ToastProvider, useToast } from './toast'
 export { LanguageSwitcher } from './language-switcher'
+export { CasePageLayout } from './case-page-layout'
 
 // Lib
 export {

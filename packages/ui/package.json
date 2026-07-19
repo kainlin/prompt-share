@@ -8,6 +8,10 @@
     ".": "./index.ts",
     "./*": "./*"
   },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
   "dependencies": {
     "@prompt-share/styles": "*",
     "@prompt-share/i18n": "*"
@@ -16,5 +20,12 @@
     "next": ">=16",
     "react": ">=19",
     "react-dom": ">=19"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.0",
+    "@testing-library/react": "^16.3.0",
+    "@vitejs/plugin-react": "^4.6.0",
+    "jsdom": "^26.0.0",
+    "vitest": "^3.2.0"
   }
 }
