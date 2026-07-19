@@ -27,8 +27,17 @@ export function getImageUrl(filename: string): string {
   return `${SUPABASE_STORAGE_URL}/${filename}`
 }
 
+/**
+ * Map a full image filename (caseN_full.ext) to its corresponding thumbnail.
+ * Thumbnails are stored as caseN_thumb.webp regardless of source format.
+ */
+function toThumbnailFilename(filename: string): string {
+  const m = filename.match(/^(case\d+)_full\.\w+$/)
+  return m ? `${m[1]}_thumb.webp` : filename
+}
+
 export function getThumbnailUrl(filename: string): string {
-  return `${SUPABASE_STORAGE_URL}/thumbnails/${filename}`
+  return `${SUPABASE_STORAGE_URL}/thumbnails/${toThumbnailFilename(filename)}`
 }
 
 export function getFullImageUrl(filename: string): string {
