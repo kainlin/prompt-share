@@ -1,0 +1,20 @@
+{
+  "name": "@prompt-share/ui",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./*": "./*"
+  },
+  "dependencies": {
+    "@prompt-share/styles": "*",
+    "@prompt-share/i18n": "*"
+  },
+  "peerDependencies": {
+    "next": ">=16",
+    "react": ">=19",
+    "react-dom": ">=19"
+  }
+}

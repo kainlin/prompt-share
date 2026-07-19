@@ -2,12 +2,12 @@ import { Footer, Layout, Navbar, LocaleSwitch } from 'nextra-theme-docs'
 import { Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
 import type { ReactNode } from 'react'
-import { getDictionary } from '../../dictionaries/get-dictionary'
-import { SITE_TITLE, SITE_DESCRIPTION } from '../../lib/constants'
+import { getDictionary } from '@prompt-share/i18n'
+import { SITE_TITLE, SITE_DESCRIPTION } from '@prompt-share/ui'
 import type { Metadata } from 'next'
-import { Providers } from '../../components/providers'
+import { Providers } from '@prompt-share/ui'
 import 'nextra-theme-docs/style.css'
-import './globals.css'
+import '@prompt-share/styles/globals.css'
 
 export const metadata: Metadata = {
   description: SITE_DESCRIPTION.zh,

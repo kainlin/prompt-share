@@ -2,6 +2,9 @@
   "name": "prompt-share",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "build": "next build",
     "dev": "next",
@@ -10,6 +13,9 @@
     "import": "npx tsx scripts/import-cases.ts"
   },
   "dependencies": {
+    "@prompt-share/i18n": "*",
+    "@prompt-share/styles": "*",
+    "@prompt-share/ui": "*",
     "@supabase/supabase-js": "^2.49.0",
     "next": "16.0.7",
     "nextra": "4.6.0",

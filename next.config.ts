@@ -9,6 +9,7 @@ const withNextra = nextra({
 
 export default withNextra({
   reactStrictMode: true,
+  transpilePackages: ['@prompt-share/ui', '@prompt-share/i18n'],
   i18n: {
     locales: ['en', 'zh'],
     defaultLocale: 'zh'

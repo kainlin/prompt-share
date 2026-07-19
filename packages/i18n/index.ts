@@ -1,0 +1,5 @@
+export { getDictionary, getDirection } from './get-dictionary'
+export { locales, defaultLocale } from './i18n-config'
+export type { Dictionary, DictionaryKey, Locale } from './i18n-config'
+export { default as en } from './en'
+export { default as zh } from './zh'
