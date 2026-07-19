@@ -57,10 +57,11 @@ model Subscription {
   userId           String
   tenantId         String
   tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  stripeSessionId  String    @unique
-  stripeCustomerId String?
-  status           String    @default("active")
-  plan             String    @default("monthly")
+  stripeSessionId       String    @unique
+  stripeSubscriptionId  String?   @unique
+  stripeCustomerId      String?
+  status                String    @default("active")
+  plan                  String    @default("monthly")
   createdAt        DateTime  @default(now())
   expiresAt        DateTime?
 

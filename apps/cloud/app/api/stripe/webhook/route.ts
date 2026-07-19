@@ -25,6 +25,7 @@ export async function POST(request: Request) {
           userId,
           tenantId,
           stripeSessionId: session.id,
+          stripeSubscriptionId: session.subscription as string || null,
           stripeCustomerId: session.customer as string,
           status: 'active',
           plan: plan || 'monthly',
@@ -35,14 +36,11 @@ export async function POST(request: Request) {
 
   if (event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object as Stripe.Subscription
-    // Find and expire the subscription
-    const sessionId = subscription.metadata?.stripeSessionId
-    if (sessionId) {
-      await db.subscription.updateMany({
-        where: { stripeSessionId: sessionId, status: 'active' },
-        data: { status: 'expired', expiresAt: new Date() },
-      })
-    }
+    // Look up by Stripe subscription ID (passed from checkout.session.completed)
+    await db.subscription.updateMany({
+      where: { stripeSubscriptionId: subscription.id, status: 'active' },
+      data: { status: 'expired', expiresAt: new Date() },
+    })
   }
 
   return NextResponse.json({ received: true })

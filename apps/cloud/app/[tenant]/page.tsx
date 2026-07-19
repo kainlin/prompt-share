@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation'
-import { CategoryGrid } from '@prompt-share/ui'
 import { db } from '@/lib/db'
 import Link from 'next/link'
 
@@ -34,11 +33,30 @@ export default async function TenantPage({ params }: Props) {
         {tenant.bio && <p style={{ color: 'var(--feishu-text-secondary)', marginTop: '0.5rem' }}>{tenant.bio}</p>}
       </div>
 
-      <CategoryGrid categories={categories.map(c => ({
-        ...c,
-        href: `/${rawTenant}?cat=${c.id}`,
-        count: c.count,
-      }))} />
+      <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+        {categories.map(c => (
+          <Link
+            key={c.id}
+            href={`/${rawTenant}?cat=${c.id}`}
+            style={{
+              padding: '1.5rem',
+              background: 'var(--feishu-card-bg)',
+              borderRadius: '12px',
+              textDecoration: 'none',
+              color: 'inherit',
+              transition: 'box-shadow 0.2s',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <span style={{ fontSize: '2rem' }}>{c.emoji}</span>
+              <span style={{ fontSize: '0.85rem', color: 'var(--feishu-text-secondary)', background: 'var(--feishu-bg)', padding: '0.2rem 0.6rem', borderRadius: '20px' }}>
+                {c.count} cases
+              </span>
+            </div>
+            <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>{c.title}</h3>
+          </Link>
+        ))}
+      </div>
 
       <div style={{ marginTop: '3rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Recent Cases</h2>

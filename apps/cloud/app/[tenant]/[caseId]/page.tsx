@@ -50,7 +50,7 @@ export default async function CasePage({ params }: Props) {
       <h2 style={{ marginTop: '2rem', fontSize: '1.25rem', fontWeight: 600 }}>Prompt</h2>
 
       <PaywallGuard isSubscribed={isSubscribed} tenantId={tenant.id}>
-        <PromptBlock emoji="💬" text={promptCase.promptText} />
+        <PromptBlock emoji="💬">{promptCase.promptText}</PromptBlock>
       </PaywallGuard>
     </main>
   )

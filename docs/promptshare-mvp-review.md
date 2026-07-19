@@ -184,6 +184,48 @@ promptshare.com/dashboard          → 创作者后台
 
 ---
 
+## 四-B. Review 发现 Bug 及修复记录
+
+本次 verification review 发现 3 个真实 Bug，均已修复：
+
+### BUG 1 🔴 PromptBlock props 不匹配（阻止渲染）
+
+| 项 | 内容 |
+|---|---|
+| **严重度** | Critical — 提示词完全不渲染 |
+| **文件** | `apps/cloud/app/[tenant]/[caseId]/page.tsx` |
+| **问题** | `<PromptBlock emoji="💬" text={...} />` 传入 `text` prop |
+| **根因** | 组件接口是 `children: string`，需用 JSX children 语法传内容 |
+| **修复** | 改为 `<PromptBlock emoji="💬">{promptCase.promptText}</PromptBlock>` |
+
+### BUG 2 🟠 CategoryGrid props 不匹配（数据错误）
+
+| 项 | 内容 |
+|---|---|
+| **严重度** | High — Cloud 租户页显示硬编码 OSS 数据 |
+| **文件** | `apps/cloud/app/[tenant]/page.tsx` |
+| **问题** | `<CategoryGrid categories={...} />` 传入动态数据 |
+| **根因** | CategoryGrid 组件接受 0 个 props，内部硬编码分类（309/140/65），`categories` prop 被忽略 |
+| **修复** | 替换为内联分类卡片 JSX，使用租户真实案例数 |
+
+### BUG 3 🟡 Stripe Webhook 取消订阅永不生效
+
+| 项 | 内容 |
+|---|---|
+| **严重度** | Medium — 用户取消订阅后 DB 永不过期 |
+| **文件** | `apps/cloud/app/api/stripe/webhook/route.ts` |
+| **问题** | `customer.subscription.deleted` handler 查找 `subscription.metadata?.stripeSessionId` |
+| **根因** | Checkout Session metadata 只包含 `{tenantId, userId, plan}`，不含 `stripeSessionId`。且 Stripe 不会将 Session metadata 自动传给 Subscription。 |
+| **修复** | (1) `Subscription` 模型新增 `stripeSubscriptionId` 字段，(2) `checkout.session.completed` handler 保存 `session.subscription` (Stripe Subscription ID)，(3) `customer.subscription.deleted` handler 直接通过 `subscription.id` 匹配 DB 记录 |
+
+### 文档勘误
+
+| 项 | 修正前 | 修正后 |
+|---|---|---|
+| Commit hash | `ed9bbaa` (import 514 cases) | `a587a1c` |
+
+---
+
 ## 五、待完成工作
 
 ### 高优先级
@@ -254,6 +296,6 @@ promptshare.com/dashboard          → 创作者后台
 | `291754f` | feat: CategoryGrid + UI polish |
 | `04e3264` | chore: next-env.d.ts update |
 | `d070bb5` | chore: image-gallery CSS tweak |
-| `ed9bbaa` | (pre-monorepo) feat: import 514 cases |
+| `a587a1c` | feat: import 514 cases |
 | `11b3e51` | feat: monorepo — extract shared packages |
 | `93f599a` | feat: SaaS MVP — apps/cloud |
