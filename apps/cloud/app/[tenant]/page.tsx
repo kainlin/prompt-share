@@ -18,10 +18,10 @@ export default async function TenantPage({ params }: Props) {
   if (!tenant) notFound()
 
   const categories = [
-    { id: 'photography', emoji: '📷', title: 'Photography & Realism', count: tenant.cases.filter(c => c.category === 'photography').length },
-    { id: 'product', emoji: '🛍️', title: 'Products & E-commerce', count: tenant.cases.filter(c => c.category === 'product').length },
-    { id: 'people', emoji: '🧍', title: 'Characters & People', count: tenant.cases.filter(c => c.category === 'people').length },
-  ].filter(c => c.count > 0)
+    { id: 'photography', emoji: '📷', title: 'Photography & Realism', count: tenant.cases.filter((c: any) => c.category === 'photography').length },
+    { id: 'product', emoji: '🛍️', title: 'Products & E-commerce', count: tenant.cases.filter((c: any) => c.category === 'product').length },
+    { id: 'people', emoji: '🧍', title: 'Characters & People', count: tenant.cases.filter((c: any) => c.category === 'people').length },
+  ].filter((c: any) => c.count > 0)
 
   return (
     <main style={{ maxWidth: 960, margin: '0 auto', padding: '2rem' }}>
