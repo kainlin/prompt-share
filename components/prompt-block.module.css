@@ -76,3 +76,240 @@
   font-size: 0.875rem;
   line-height: 1.65;
 }
+
+/* ─── Premium Split Editor Styles ─── */
+.editorCard {
+  margin: 2rem 0;
+  background: var(--feishu-bg);
+  border: 1px solid var(--feishu-border);
+  border-radius: 12px;
+  box-shadow: var(--feishu-shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.editorHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--feishu-card-bg);
+  border-bottom: 1px solid var(--feishu-border);
+}
+
+.editorLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--feishu-text-primary);
+}
+
+.editorActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resetBtn {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--feishu-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.resetBtn:hover {
+  color: #ff4d4f;
+  background: rgba(255, 77, 79, 0.06);
+}
+
+.rawBtn {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--feishu-border);
+  color: var(--feishu-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.rawBtn:hover {
+  background: var(--feishu-card-hover);
+  color: var(--feishu-text-primary);
+  border-color: var(--feishu-text-secondary);
+}
+
+.primaryBtn {
+  padding: 6px 14px;
+  background: var(--feishu-accent);
+  border: 1px solid var(--feishu-accent);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(51, 112, 255, 0.15);
+}
+
+.primaryBtn:hover {
+  background: #2558d7;
+  border-color: #2558d7;
+  transform: translateY(-1px);
+}
+
+.editorLayout {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  min-height: 320px;
+}
+
+/* Panels styling */
+.formPanel {
+  padding: 20px;
+  border-right: 1px solid var(--feishu-border);
+  background: rgba(242, 243, 245, 0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+:global(.dark) .formPanel {
+  background: rgba(26, 26, 26, 0.25);
+}
+
+.previewPanel {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  background: var(--feishu-bg);
+}
+
+.panelTitle {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--feishu-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 16px 0 !important;
+}
+
+/* Form inputs styling */
+.formList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  max-height: 400px;
+  padding-right: 4px;
+}
+
+.formItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.activeFormItem {
+  background: var(--feishu-accent-light);
+  border-color: rgba(51, 112, 255, 0.15);
+}
+
+.fieldLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--feishu-text-primary);
+  text-transform: capitalize;
+}
+
+.fieldInput, .fieldTextarea {
+  padding: 8px 12px;
+  border: 1px solid var(--feishu-border);
+  background: var(--feishu-bg);
+  color: var(--feishu-text-primary);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.fieldInput:focus, .fieldTextarea:focus {
+  border-color: var(--feishu-accent);
+  box-shadow: 0 0 0 3px rgba(51, 112, 255, 0.15);
+  background: var(--feishu-bg);
+}
+
+.fieldTextarea {
+  resize: vertical;
+}
+
+/* Preview display */
+.previewContainer {
+  flex: 1;
+  border: 1px solid var(--feishu-border);
+  border-radius: 8px;
+  background: var(--feishu-card-bg);
+  padding: 16px;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.previewContent {
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: var(--feishu-text-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Custom Highlight Pills */
+.highlightPill {
+  display: inline-block;
+  cursor: pointer;
+  background: var(--feishu-accent-light);
+  color: var(--feishu-accent);
+  border-bottom: 2px dashed var(--feishu-accent);
+  padding: 0px 6px;
+  margin: 0 2px;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.highlightPill:hover {
+  background: var(--feishu-accent);
+  color: #fff;
+  border-bottom-style: solid;
+  transform: translateY(-1px);
+}
+
+.activePill {
+  background: var(--feishu-accent) !important;
+  color: #fff !important;
+  border-bottom-style: solid !important;
+  box-shadow: 0 2px 6px rgba(51, 112, 255, 0.3);
+}
+
+/* Mobile responsive */
+@media (max-width: 820px) {
+  .editorLayout {
+    grid-template-columns: 1fr;
+  }
+  .formPanel {
+    border-right: none;
+    border-bottom: 1px solid var(--feishu-border);
+  }
+}

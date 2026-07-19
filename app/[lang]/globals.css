@@ -53,15 +53,76 @@ article h3 {
   margin-top: 1.5rem;
 }
 
-/* Sidebar hover states */
+/* ─── Custom Scrollbars ─── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.24);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+/* ─── Selection Styling ─── */
+::selection {
+  background: var(--feishu-accent-light);
+  color: var(--feishu-accent);
+}
+
+/* ─── Sidebar Customization ─── */
+.nextra-sidebar-container a {
+  transition: all 0.2s ease !important;
+}
+
 .nextra-sidebar-container a:hover {
   background: var(--feishu-card-bg) !important;
   border-radius: 6px;
+  padding-left: 12px !important;
 }
 
 .nextra-sidebar-container a[aria-current="true"] {
   background: var(--feishu-accent-light) !important;
   color: var(--feishu-accent) !important;
   border-radius: 6px;
-  font-weight: 500;
+  font-weight: 600;
+  padding-left: 12px !important;
 }
+
+/* ─── Table Aesthetics ─── */
+table {
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  width: 100%;
+  font-size: 0.875rem;
+}
+th {
+  background-color: var(--feishu-card-bg);
+  border-bottom: 2px solid var(--feishu-border);
+  color: var(--feishu-text-primary);
+  font-weight: 600;
+  padding: 12px 16px;
+  text-align: left;
+}
+td {
+  border-bottom: 1px solid var(--feishu-border);
+  padding: 12px 16px;
+  color: var(--feishu-text-primary);
+  transition: background 0.15s ease;
+}
+tr:hover td {
+  background-color: var(--feishu-card-bg) / 50%;
+}
+
