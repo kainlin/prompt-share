@@ -36,16 +36,6 @@ export default async function SettingsPage() {
         </form>
       </section>
 
-      <section style={{ padding: '1.5rem', border: '1px solid var(--feishu-border)', borderRadius: '8px' }}>
-        <h2 style={{ fontSize: '1.1rem', fontWeight: 600, margin: '0 0 1rem' }}>Stripe Configuration</h2>
-        <p style={{ fontSize: '0.9rem', color: 'var(--feishu-text-secondary)', marginBottom: '1rem' }}>
-          Set up your Stripe product prices in the Stripe Dashboard, then add the Price IDs to your environment.
-        </p>
-        <div style={codeStyle}>
-          STRIPE_PRICE_MONTHLY=price_xxxxx<br />
-          STRIPE_PRICE_LIFETIME=price_xxxxx
-        </div>
-      </section>
     </div>
   )
 }
@@ -70,12 +60,4 @@ const btnStyle: React.CSSProperties = {
   fontWeight: 600,
   fontSize: '0.9rem',
   cursor: 'pointer',
-}
-
-const codeStyle: React.CSSProperties = {
-  padding: '0.75rem',
-  background: 'var(--feishu-card-bg)',
-  borderRadius: '6px',
-  fontFamily: 'monospace',
-  fontSize: '0.8rem',
 }
