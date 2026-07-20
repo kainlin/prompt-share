@@ -1,10 +1,13 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  schemas   = ["public", "auth"]
 }
 
 model User {
@@ -21,6 +24,7 @@ model User {
   accounts      Account[]
 
   @@map("ps_user")
+  @@schema("public")
 }
 
 model Session {
@@ -35,19 +39,22 @@ model Session {
   updatedAt DateTime @updatedAt
 
   @@map("ps_session")
+  @@schema("public")
 }
 
 model Account {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider  String
-  accountId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  providerId String
+  accountId  String
+  password   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  @@unique([provider, accountId])
+  @@unique([providerId, accountId])
   @@map("ps_account")
+  @@schema("public")
 }
 
 model Verification {
@@ -59,6 +66,7 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@map("ps_verification")
+  @@schema("public")
 }
 
 model Tenant {
@@ -75,6 +83,7 @@ model Tenant {
   updatedAt     DateTime       @updatedAt
 
   @@map("ps_tenant")
+  @@schema("public")
 }
 
 model PromptCase {
@@ -97,6 +106,7 @@ model PromptCase {
 
   @@unique([tenantId, slug])
   @@map("ps_prompt_case")
+  @@schema("public")
 }
 
 model Subscription {
@@ -114,4 +124,5 @@ model Subscription {
 
   @@index([userId, tenantId])
   @@map("ps_subscription")
+  @@schema("public")
 }
