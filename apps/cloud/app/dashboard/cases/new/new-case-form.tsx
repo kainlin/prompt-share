@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { ImageUpload } from '@/components/image-upload'
 
 export function NewCaseForm() {
   const router = useRouter()
@@ -115,14 +116,29 @@ export function NewCaseForm() {
           />
         </div>
 
-        <div>
-          <label style={labelStyle}>Cover Image URL</label>
-          <input type="text" value={coverImageUrl} onChange={e => setCoverImageUrl(e.target.value)} required style={inputStyle} placeholder="e.g. case139_thumb.webp" />
-        </div>
+        <ImageUpload
+          value={coverImageUrl}
+          onChange={setCoverImageUrl}
+          label="Cover Image"
+          required
+        />
 
         <div>
-          <label style={labelStyle}>Sub-images (Comma separated)</label>
-          <input type="text" value={imagesText} onChange={e => setImagesText(e.target.value)} style={inputStyle} placeholder="e.g. case139_full.jpg" />
+          <label style={labelStyle}>Sub-images (Comma separated URLs)</label>
+          <input type="text" value={imagesText} onChange={e => setImagesText(e.target.value)} style={inputStyle} placeholder="e.g. case139_full.jpg (or upload via /api/upload first)" />
+          {imagesText && (
+            <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+              {imagesText.split(',').map((url, i) => url.trim() && (
+                <img
+                  key={i}
+                  src={url.trim()}
+                  alt=""
+                  style={{ width: 60, height: 40, objectFit: 'cover', borderRadius: 4, border: '1px solid var(--feishu-border)' }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         <div>

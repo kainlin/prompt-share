@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
+import { ImageUpload } from '@/components/image-upload'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -178,14 +179,29 @@ export default function EditCasePage({ params }: Props) {
           />
         </div>
 
-        <div>
-          <label style={labelStyle}>Cover Image URL</label>
-          <input type="text" value={coverImageUrl} onChange={e => setCoverImageUrl(e.target.value)} required style={inputStyle} />
-        </div>
+        <ImageUpload
+          value={coverImageUrl}
+          onChange={setCoverImageUrl}
+          label="Cover Image"
+          required
+        />
 
         <div>
-          <label style={labelStyle}>Sub-images (Comma separated)</label>
+          <label style={labelStyle}>Sub-images (Comma separated URLs)</label>
           <input type="text" value={imagesText} onChange={e => setImagesText(e.target.value)} style={inputStyle} />
+          {imagesText && (
+            <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
+              {imagesText.split(',').map((url: string, i: number) => url.trim() && (
+                <img
+                  key={i}
+                  src={url.trim()}
+                  alt=""
+                  style={{ width: 60, height: 40, objectFit: 'cover', borderRadius: 4, border: '1px solid var(--feishu-border)' }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         <div>
