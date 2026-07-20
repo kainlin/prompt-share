@@ -100,6 +100,10 @@ model PromptCase {
   promptText     String
   sourcePlatform String?
   sourceAuthor   String?
+  // Multi-modal preview: image (default), video, or web
+  previewType    String?  @default("image")
+  previewSource  String?
+  previewPoster  String?
   published      Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

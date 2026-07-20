@@ -36,7 +36,7 @@ export async function PUT(request: Request, context: Context) {
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
-    const { title, category, emoji, promptText, images, coverImageUrl, sourcePlatform, sourceAuthor, tags, published } = body
+    const { title, category, emoji, promptText, images, coverImageUrl, sourcePlatform, sourceAuthor, tags, published, previewType, previewSource, previewPoster } = body
 
     if (!title || !promptText) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -71,6 +71,9 @@ export async function PUT(request: Request, context: Context) {
         sourceAuthor,
         tags: tags || [],
         published: published !== undefined ? published : true,
+        ...(previewType !== undefined && { previewType }),
+        ...(previewSource !== undefined && { previewSource }),
+        ...(previewPoster !== undefined && { previewPoster }),
       },
     })
 

@@ -22,6 +22,9 @@ export default function EditCasePage({ params }: Props) {
   const [sourcePlatform, setSourcePlatform] = useState('')
   const [sourceAuthor, setSourceAuthor] = useState('')
   const [published, setPublished] = useState(true)
+  const [previewType, setPreviewType] = useState('image')
+  const [previewSource, setPreviewSource] = useState('')
+  const [previewPoster, setPreviewPoster] = useState('')
   const [tenantId, setTenantId] = useState('')
 
   const [loading, setLoading] = useState(true)
@@ -46,6 +49,9 @@ export default function EditCasePage({ params }: Props) {
         setSourcePlatform(data.sourcePlatform || '')
         setSourceAuthor(data.sourceAuthor || '')
         setPublished(data.published)
+        setPreviewType(data.previewType || 'image')
+        setPreviewSource(data.previewSource || '')
+        setPreviewPoster(data.previewPoster || '')
         setTenantId(data.tenantId)
       } catch (err: any) {
         setError(err.message)
@@ -79,6 +85,9 @@ export default function EditCasePage({ params }: Props) {
           sourcePlatform,
           sourceAuthor,
           published,
+          previewType,
+          previewSource,
+          previewPoster,
         }),
       })
 
@@ -185,6 +194,69 @@ export default function EditCasePage({ params }: Props) {
           label="Cover Image"
           required
         />
+
+        {/* ── Multi-modal Preview Section ── */}
+        <section style={{ padding: '1rem', border: '1px solid var(--feishu-border)', borderRadius: '8px', background: 'var(--feishu-card-bg)' }}>
+          <label style={labelStyle}>Preview Type</label>
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+            {[
+              { value: 'image', emoji: '🖼️', label: 'Image Gallery' },
+              { value: 'video', emoji: '🎬', label: 'Video Player' },
+              { value: 'web', emoji: '🌐', label: 'Web Sandbox' },
+            ].map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setPreviewType(opt.value)}
+                style={{
+                  flex: 1,
+                  padding: '0.5rem',
+                  borderRadius: '6px',
+                  border: previewType === opt.value ? '2px solid var(--feishu-accent)' : '1px solid var(--feishu-border)',
+                  background: previewType === opt.value ? 'var(--feishu-accent-light)' : 'var(--feishu-bg)',
+                  color: 'var(--feishu-text-primary)',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  fontWeight: previewType === opt.value ? 600 : 400,
+                }}
+              >
+                {opt.emoji} {opt.label}
+              </button>
+            ))}
+          </div>
+
+          {previewType !== 'image' && (
+            <div style={{ marginTop: '0.75rem' }}>
+              <label style={labelStyle}>
+                {previewType === 'video' ? '🎬 Video URL' : '🌐 Web URL'}
+              </label>
+              <input
+                type="url"
+                value={previewSource}
+                onChange={e => setPreviewSource(e.target.value)}
+                style={inputStyle}
+                placeholder={
+                  previewType === 'video'
+                    ? 'https://.../my-video.mp4'
+                    : 'https://v0.dev/r/xxxxx'
+                }
+              />
+            </div>
+          )}
+
+          {previewType === 'video' && (
+            <div style={{ marginTop: '0.5rem' }}>
+              <label style={labelStyle}>🖼️ Poster Image URL (optional)</label>
+              <input
+                type="url"
+                value={previewPoster}
+                onChange={e => setPreviewPoster(e.target.value)}
+                style={inputStyle}
+                placeholder="https://.../video-cover.jpg"
+              />
+            </div>
+          )}
+        </section>
 
         <div>
           <label style={labelStyle}>Sub-images (Comma separated URLs)</label>

@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const { tenantId, title, category, emoji, promptText, images, coverImageUrl, sourcePlatform, sourceAuthor, tags } = body
+  const { tenantId, title, category, emoji, promptText, images, coverImageUrl, sourcePlatform, sourceAuthor, tags, previewType, previewSource, previewPoster } = body
 
   if (!tenantId || !title || !promptText) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -59,6 +59,9 @@ export async function POST(request: Request) {
       sourcePlatform,
       sourceAuthor,
       tags: tags || [],
+      previewType: previewType || 'image',
+      previewSource: previewSource || null,
+      previewPoster: previewPoster || null,
     },
   })
 

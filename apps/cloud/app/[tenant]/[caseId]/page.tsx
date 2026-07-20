@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
-import { CaseHeader, PromptBlock, ImageGallery } from '@prompt-share/ui'
+import { CaseHeader, PromptBlock, ImageGallery, VideoPlayer, IframeSandbox } from '@prompt-share/ui'
 import { db } from '@/lib/db'
 import { auth } from '@/lib/auth'
 import { PaywallGuard } from '@/components/paywall-guard'
@@ -45,7 +45,17 @@ export default async function CasePage({ params }: Props) {
         source={source}
       />
 
-      <ImageGallery images={promptCase.images} alt={promptCase.title} />
+      {/* Multi-modal preview: render based on previewType */}
+      {promptCase.previewType === 'video' && promptCase.previewSource ? (
+        <VideoPlayer
+          videoUrl={promptCase.previewSource}
+          posterUrl={promptCase.previewPoster || undefined}
+        />
+      ) : promptCase.previewType === 'web' && promptCase.previewSource ? (
+        <IframeSandbox sourceUrl={promptCase.previewSource} />
+      ) : (
+        <ImageGallery images={promptCase.images} alt={promptCase.title} />
+      )}
 
       <h2 style={{ marginTop: '2rem', fontSize: '1.25rem', fontWeight: 600 }}>Prompt</h2>
 
