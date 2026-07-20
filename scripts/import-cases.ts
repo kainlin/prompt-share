@@ -194,15 +194,20 @@ async function processImageFromPath(
 
 // ─── Supabase Upload ──────────────────────────────────────────
 
+/** CDN cache durations for different asset types */
+const CACHE_IMMUTABLE = '31536000, immutable' // 1 year — content-addressed assets
+const CACHE_LONG = '604800'                   // 1 week — stable assets, may be upserted
+
 async function uploadBuffer(
   supabase: SupabaseClient,
   buffer: Buffer,
   remotePath: string,
-  contentType: string
+  contentType: string,
+  cacheControl: string = CACHE_LONG,
 ): Promise<void> {
   const { error } = await supabase.storage
     .from(BUCKET)
-    .upload(remotePath, buffer, { contentType, upsert: true })
+    .upload(remotePath, buffer, { contentType, upsert: true, cacheControl })
 
   if (error) {
     throw new Error(`Upload failed: ${error.message}`)
@@ -348,8 +353,8 @@ async function main() {
           continue
         }
 
-        await uploadBuffer(supabase, imgResult.thumbBuffer, `thumbnails/${thumbFile}`, 'image/webp')
-        await uploadBuffer(supabase, imgResult.fullBuffer, `full/${fullFile}`, `image/${ext === 'png' ? 'png' : 'jpeg'}`)
+        await uploadBuffer(supabase, imgResult.thumbBuffer, `thumbnails/${thumbFile}`, 'image/webp', CACHE_IMMUTABLE)
+        await uploadBuffer(supabase, imgResult.fullBuffer, `full/${fullFile}`, `image/${ext === 'png' ? 'png' : 'jpeg'}`, CACHE_LONG)
 
         const mdxEn = generateMdx(c, 'en')
         const mdxZh = generateMdx(c, 'zh')
