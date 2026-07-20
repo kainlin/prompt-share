@@ -19,6 +19,8 @@ model User {
   tenants       Tenant[]
   sessions      Session[]
   accounts      Account[]
+
+  @@map("ps_user")
 }
 
 model Session {
@@ -31,6 +33,8 @@ model Session {
   userAgent String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("ps_session")
 }
 
 model Account {
@@ -43,29 +47,34 @@ model Account {
   updatedAt DateTime @updatedAt
 
   @@unique([provider, accountId])
+  @@map("ps_account")
 }
 
 model Verification {
-  id        String   @id @default(uuid())
+  id         String   @id @default(uuid())
   identifier String
-  value     String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("ps_verification")
 }
 
 model Tenant {
-  id           String       @id @default(uuid())
-  slug         String       @unique
-  displayName  String
-  bio          String?
-  avatarUrl    String?
-  ownerId      String
-  owner        User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  cases        PromptCase[]
+  id            String         @id @default(uuid())
+  slug          String         @unique
+  displayName   String
+  bio           String?
+  avatarUrl     String?
+  ownerId       String
+  owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  cases         PromptCase[]
   subscriptions Subscription[]
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@map("ps_tenant")
 }
 
 model PromptCase {
@@ -87,6 +96,7 @@ model PromptCase {
   updatedAt      DateTime @updatedAt
 
   @@unique([tenantId, slug])
+  @@map("ps_prompt_case")
 }
 
 model Subscription {
@@ -103,4 +113,5 @@ model Subscription {
   expiresAt             DateTime?
 
   @@index([userId, tenantId])
+  @@map("ps_subscription")
 }
