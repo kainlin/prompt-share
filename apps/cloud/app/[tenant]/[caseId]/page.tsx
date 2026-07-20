@@ -11,7 +11,7 @@ interface Props {
 
 export default async function CasePage({ params }: Props) {
   const { tenant: rawTenant, caseId } = await params
-  const slug = rawTenant.startsWith('@') ? rawTenant.slice(1) : rawTenant
+  const slug = decodeURIComponent(rawTenant).replace(/^@/, '')
 
   const tenant = await db.tenant.findUnique({ where: { slug } })
   if (!tenant) notFound()
