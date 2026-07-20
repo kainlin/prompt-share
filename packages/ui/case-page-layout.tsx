@@ -7,6 +7,9 @@ import { ImageGallery } from './image-gallery'
 import { CaseHeader } from './case-header'
 import { PromptBlock } from './prompt-block'
 import { getFullImageUrl } from './lib/supabase-url'
+import { IframeSandbox } from './iframe-sandbox'
+import { VideoPlayer } from './video-player'
+import { PaywallGuard } from './paywall-guard'
 
 interface CasePageLayoutProps {
   children: React.ReactNode
@@ -20,6 +23,15 @@ interface CasePageLayoutProps {
     source?: {
       platform?: string
       author?: string
+    }
+    preview?: {
+      type: 'image' | 'video' | 'web'
+      source: string | string[]
+      poster?: string
+    }
+    paywall?: {
+      isPremium: boolean
+      price?: number
     }
   }
   [key: string]: any
@@ -52,7 +64,7 @@ const isComponent = (child: any, component: any, name: string) => {
   return false
 }
 
-export function CasePageLayout({ children, metadata, ...props }: CasePageLayoutProps) {
+export function CasePageLayout({ children, metadata }: CasePageLayoutProps) {
   const childrenArray = React.Children.toArray(children)
   
   let imageGalleryNode: any = null
@@ -79,8 +91,8 @@ export function CasePageLayout({ children, metadata, ...props }: CasePageLayoutP
     }
   })
 
-  // Fallback to standard flow if core elements are missing
-  if (!imageGalleryNode && !caseHeaderNode && !promptBlockNode) {
+  // Fallback to standard flow if core elements are missing (allowing preview-only or header-only cases just in case)
+  if (!imageGalleryNode && !caseHeaderNode && !promptBlockNode && !metadata.preview) {
     return <>{children}</>
   }
 
@@ -92,21 +104,63 @@ export function CasePageLayout({ children, metadata, ...props }: CasePageLayoutP
   const categoryLabel = metadata.category ? getCategoryLabel(metadata.category) : ''
 
   // Determine model estimate from metadata or defaults
-  let modelEstimate = '🤖 Midjourney / Stable Diffusion'
+  let modelEstimate = '🤖 GPT Image-2'
   if (metadata.category === 'photography') {
-    modelEstimate = '📷 Midjourney v6 / SDXL (Photography)'
+    modelEstimate = '📷 GPT Image-2 (Photography)'
   } else if (metadata.category === 'product') {
-    modelEstimate = '🛍️ Midjourney v6 (Product Design)'
+    modelEstimate = '🛍️ GPT Image-2 (Product Design)'
   } else if (metadata.category === 'people') {
-    modelEstimate = '🧍 Midjourney v6 (Character Portrait)'
+    modelEstimate = '🧍 GPT Image-2 (Character Portrait)'
+  }
+
+  // Helper to render the appropriate preview container
+  const renderPreviewElement = () => {
+    const previewType = metadata.preview?.type
+    const previewSource = metadata.preview?.source
+
+    if (previewType === 'web' && typeof previewSource === 'string') {
+      return <IframeSandbox sourceUrl={previewSource} />
+    }
+
+    if (previewType === 'video' && typeof previewSource === 'string') {
+      return <VideoPlayer videoUrl={previewSource} posterUrl={metadata.preview?.poster} />
+    }
+
+    return (
+      <>
+        {imageGalleryNode}
+        {imageUrl && <ColorPalette imageUrl={imageUrl} />}
+      </>
+    )
+  }
+
+  // Helper to wrap the PromptBlock with PaywallGuard if it is premium
+  const renderPromptBlockElement = () => {
+    if (!promptBlockNode) return null
+
+    const paywallInfo = metadata.paywall
+    if (paywallInfo?.isPremium) {
+      const promptText = promptBlockNode.props?.children || ''
+      return (
+        <PaywallGuard
+          price={paywallInfo.price}
+          isPremium={true}
+          promptText={promptText}
+          caseIdentifier={metadata.title || ''}
+        >
+          {promptBlockNode}
+        </PaywallGuard>
+      )
+    }
+
+    return promptBlockNode
   }
 
   const renderLayout = () => (
     <div className={styles.container}>
-      {/* Left Column: Image View & Color Palette */}
+      {/* Left Column: Image View, Video View or Iframe Sandbox */}
       <div className={styles.leftColumn}>
-        {imageGalleryNode}
-        {imageUrl && <ColorPalette imageUrl={imageUrl} />}
+        {renderPreviewElement()}
       </div>
       
       {/* Right Column: Metadata & Prompt Configurator */}
@@ -145,8 +199,8 @@ export function CasePageLayout({ children, metadata, ...props }: CasePageLayoutP
           </div>
         </div>
 
-        {/* The Prompt Editor Panel */}
-        {promptBlockNode}
+        {/* The Prompt Editor Panel (with optional Paywall Guard) */}
+        {renderPromptBlockElement()}
         
         {/* Render any additional paragraphs, notes, or tags */}
         {otherNodes.length > 0 && (
