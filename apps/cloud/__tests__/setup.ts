@@ -18,6 +18,8 @@ vi.mock('@/lib/db', () => ({
     },
     subscription: {
       create: vi.fn(),
+      findFirst: vi.fn(),
+      update: vi.fn(),
       updateMany: vi.fn(),
     },
     user: {
@@ -27,20 +29,16 @@ vi.mock('@/lib/db', () => ({
 }))
 
 // ---------------------------------------------------------------------------
-// Mock Supabase server client
+// Mock Better Auth (replaces Supabase Auth)
 // ---------------------------------------------------------------------------
-const mockGetUser = vi.fn()
-const mockExchangeCode = vi.fn()
+const mockGetSession = vi.fn()
 
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(() =>
-    Promise.resolve({
-      auth: {
-        getUser: mockGetUser,
-        exchangeCodeForSession: mockExchangeCode,
-      },
-    })
-  ),
+vi.mock('@/lib/auth', () => ({
+  auth: {
+    api: {
+      getSession: mockGetSession,
+    },
+  },
 }))
 
 // ---------------------------------------------------------------------------
@@ -58,18 +56,10 @@ vi.mock('@/lib/stripe', () => ({
 }))
 
 // ---------------------------------------------------------------------------
-// Mock @supabase/ssr (used directly by middleware)
+// Mock next/headers (used by auth routes)
 // ---------------------------------------------------------------------------
-vi.mock('@supabase/ssr', () => ({
-  createServerClient: vi.fn(() => ({
-    auth: {
-      getUser: mockGetUser,
-    },
-  })),
-}))
-
-// Mock next/headers (used by supabase server)
 vi.mock('next/headers', () => ({
+  headers: vi.fn(() => new Map()),
   cookies: vi.fn(() =>
     Promise.resolve({
       getAll: vi.fn(() => []),
@@ -78,4 +68,18 @@ vi.mock('next/headers', () => ({
   ),
 }))
 
-export { mockGetUser, mockStripeClient, mockExchangeCode }
+// ---------------------------------------------------------------------------
+// Mock @supabase/supabase-js (still used by upload route for Storage)
+// ---------------------------------------------------------------------------
+const mockStorageUpload = vi.fn()
+vi.mock('@supabase/supabase-js', () => ({
+  createClient: vi.fn(() => ({
+    storage: {
+      from: vi.fn(() => ({
+        upload: mockStorageUpload,
+      })),
+    },
+  })),
+}))
+
+export { mockGetSession, mockStripeClient, mockStorageUpload }

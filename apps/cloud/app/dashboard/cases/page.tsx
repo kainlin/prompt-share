@@ -1,17 +1,17 @@
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import Link from 'next/link'
+import { headers } from 'next/headers'
 
 interface Props {
   searchParams: Promise<{ tenant?: string }>
 }
 
 export default async function CasesPage({ searchParams }: Props) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const session = await auth.api.getSession({ headers: await headers() })
   const { tenant: tenantId } = await searchParams
 
-  const tenants = await db.tenant.findMany({ where: { ownerId: user!.id } })
+  const tenants = await db.tenant.findMany({ where: { ownerId: session!.user.id } })
   const selectedTenant = tenantId || tenants[0]?.id
 
   const cases = selectedTenant

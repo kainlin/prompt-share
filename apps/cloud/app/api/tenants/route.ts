@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { headers } from 'next/headers'
+import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const session = await auth.api.getSession({ headers: await headers() })
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       data: {
         slug,
         displayName,
-        ownerId: user.id,
+        ownerId: session.user.id,
       },
     })
 

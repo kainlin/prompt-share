@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
+import { headers } from 'next/headers'
 import { CaseHeader, PromptBlock, ImageGallery } from '@prompt-share/ui'
 import { db } from '@/lib/db'
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@/lib/auth'
 import { PaywallGuard } from '@/components/paywall-guard'
 
 interface Props {
@@ -21,10 +22,9 @@ export default async function CasePage({ params }: Props) {
   if (!promptCase) notFound()
 
   // Check subscription status
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const session = await auth.api.getSession({ headers: await headers() })
 
-  const isSubscribed = user ? await checkSubscription(user.id, tenant.id) : false
+  const isSubscribed = session ? await checkSubscription(session.user.id, tenant.id) : false
 
   const source = promptCase.sourcePlatform || promptCase.sourceAuthor
     ? { platform: promptCase.sourcePlatform || '', author: promptCase.sourceAuthor || '' }

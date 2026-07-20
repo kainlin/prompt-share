@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { db } from '@/lib/db'
 import { stripe } from '@/lib/stripe'
-import { mockGetUser, mockStripeClient } from '../setup'
+import { mockGetSession, mockStripeClient } from '../setup'
 
 // stub the real imports — they resolve to what setup.ts mocked
 const mockDb = vi.mocked(db)
@@ -34,7 +34,7 @@ describe('/api/cases', () => {
   // -------------------------------------------------------------------
   describe('POST', () => {
     it('returns 401 when not authenticated', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: null }, error: null })
+      mockGetSession.mockResolvedValue(null)
 
       const req = new Request('http://localhost/api/cases', {
         method: 'POST',
@@ -47,7 +47,7 @@ describe('/api/cases', () => {
     })
 
     it('returns 403 when tenant does not belong to user', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       mockDb.tenant.findFirst.mockResolvedValue(null) // not found / not owned
 
       const req = new Request('http://localhost/api/cases', {
@@ -61,7 +61,7 @@ describe('/api/cases', () => {
     })
 
     it('returns 400 when title is missing', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       mockDb.tenant.findFirst.mockResolvedValue(tenant)
 
       const body = { ...validBody, title: '' }
@@ -76,7 +76,7 @@ describe('/api/cases', () => {
     })
 
     it('returns 400 when promptText is missing', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       mockDb.tenant.findFirst.mockResolvedValue(tenant)
 
       const body = { ...validBody, promptText: '' }
@@ -91,7 +91,7 @@ describe('/api/cases', () => {
     })
 
     it('creates a case and returns 201', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       mockDb.tenant.findFirst.mockResolvedValue(tenant)
 
       const created = { id: 'c-1', ...validBody, slug: 'sunset-dream' }
@@ -114,7 +114,7 @@ describe('/api/cases', () => {
   // -------------------------------------------------------------------
   describe('GET', () => {
     it('returns 401 when not authenticated', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: null }, error: null })
+      mockGetSession.mockResolvedValue(null)
 
       const req = new Request('http://localhost/api/cases?tenantId=t-1')
       const res = await GET(req)
@@ -122,7 +122,7 @@ describe('/api/cases', () => {
     })
 
     it('returns 400 when tenantId is missing', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
 
       const req = new Request('http://localhost/api/cases')
       const res = await GET(req)
@@ -132,7 +132,7 @@ describe('/api/cases', () => {
     })
 
     it('returns 403 when tenant is not owned by user', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       mockDb.tenant.findFirst.mockResolvedValue(null)
 
       const req = new Request('http://localhost/api/cases?tenantId=t-1')
@@ -141,7 +141,7 @@ describe('/api/cases', () => {
     })
 
     it('returns list of cases', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       mockDb.tenant.findFirst.mockResolvedValue(tenant)
       const cases = [{ id: 'c-1', title: 'Sunset' }, { id: 'c-2', title: 'Sunrise' }]
       mockDb.promptCase.findMany.mockResolvedValue(cases as any)

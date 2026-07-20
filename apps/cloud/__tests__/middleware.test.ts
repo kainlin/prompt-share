@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { NextRequest } from 'next/server'
-import { mockGetUser } from './setup'
+import { mockGetSession } from './setup'
 
 // We need to mock createServerClient from @supabase/ssr as well — already in setup.ts
 // But middleware imports it directly. So we need to set up the mock behavior.
@@ -22,7 +22,7 @@ describe('middleware', () => {
 
   describe('protected paths', () => {
     it('redirects /dashboard to /login when not authenticated', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: null }, error: null })
+      mockGetSession.mockResolvedValue(null)
 
       const req = buildRequest('/dashboard')
       const res = await middleware(req)
@@ -35,7 +35,7 @@ describe('middleware', () => {
     })
 
     it('allows /dashboard when authenticated', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } }, error: null })
+      mockGetSession.mockResolvedValue({ user: { id: 'user-1' } })
 
       const req = buildRequest('/dashboard')
       const res = await middleware(req)
@@ -45,7 +45,7 @@ describe('middleware', () => {
     })
 
     it('redirects /dashboard/cases to /login when not authenticated', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: null }, error: null })
+      mockGetSession.mockResolvedValue(null)
 
       const req = buildRequest('/dashboard/cases')
       const res = await middleware(req)

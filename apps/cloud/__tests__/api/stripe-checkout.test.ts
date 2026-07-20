@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { db } from '@/lib/db'
 import { stripe } from '@/lib/stripe'
-import { mockGetUser, mockStripeClient } from '../setup'
+import { mockGetSession, mockStripeClient } from '../setup'
 
 const mockDb = vi.mocked(db)
 
@@ -16,7 +16,7 @@ describe('/api/stripe/checkout', () => {
   })
 
   it('returns 401 when not authenticated', async () => {
-    mockGetUser.mockResolvedValue({ data: { user: null }, error: null })
+    mockGetSession.mockResolvedValue(null)
 
     const req = new Request('http://localhost/api/stripe/checkout', {
       method: 'POST',
@@ -29,7 +29,7 @@ describe('/api/stripe/checkout', () => {
   })
 
   it('returns 404 when tenant does not exist', async () => {
-    mockGetUser.mockResolvedValue({ data: { user }, error: null })
+    mockGetSession.mockResolvedValue({ user })
     mockDb.tenant.findUnique.mockResolvedValue(null)
 
     const req = new Request('http://localhost/api/stripe/checkout', {
@@ -43,7 +43,7 @@ describe('/api/stripe/checkout', () => {
   })
 
   it('returns a checkout url for monthly plan', async () => {
-    mockGetUser.mockResolvedValue({ data: { user }, error: null })
+    mockGetSession.mockResolvedValue({ user })
     mockDb.tenant.findUnique.mockResolvedValue(tenant as any)
     mockStripeClient.checkout.sessions.create.mockResolvedValue({ url: 'https://checkout.stripe.com/test' } as any)
 
@@ -62,7 +62,7 @@ describe('/api/stripe/checkout', () => {
   })
 
   it('returns a checkout url for lifetime plan', async () => {
-    mockGetUser.mockResolvedValue({ data: { user }, error: null })
+    mockGetSession.mockResolvedValue({ user })
     mockDb.tenant.findUnique.mockResolvedValue(tenant as any)
     mockStripeClient.checkout.sessions.create.mockResolvedValue({ url: 'https://checkout.stripe.com/lifetime' } as any)
 
@@ -81,7 +81,7 @@ describe('/api/stripe/checkout', () => {
   })
 
   it('defaults to monthly plan when plan is not specified', async () => {
-    mockGetUser.mockResolvedValue({ data: { user }, error: null })
+    mockGetSession.mockResolvedValue({ user })
     mockDb.tenant.findUnique.mockResolvedValue(tenant as any)
     mockStripeClient.checkout.sessions.create.mockResolvedValue({ url: 'https://checkout.stripe.com/test' } as any)
 
@@ -98,7 +98,7 @@ describe('/api/stripe/checkout', () => {
   })
 
   it('passes metadata to Stripe', async () => {
-    mockGetUser.mockResolvedValue({ data: { user }, error: null })
+    mockGetSession.mockResolvedValue({ user })
     mockDb.tenant.findUnique.mockResolvedValue(tenant as any)
     mockStripeClient.checkout.sessions.create.mockResolvedValue({ url: 'https://checkout.stripe.com/test' } as any)
 

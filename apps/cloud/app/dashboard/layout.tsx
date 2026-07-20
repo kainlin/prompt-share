@@ -1,15 +1,15 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { db } from '@/lib/db'
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login?redirect=/dashboard')
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) redirect('/login?redirect=/dashboard')
 
-  const tenants = await db.tenant.findMany({ where: { ownerId: user.id }, orderBy: { createdAt: 'desc' } })
+  const tenants = await db.tenant.findMany({ where: { ownerId: session.user.id }, orderBy: { createdAt: 'desc' } })
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
@@ -27,7 +27,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         </nav>
 
         <div style={{ marginTop: 'auto', paddingTop: '2rem' }}>
-          <form action="/api/auth/signout" method="post">
+          <form action="/api/auth/sign-out" method="post">
             <button style={{ ...navLinkStyle, background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}>
               🚪 Sign out
             </button>

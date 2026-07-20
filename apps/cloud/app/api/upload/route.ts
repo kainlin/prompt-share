@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
+import { headers } from 'next/headers'
 import { createClient } from '@supabase/supabase-js'
-import { createClient as createServerSupabaseClient } from '@/lib/supabase/server'
+import { auth } from '@/lib/auth'
 
 const STORAGE_BUCKET = 'prompt-images'
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
@@ -8,9 +9,8 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
 export async function POST(request: Request) {
   // Auth check
-  const supabase = await createServerSupabaseClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   const ext = file.name.split('.').pop() || 'jpg'
   const timestamp = Date.now()
   const random = Math.random().toString(36).slice(2, 8)
-  const remotePath = `uploads/${user.id}/${timestamp}-${random}.${ext}`
+  const remotePath = `uploads/${session.user.id}/${timestamp}-${random}.${ext}`
 
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!serviceKey) {

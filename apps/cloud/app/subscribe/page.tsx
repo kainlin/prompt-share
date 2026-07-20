@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { headers } from 'next/headers'
+import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { StripePlans } from './stripe-plans'
 
@@ -12,9 +13,8 @@ export default async function SubscribePage({ searchParams }: Props) {
   if (!tenantId) redirect('/')
 
   // Authenticate user
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) {
     redirect(`/login?redirect=/subscribe?tenant=${tenantId}`)
   }
 
@@ -24,7 +24,7 @@ export default async function SubscribePage({ searchParams }: Props) {
 
   // Check if already subscribed
   const existingSub = await db.subscription.findFirst({
-    where: { userId: user.id, tenantId, status: 'active' }
+    where: { userId: session?.user.id, tenantId, status: 'active' }
   })
   
   if (existingSub) {

@@ -1,11 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
+import { headers } from 'next/headers'
 
 export default async function SettingsPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const session = await auth.api.getSession({ headers: await headers() })
 
-  const tenants = await db.tenant.findMany({ where: { ownerId: user!.id } })
+  const tenants = await db.tenant.findMany({ where: { ownerId: session!.user.id } })
 
   return (
     <div style={{ maxWidth: 600 }}>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { headers } from 'next/headers'
+import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 
 interface Context {
@@ -9,9 +10,8 @@ interface Context {
 export async function GET(request: Request, context: Context) {
   try {
     const { id } = await context.params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const session = await auth.api.getSession({ headers: await headers() })
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const promptCase = await db.promptCase.findUnique({
       where: { id },
@@ -19,7 +19,7 @@ export async function GET(request: Request, context: Context) {
     })
 
     if (!promptCase) return NextResponse.json({ error: 'Case not found' }, { status: 404 })
-    if (promptCase.tenant.ownerId !== user.id) {
+    if (promptCase.tenant.ownerId !== session.user.id) {
       return NextResponse.json({ error: 'Not your case' }, { status: 403 })
     }
 
@@ -32,9 +32,8 @@ export async function GET(request: Request, context: Context) {
 export async function PUT(request: Request, context: Context) {
   try {
     const { id } = await context.params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const session = await auth.api.getSession({ headers: await headers() })
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
     const { title, category, emoji, promptText, images, coverImageUrl, sourcePlatform, sourceAuthor, tags, published } = body
@@ -49,7 +48,7 @@ export async function PUT(request: Request, context: Context) {
     })
 
     if (!promptCase) return NextResponse.json({ error: 'Case not found' }, { status: 404 })
-    if (promptCase.tenant.ownerId !== user.id) {
+    if (promptCase.tenant.ownerId !== session.user.id) {
       return NextResponse.json({ error: 'Not your case' }, { status: 403 })
     }
 
@@ -84,9 +83,8 @@ export async function PUT(request: Request, context: Context) {
 export async function DELETE(request: Request, context: Context) {
   try {
     const { id } = await context.params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const session = await auth.api.getSession({ headers: await headers() })
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const promptCase = await db.promptCase.findUnique({
       where: { id },
@@ -94,7 +92,7 @@ export async function DELETE(request: Request, context: Context) {
     })
 
     if (!promptCase) return NextResponse.json({ error: 'Case not found' }, { status: 404 })
-    if (promptCase.tenant.ownerId !== user.id) {
+    if (promptCase.tenant.ownerId !== session.user.id) {
       return NextResponse.json({ error: 'Not your case' }, { status: 403 })
     }
 

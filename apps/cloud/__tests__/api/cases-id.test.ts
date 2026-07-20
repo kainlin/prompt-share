@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { db } from '@/lib/db'
-import { mockGetUser } from '../setup'
+import { mockGetSession } from '../setup'
 
 const mockDb = vi.mocked(db)
 
@@ -24,7 +24,7 @@ describe('/api/cases/[id]', () => {
   // -------------------------------------------------------------------
   describe('GET', () => {
     it('returns 401 when not authenticated', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: null }, error: null })
+      mockGetSession.mockResolvedValue(null)
 
       const req = new Request('http://localhost/api/cases/c-1')
       const res = await GET(req, ctx('c-1'))
@@ -32,7 +32,7 @@ describe('/api/cases/[id]', () => {
     })
 
     it('returns 404 when case does not exist', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       mockDb.promptCase.findUnique.mockResolvedValue(null)
 
       const req = new Request('http://localhost/api/cases/c-1')
@@ -43,7 +43,7 @@ describe('/api/cases/[id]', () => {
     })
 
     it('returns 403 when tenant owner does not match', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       mockDb.promptCase.findUnique.mockResolvedValue({
         id: 'c-1',
         tenant: { ownerId: 'someone-else' },
@@ -57,7 +57,7 @@ describe('/api/cases/[id]', () => {
     })
 
     it('returns the case when authenticated owner', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       const found = { id: 'c-1', title: 'Sunset', tenant: { ownerId: 'user-1' } }
       mockDb.promptCase.findUnique.mockResolvedValue(found as any)
 
@@ -76,7 +76,7 @@ describe('/api/cases/[id]', () => {
     const updateBody = { title: 'New Title', promptText: 'New prompt' }
 
     it('returns 401 when not authenticated', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: null }, error: null })
+      mockGetSession.mockResolvedValue(null)
 
       const req = new Request('http://localhost/api/cases/c-1', {
         method: 'PUT',
@@ -87,7 +87,7 @@ describe('/api/cases/[id]', () => {
     })
 
     it('returns 404 when case does not exist', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       mockDb.promptCase.findUnique.mockResolvedValue(null)
 
       const req = new Request('http://localhost/api/cases/c-1', {
@@ -101,7 +101,7 @@ describe('/api/cases/[id]', () => {
     })
 
     it('returns 403 when not the owner', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       mockDb.promptCase.findUnique.mockResolvedValue({
         id: 'c-1',
         title: 'Old',
@@ -118,7 +118,7 @@ describe('/api/cases/[id]', () => {
     })
 
     it('returns 400 when title is missing', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       mockDb.promptCase.findUnique.mockResolvedValue({
         id: 'c-1',
         title: 'Old',
@@ -137,7 +137,7 @@ describe('/api/cases/[id]', () => {
     })
 
     it('updates and returns the case', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       mockDb.promptCase.findUnique.mockResolvedValue({
         id: 'c-1',
         title: 'Old',
@@ -164,7 +164,7 @@ describe('/api/cases/[id]', () => {
   // -------------------------------------------------------------------
   describe('DELETE', () => {
     it('returns 401 when not authenticated', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: null }, error: null })
+      mockGetSession.mockResolvedValue(null)
 
       const req = new Request('http://localhost/api/cases/c-1', { method: 'DELETE' })
       const res = await DELETE(req, ctx('c-1'))
@@ -172,7 +172,7 @@ describe('/api/cases/[id]', () => {
     })
 
     it('returns 404 when case does not exist', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       mockDb.promptCase.findUnique.mockResolvedValue(null)
 
       const req = new Request('http://localhost/api/cases/c-1', { method: 'DELETE' })
@@ -181,7 +181,7 @@ describe('/api/cases/[id]', () => {
     })
 
     it('returns 403 when not the owner', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       mockDb.promptCase.findUnique.mockResolvedValue({
         id: 'c-1',
         tenant: { ownerId: 'someone-else' },
@@ -193,7 +193,7 @@ describe('/api/cases/[id]', () => {
     })
 
     it('deletes and returns success', async () => {
-      mockGetUser.mockResolvedValue({ data: { user }, error: null })
+      mockGetSession.mockResolvedValue({ user })
       mockDb.promptCase.findUnique.mockResolvedValue({
         id: 'c-1',
         tenant: { ownerId: 'user-1' },

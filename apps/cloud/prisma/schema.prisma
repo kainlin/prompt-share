@@ -8,11 +8,48 @@ datasource db {
 }
 
 model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  name          String?
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  tenants       Tenant[]
+  sessions      Session[]
+  accounts      Account[]
+}
+
+model Session {
   id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  avatarUrl String?
-  tenants   Tenant[]
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider  String
+  accountId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([provider, accountId])
+}
+
+model Verification {
+  id        String   @id @default(uuid())
+  identifier String
+  value     String
+  expiresAt DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -53,17 +90,17 @@ model PromptCase {
 }
 
 model Subscription {
-  id               String    @id @default(uuid())
-  userId           String
-  tenantId         String
-  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id                    String    @id @default(uuid())
+  userId                String
+  tenantId              String
+  tenant                Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   stripeSessionId       String    @unique
   stripeSubscriptionId  String?   @unique
   stripeCustomerId      String?
   status                String    @default("active")
   plan                  String    @default("monthly")
-  createdAt        DateTime  @default(now())
-  expiresAt        DateTime?
+  createdAt             DateTime  @default(now())
+  expiresAt             DateTime?
 
   @@index([userId, tenantId])
 }
