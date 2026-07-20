@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { db } from '@/lib/db'
+import { SignOutButton } from './sign-out-button'
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -27,11 +28,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         </nav>
 
         <div style={{ marginTop: 'auto', paddingTop: '2rem' }}>
-          <form action="/api/auth/sign-out" method="post">
-            <button style={{ ...navLinkStyle, background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}>
-              🚪 Sign out
-            </button>
-          </form>
+          <SignOutButton />
         </div>
       </aside>
 
