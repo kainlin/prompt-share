@@ -1,6 +1,9 @@
 import { auth } from '@/lib/auth'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Must run on Node.js because auth.api.getSession() uses Prisma
+export const runtime = 'nodejs'
+
 const PROTECTED_PATHS = ['/dashboard']
 
 export async function middleware(request: NextRequest) {
