@@ -25,6 +25,7 @@
 |------|:---:|
 | Stripe 环境变量全是占位符（`sk_test_`、`price_`、`whsec_`），不能真收钱 | 🔴 |
 | PaywallGuard 只挡了 PromptBlock 文本，ImageGallery/VideoPlayer/IframeSandbox 对未订阅用户完全裸露 | 🔴 |
+| 无按案例粒度的收费模式 — 创作者不能设置哪些免费、哪些半锁、哪些全锁 | 🔴 |
 | 无 rate limiting — login、upload、Stripe webhook 均无防护 | 🔴 |
 | 无 OG metadata — 所有页面无法被社交平台/搜索引擎正确索引 | 🔴 |
 | 无邮箱验证 / 密码重置 — 注册无需验证邮箱 | 🟡 |
@@ -57,14 +58,64 @@ P3 ─ 消费者发现体验 ...................... 有流量后
 - [ ] **验证 Webhook**：部署后在 Stripe Dashboard 注册 `https://<domain>/api/stripe/webhook`，验证 `checkout.session.completed` 和 `customer.subscription.deleted` 事件能正确写入 `ps_subscription`
 - [ ] **订阅后状态即时刷新**：支付成功后重定向回店铺页，`checkSubscription()` 能立即读到 active 状态
 
-### 2. PaywallGuard 全覆盖
+### 2. 创作者按案例分级收费模式
 
-- [ ] **ImageGallery 受保护**：未订阅用户看到模糊缩略图 + 锁定浮层（复用现有 PaywallGuard 组件）
-- [ ] **VideoPlayer 受保护**：未订阅用户看到模糊封面/第一帧 + 锁定浮层
-- [ ] **IframeSandbox 受保护**：未订阅用户看到加载骨架 + 锁定浮层，不加载实际 iframe
-- [ ] **可配置免费预览策略**：每个案例可设置 `freePreview` 字段（如 "前 3 张图免费" 或 "首张图免费"），店主在新建/编辑案例时可选
+**现状**：PaywallGuard 是全局二元的——要么全锁要么全开，无法按案例粒度差异化。创作者不能决定「哪些免费、哪些付费、哪些半锁」。
 
-### 3. Rate Limiting
+**目标**：每个案例支持三种收费模式：
+
+| 模式 | `paywallMode` | 免费用户体验 | 订阅用户体验 |
+|------|:---:|---|---|
+| 🆓 免费公开 | `free` | 图片/视频/网页 + 提示词全文 + 一键复制 | 同免费 |
+| 👁️ 图片可见，提示词付费 | `prompt_only` | 图片/视频正常浏览，提示词模糊 + 锁定浮层 | 全部可见 |
+| 🔒 全部锁定 | `full_lock` | 图片水印/模糊 + 提示词锁定 | 全部可见 |
+
+**可选增强**（可后续迭代）：
+
+- 🏷️ **免费预览张数**：`freePreviewCount` 字段 — 如 gallery 前 3 张免费，之后模糊
+- 💧 **水印叠加**：`watermarkEnabled` 布尔字段 — `full_lock` 模式下在图中央覆盖半透明水印文字（店铺名/logo），而非仅高斯模糊
+
+**Database 变更**：
+
+```
+ps_prompt_case 新增字段：
+  paywallMode      TEXT    DEFAULT 'free'    -- free | prompt_only | full_lock
+  freePreviewCount INT     DEFAULT 0         -- 0 = 无免费预览
+  watermarkEnabled BOOLEAN DEFAULT false
+```
+
+**需要改的文件**：
+
+| 文件 | 改动 |
+|------|------|
+| `prisma/schema.prisma` | PromptCase 加 3 个字段 |
+| `/api/cases` POST/PUT | 接受新字段 |
+| `new-case-form.tsx` | 收费模式选择器（3 个 radio/button）+ 可选配置项 |
+| `edit/page.tsx` | 同步新增字段 |
+| `PaywallGuard` | 根据 `paywallMode` 决定锁什么（文本、图片、全锁） |
+| `[tenant]/[caseId]/page.tsx` | 透传 `paywallMode` 给 PaywallGuard + ImageGallery |
+
+**SQL（在新字段加入 schema 后执行）**：
+
+```sql
+ALTER TABLE ps_prompt_case ADD COLUMN IF NOT EXISTS "paywallMode" TEXT NOT NULL DEFAULT 'free';
+ALTER TABLE ps_prompt_case ADD COLUMN IF NOT EXISTS "freePreviewCount" INT NOT NULL DEFAULT 0;
+ALTER TABLE ps_prompt_case ADD COLUMN IF NOT EXISTS "watermarkEnabled" BOOLEAN NOT NULL DEFAULT false;
+```
+
+---
+
+### 3. PaywallGuard 全覆盖（依赖 #2）
+
+> 需要 #2 的 `paywallMode` 完成后才能实现，「锁什么」取决于案例的收费模式。
+
+- [ ] **`full_lock` 模式**：ImageGallery 所有图片模糊 + 居中水印叠加层 + 锁定浮层；VideoPlayer 显示模糊封面 + 锁定浮层；IframeSandbox 不渲染 iframe，显示锁定浮层
+- [ ] **`prompt_only` 模式**：图片/视频正常可见，仅 PromptBlock 被模糊 + 锁定浮层（当前已有）
+- [ ] **`free` 模式**：全部内容可见，无锁定浮层
+- [ ] **`freePreviewCount` 处理**：如图片 5 张、`freePreviewCount=2`，则前 2 张正常显示，第 3 张起模糊
+- [ ] **`watermarkEnabled` 处理**：云纹文字叠加（CSS `::after` pseudo-element 或绝对定位 div），显示店铺名/logo
+
+### 4. Rate Limiting
 
 - [ ] **登录接口限频**：`/api/auth/sign-in/email` — 同一 IP 每分钟最多 10 次，超限返回 429
 - [ ] **注册接口限频**：`/api/auth/sign-up/email` — 同一 IP 每小时最多 5 次
@@ -72,7 +123,7 @@ P3 ─ 消费者发现体验 ...................... 有流量后
 - [ ] **Stripe Webhook 不限频**：webhook 路由加入白名单
 - [ ] **实现方式**：`next-rate-limiter` 或基于 Redis/Memory 的滑动窗口中间件
 
-### 4. SEO / Social Metadata
+### 5. SEO / Social Metadata
 
 - [ ] **店铺首页 OG**：动态 `generateMetadata` — title 取 `{tenant.displayName} - PromptShare`，og:image 取 `tenant.avatarUrl`
 - [ ] **案例详情页 OG**：title 取 `{case.title} - {tenant.displayName}`，og:image 取 `case.coverImageUrl`，og:description 取 prompt 前 200 字符
@@ -80,7 +131,7 @@ P3 ─ 消费者发现体验 ...................... 有流量后
 - [ ] **Twitter Card 支持**：`summary_large_image`
 - [ ] **Canonical URL**：店铺页和案例页加 `<link rel="canonical">`
 
-### 5. 环境变量启动校验
+### 6. 环境变量启动校验
 
 - [ ] **`instrumentation.ts` 或预检查脚本**：启动时检查所有必需环境变量是否存在
   - `DATABASE_URL`、`DIRECT_URL`
@@ -93,20 +144,20 @@ P3 ─ 消费者发现体验 ...................... 有流量后
 
 ## P1：用户自助 + 基础可用（下周）
 
-### 6. Stripe Customer Portal
+### 7. Stripe Customer Portal
 
 - [ ] **订阅管理页面**：已订阅用户在 `/subscribe` 页面看到当前计划信息 + "Manage Subscription" 按钮
 - [ ] **Portal Session API**：`/api/stripe/portal` 创建 Stripe Customer Portal Session（需要 `stripeCustomerId`）
 - [ ] **取消/续订**：用户在 Portal 中可取消订阅，webhook 收到 `customer.subscription.deleted` 后标记过期
 - [ ] **升级方案**：Portal 中支持从 Monthly 升到 Lifetime
 
-### 7. 邮箱验证 + 密码重置
+### 8. 邮箱验证 + 密码重置
 
 - [ ] **邮箱验证**：注册后发送验证邮件（Better Auth 内置，配置 Resend 或 SMTP provider）
 - [ ] **密码重置流程**：登录页 "Forgot password?" → 输入邮箱 → 重置链接 → 新密码
 - [ ] **验证状态提示**：Dashboard 顶部对未验证邮箱显示黄色提醒条
 
-### 8. 移动端适配
+### 9. 移动端适配
 
 - [ ] **Dashboard 侧边栏折叠**：移动端隐藏侧边栏，汉堡菜单按钮控制显示
 - [ ] **店铺首页响应式**：分类卡片 `grid-template-columns` 在小屏自动切换为 2 列或 1 列
@@ -114,13 +165,13 @@ P3 ─ 消费者发现体验 ...................... 有流量后
 - [ ] **案例管理列表**：表格改为卡片式布局
 - [ ] **新建/编辑案例表单**：两列布局在小屏改为单列
 
-### 9. 完善店铺首页
+### 10. 完善店铺首页
 
 - [ ] **Category filter 接线**：`?cat=photography` → 店铺首页下方只展示该分类的案例
 - [ ] **案例网格**：店铺首页增加案例缩略图网格（类似 OSS 版的 CategoryGrid）
 - [ ] **搜索服务端化**：`/api/tenants/[slug]/cases/search?q=` → PostgreSQL `ILIKE` 或 `tsvector`
 
-### 10. 基础 Landing Page
+### 11. 基础 Landing Page
 
 - [ ] **`/` 首页改造**：当前仅显示 "PromptShare Cloud — AI Prompt Monetization"，改为包含 Hero section + Feature 卡片 + CTA 的产品首页
 - [ ] **定价页**：`/subscribe` 页面可在无 tenant 参数时展示公开定价
@@ -130,26 +181,26 @@ P3 ─ 消费者发现体验 ...................... 有流量后
 
 ## P2：创作者工具体验（有创作者后）
 
-### 11. 案例分析面板
+### 12. 案例分析面板
 
 - [ ] **Tracker 表**：`ps_case_analytics`（caseId, event: view/copy/subscribe, timestamp, userId?）
 - [ ] **Dashboard 分析卡片**：每个店铺展示今日/本周/本月 views、copies、subscribes
 - [ ] **图表**：简易折线图（近期 views 趋势）
 - [ ] **实现方式**：API route 插入事件 + Dashboard 用 CSS 手绘简易图表（无需引入图表库）
 
-### 12. 案例排序与管理
+### 13. 案例排序与管理
 
 - [ ] **排序字段**：`PromptCase` 加 `sortOrder: Int` 字段
 - [ ] **拖拽排序**：案例列表页支持拖拽（或上下箭头按钮）
 - [ ] **固定/推荐案例**：`featured: Boolean` 字段，置顶展示
 
-### 13. 批量导入
+### 14. 批量导入
 
 - [ ] **JSON/CSV 导入**：Dashboard → Import → 粘贴 JSON 或上传 CSV
 - [ ] **批量操作**：案例列表支持多选 → 批量发布/取消发布/删除
 - [ ] **从 OSS 版一键导入**：如果 `content/` 目录有 MDX 文件，可批量解析导入
 
-### 14. 参数化提示词编辑器
+### 15. 参数化提示词编辑器
 
 - [ ] **提取 `{argument}` 占位符**：在案例编辑页自动检测 prompt 中的 `{argument name="xxx" default="yyy"}` 语法
 - [ ] **预览表单**：在店铺详情页渲染个性化表单（输入框替换占位符）
@@ -159,25 +210,25 @@ P3 ─ 消费者发现体验 ...................... 有流量后
 
 ## P3：消费者发现体验（有流量后）
 
-### 15. 服务端搜索 + 分页
+### 16. 服务端搜索 + 分页
 
 - [ ] **PostgreSQL Full-Text Search**：`tsvector` 列 + GIN 索引
 - [ ] **搜索 API**：`/api/tenants/[slug]/cases/search` `<sup>†</sup>` 支持分页、分类过滤、排序
 - [ ] **案例列表分页**：店铺首页 + 案例管理列表均支持分页（offset-based 或 cursor-based）
 
-### 16. 动态 Table of Contents
+### 17. 动态 Table of Contents
 
 - [ ] **Intersection Observer**：自动追踪页面中的 h2/h3 可见区域
 - [ ] **高亮当前 section**：侧边栏 TOC 中当前所在 section 高亮
 - [ ] **点击跳转平滑滚动**
 
-### 17. 社交分享与嵌入
+### 18. 社交分享与嵌入
 
 - [ ] **一键复制分享链接**（带 UTM）
 - [ ] **OG Image 动态生成**：案例封面 + title 叠加文字（Vercel `@vercel/og` 或 `satori`）
 - [ ] **Embed 卡片**：可嵌入到 Notion/博客的 `<iframe>` 预览卡片
 
-### 18. 通知系统
+### 19. 通知系统
 
 - [ ] **订阅成功通知**：创作者 + 消费者双方邮件
 - [ ] **新案例通知**：订阅者可选是否接收新案例推送
