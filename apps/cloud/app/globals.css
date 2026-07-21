@@ -1,8 +1,38 @@
-/* Cloud-specific overrides */
-body {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  color: var(--feishu-text-primary);
-  background: var(--feishu-bg);
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --saas-bg: #FAF8F5; /* Oatmeal Cream */
+  --saas-panel: #FFFFFF;
+  --saas-sidebar: #F4EFEB; /* Soft Warm Gray */
+  --saas-text-primary: #12131A; /* Deep Indigo Black */
+  --saas-text-secondary: #7D7D8A; /* Muted Warm Gray */
+  --saas-border: #EFEAE4; /* Warm Border */
+  --saas-accent: #12131A; /* Brand color */
+  --saas-coral: #F43F5E; /* Red notice */
+  
+  /* Pastels */
+  --saas-rose: #FCE7E6;
+  --saas-orange: #FDF0D5;
+  --saas-lavender: #E8E5F7;
+  --saas-mint: #E1F4EC;
+  
+  --saas-radius-card: 24px;
+  --saas-radius-btn: 9999px;
+  --saas-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  --saas-shadow-hover: 0 12px 30px rgba(18, 19, 26, 0.05);
 }
 
-a { color: var(--feishu-accent); }
+body {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--saas-text-primary);
+  background: var(--saas-bg);
+}
+
+a {
+  color: var(--saas-text-primary);
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--saas-accent);
+}

@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import Link from 'next/link'
 import { headers } from 'next/headers'
+import styles from '../dashboard.module.css'
 
 interface Props {
   searchParams: Promise<{ tenant?: string }>
@@ -23,40 +24,26 @@ export default async function CasesPage({ searchParams }: Props) {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Cases</h1>
+      <div className={styles.pageHeader}>
+        <h1 className={styles.pageTitle} style={{ margin: 0 }}>案例管理 (Prompt Cases)</h1>
         {selectedTenant && (
           <Link
             href={`/dashboard/cases/new?tenant=${selectedTenant}`}
-            style={{
-              padding: '0.6rem 1.5rem',
-              background: 'var(--feishu-accent)',
-              color: '#fff',
-              borderRadius: '8px',
-              fontWeight: 600,
-              textDecoration: 'none',
-              fontSize: '0.9rem',
-            }}
+            className={styles.createBtn}
+            style={{ padding: '10px 24px' }}
           >
-            + New Case
+            + 新建案例 (New Case)
           </Link>
         )}
       </div>
 
       {/* Tenant selector */}
-      <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem' }}>
+      <div className={styles.capsuleGroup}>
         {tenants.map(t => (
           <Link
             key={t.id}
             href={`?tenant=${t.id}`}
-            style={{
-              padding: '0.4rem 1rem',
-              borderRadius: '20px',
-              background: selectedTenant === t.id ? 'var(--feishu-accent)' : 'var(--feishu-card-bg)',
-              color: selectedTenant === t.id ? '#fff' : 'var(--feishu-text-primary)',
-              textDecoration: 'none',
-              fontSize: '0.85rem',
-            }}
+            className={`${styles.capsule} ${selectedTenant === t.id ? styles.activeCapsule : ''}`}
           >
             {t.displayName}
           </Link>
@@ -64,42 +51,43 @@ export default async function CasesPage({ searchParams }: Props) {
       </div>
 
       {cases.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '3rem', background: 'var(--feishu-card-bg)', borderRadius: '8px' }}>
-          <p style={{ color: 'var(--feishu-text-secondary)' }}>No cases yet. Create your first prompt case!</p>
+        <div className={styles.emptyState}>
+          <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📝</div>
+          <h3 className={styles.emptyTitle}>这里还没有提示词案例</h3>
+          <p className={styles.emptyText}>
+            点击右上角“新建案例”按钮创建一个展示你 AI 绘画/生成模型效果的提示词吧。
+          </p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gap: '0.5rem' }}>
+        <div className={styles.listGroup}>
           {cases.map(c => (
-            <div
-              key={c.id}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '0.75rem 1rem',
-                border: '1px solid var(--feishu-border)',
-                borderRadius: '8px',
-              }}
-            >
-              <div>
-                <span style={{ fontWeight: 600 }}>{c.emoji} {c.title}</span>
-                <span style={{ marginLeft: '0.75rem', fontSize: '0.8rem', color: 'var(--feishu-text-secondary)' }}>
-                  {c.published ? '🟢' : '⚫'} {c.category}
-                </span>
+            <div key={c.id} className={styles.listItem}>
+              <div className={styles.listInfo}>
+                <span style={{ fontSize: '1.25rem' }}>{c.emoji || '📷'}</span>
+                <div>
+                  <span className={styles.listTitle}>{c.title}</span>
+                  <span style={{ marginLeft: '12px' }} className={styles.listBadge}>
+                    {c.published ? '🟢 已发布' : '⚫ 草稿'}
+                  </span>
+                  <span style={{ marginLeft: '6px' }} className={styles.listBadge}>
+                    {c.category}
+                  </span>
+                </div>
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+              
+              <div className={styles.listActions}>
                 <Link
                   href={`/dashboard/cases/${c.id}/edit`}
-                  style={{ fontSize: '0.85rem', color: 'var(--feishu-accent)', textDecoration: 'none' }}
+                  className={styles.actionLinkPrimary}
                 >
-                  Edit
+                  编辑 (Edit)
                 </Link>
                 <Link
                   href={`/@${tenants.find(t => t.id === selectedTenant)?.slug}/${c.slug}`}
                   target="_blank"
-                  style={{ fontSize: '0.85rem', color: 'var(--feishu-text-secondary)', textDecoration: 'none' }}
+                  className={styles.actionLinkSecondary}
                 >
-                  View ↗
+                  预览 (View) ↗
                 </Link>
               </div>
             </div>

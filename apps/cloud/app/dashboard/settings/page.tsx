@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { headers } from 'next/headers'
+import styles from '../dashboard.module.css'
 
 export default async function SettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -9,17 +10,19 @@ export default async function SettingsPage() {
 
   return (
     <div style={{ maxWidth: 600 }}>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>Settings</h1>
+      <h1 className={styles.pageTitle}>店铺配置 (Settings)</h1>
 
-      <section style={{ marginBottom: '2rem', padding: '1.5rem', border: '1px solid var(--feishu-border)', borderRadius: '8px' }}>
-        <h2 style={{ fontSize: '1.1rem', fontWeight: 600, margin: '0 0 1rem' }}>Your Prompt Stores</h2>
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>我创建的提示词店铺 (Your Stores)</h2>
         {tenants.map(t => (
-          <div key={t.id} style={{ padding: '0.75rem 0', borderBottom: '1px solid var(--feishu-border)' }}>
-            <div style={{ fontWeight: 600 }}>@{t.slug}</div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--feishu-text-secondary)' }}>{t.displayName}</div>
-            <div style={{ marginTop: '0.25rem' }}>
-              <a href={`/@${t.slug}`} target="_blank" style={{ fontSize: '0.85rem', color: 'var(--feishu-accent)' }}>
-                View public page →
+          <div key={t.id} className={styles.storeListItem}>
+            <div>
+              <div className={styles.storeListTitle}>@{t.slug}</div>
+              <div className={styles.storeListMeta}>{t.displayName}</div>
+            </div>
+            <div>
+              <a href={`/@${t.slug}`} target="_blank" className={styles.actionLinkPrimary}>
+                访问店铺 ↗
               </a>
             </div>
           </div>
@@ -28,36 +31,27 @@ export default async function SettingsPage() {
         <form
           action="/api/tenants"
           method="post"
-          style={{ marginTop: '1rem' }}
+          style={{ marginTop: '24px' }}
         >
-          <input type="text" name="slug" placeholder="your-store-slug" required style={inputStyle} />
-          <input type="text" name="displayName" placeholder="Display Name" required style={inputStyle} />
-          <button type="submit" style={btnStyle}>Create Store</button>
+          <div className={styles.inputGroup}>
+            <label style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--saas-text-secondary)' }}>
+              店铺唯一标识 (Slug)
+            </label>
+            <input type="text" name="slug" placeholder="e.g. cyber-avatar" required className={styles.input} />
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--saas-text-secondary)' }}>
+              店铺展示名称 (Display Name)
+            </label>
+            <input type="text" name="displayName" placeholder="e.g. Cyberpunk Art Shop" required className={styles.input} />
+          </div>
+
+          <button type="submit" className={styles.btnSubmit}>
+            创建新店铺 (Create Store)
+          </button>
         </form>
       </section>
-
     </div>
   )
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '0.6rem',
-  marginTop: '0.5rem',
-  border: '1px solid var(--feishu-border)',
-  borderRadius: '6px',
-  fontSize: '0.9rem',
-  boxSizing: 'border-box' as const,
-}
-
-const btnStyle: React.CSSProperties = {
-  marginTop: '0.75rem',
-  padding: '0.6rem 1.5rem',
-  background: 'var(--feishu-accent)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: '6px',
-  fontWeight: 600,
-  fontSize: '0.9rem',
-  cursor: 'pointer',
 }

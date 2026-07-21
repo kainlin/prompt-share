@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import Link from 'next/link'
 import { headers } from 'next/headers'
+import styles from './dashboard.module.css'
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -11,56 +12,69 @@ export default async function DashboardPage() {
     include: { _count: { select: { cases: true, subscriptions: true } } },
   })
 
+  // Pastel theme classes to cycle through (matching Image 1 styles)
+  const themeClasses = [
+    styles.roseCard,
+    styles.orangeCard,
+    styles.lavenderCard,
+    styles.mintCard
+  ]
+
+  // Category labels based on index or fallback
+  const storeCategories = [
+    '写实摄影 Store',
+    '产品渲染 Store',
+    '人物角色 Store',
+    '网页组件 Store'
+  ]
+
   return (
     <div>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '2rem' }}>Your Prompt Stores</h1>
+      <h1 className={styles.pageTitle}>我的提示词店铺 (Stores)</h1>
 
       {tenants.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--feishu-card-bg)', borderRadius: '8px' }}>
-          <p style={{ color: 'var(--feishu-text-secondary)', marginBottom: '1rem' }}>
-            You haven't created a prompt store yet.
+        <div className={styles.emptyState}>
+          <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🏬</div>
+          <h3 className={styles.emptyTitle}>你还没有创建提示词店铺</h3>
+          <p className={styles.emptyText}>
+            创建一个专属店铺，上传你的 AI 图像生成提示词，开启你的订阅变现之旅吧。
           </p>
-          <Link
-            href="/dashboard/settings"
-            style={{
-              display: 'inline-block',
-              padding: '0.75rem 2rem',
-              background: 'var(--feishu-accent)',
-              color: '#fff',
-              borderRadius: '8px',
-              fontWeight: 600,
-              textDecoration: 'none',
-            }}
-          >
-            Create Your First Store
+          <Link href="/dashboard/settings" className={styles.createBtn}>
+            创建我的第一个店铺
           </Link>
         </div>
       ) : (
-        <div style={{ display: 'grid', gap: '1rem' }}>
-          {tenants.map(t => (
-            <Link
-              key={t.id}
-              href={`/dashboard/cases?tenant=${t.id}`}
-              style={{
-                display: 'block',
-                padding: '1.5rem',
-                border: '1px solid var(--feishu-border)',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                color: 'inherit',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600 }}>@{t.slug}</h3>
-                  <p style={{ margin: '0.25rem 0 0', color: 'var(--feishu-text-secondary)', fontSize: '0.85rem' }}>
-                    {t._count.cases} cases · {t._count.subscriptions} subscribers
-                  </p>
+        <div className={styles.grid}>
+          {tenants.map((t, index) => {
+            const themeClass = themeClasses[index % themeClasses.length]
+            const categoryText = storeCategories[index % storeCategories.length]
+            
+            return (
+              <Link
+                key={t.id}
+                href={`/dashboard/cases?tenant=${t.id}`}
+                className={`${styles.card} ${themeClass}`}
+              >
+                {/* Card Header */}
+                <div className={styles.cardHeader}>
+                  <span className={styles.badge}>{categoryText}</span>
+                  <div className={styles.cardArrow}>
+                    <svg style={{ width: '16px', height: '16px' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
                 </div>
-                <span style={{ color: 'var(--feishu-text-secondary)' }}>→</span>
-              </div>
-            </Link>
-          ))}
+
+                {/* Card Body */}
+                <h3 className={styles.storeSlug}>@{t.slug}</h3>
+                <p className={styles.storeMeta}>
+                  <span>{t._count.cases} 个案例 (Cases)</span>
+                  <span className={styles.metaDot} />
+                  <span>{t._count.subscriptions} 位订阅者 (Subscribers)</span>
+                </p>
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>
