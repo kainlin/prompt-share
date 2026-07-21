@@ -6,6 +6,17 @@
 
 ## 当前状态诊断
 
+### 收钱模型说明
+
+**消费者角度**：按月订阅（$9.99/mo）或一次性买断（$49.99），付费后解锁该店铺所有付费内容。
+
+**平台 + 创作者角度**（新增）：
+- 消费者付款进入**平台 Stripe 账户**（Checkout Session）
+- 平台自动记账分账：平台抽成 15%，创作者收益 85%
+- 创作者**无需先完成 Stripe KYC** 即可开始卖
+- 收益在 `ps_order` 中累计，14 天冷却期后可提现
+- 创作者完成 Stripe Connect 入驻（Express 账户）后可手动提现
+
 ### 能用的
 
 | 模块 | 状态 |
@@ -51,12 +62,90 @@ P3 ─ 消费者发现体验 ...................... 有流量后
 
 ## P0：商业闭环 + 安全上线（本周）
 
-### 1. Stripe 真实支付闭环
+### 1. Stripe Connect — 平台代收 + 延迟分账
 
-- [ ] **配置真实 Stripe 密钥**：将 `STRIPE_SECRET_KEY`、`STRIPE_PRICE_MONTHLY`、`STRIPE_PRICE_LIFETIME`、`STRIPE_WEBHOOK_SECRET` 填入生产值
-- [ ] **创建 Stripe Products**：Monthly（$9.99/mo subscription）和 Lifetime（$49.99 one-time payment）
-- [ ] **验证 Webhook**：部署后在 Stripe Dashboard 注册 `https://<domain>/api/stripe/webhook`，验证 `checkout.session.completed` 和 `customer.subscription.deleted` 事件能正确写入 `ps_subscription`
-- [ ] **订阅后状态即时刷新**：支付成功后重定向回店铺页，`checkSubscription()` 能立即读到 active 状态
+> **模式 A 变体**：参考 stuncreator 的实现架构。所有消费者付款走平台 Stripe 账户，创作者无需先完成 KYC 即可开始卖。收益在平台暂存，创作者完成 Stripe Connect 入驻后可提现。
+
+#### 架构概览
+
+```
+消费者付款 → 平台 Stripe 账户（Checkout Session）
+                    ↓
+              ps_order 记录分账（platform_fee + creator_revenue）
+                    ↓
+          payout_status = 'pending'（14 天冷却期）
+                    ↓
+    创作者完成 Stripe Connect KYC → payout_status → 'available'
+                    ↓
+    创作者手动提现 → stripe.transfers.create() → 资金到创作者账户
+```
+
+#### 1a. 平台级 Stripe 配置
+
+- [ ] **真实密钥**：`STRIPE_SECRET_KEY`、`STRIPE_WEBHOOK_SECRET` 从 Stripe Dashboard 获取
+- [ ] **产品创建**：Monthly（$9.99/mo subscription）+ Lifetime（$49.99 one-time payment），Price ID 填入 `STRIPE_PRICE_MONTHLY` / `STRIPE_PRICE_LIFETIME`
+- [ ] **Webhook 注册**：`https://<domain>/api/stripe/webhook`，监听 `checkout.session.completed`、`customer.subscription.deleted`、`charge.dispute.created`、`charge.dispute.closed`
+
+#### 1b. Database — `ps_order` 表 + `ps_user` 扩展
+
+```sql
+-- 订单/收益追踪表
+CREATE TABLE IF NOT EXISTS ps_order (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  userId            UUID NOT NULL,
+  tenantId          UUID NOT NULL,
+  stripeSessionId   TEXT UNIQUE NOT NULL,
+  amountTotal       INT NOT NULL,          -- 单位：美分
+  platformFee       INT NOT NULL DEFAULT 0, -- 平台抽成（美分）
+  creatorRevenue    INT NOT NULL DEFAULT 0, -- 创作者收益（美分）
+  payoutStatus      TEXT NOT NULL DEFAULT 'pending',
+    -- pending: 冷却期中
+    -- available: 可提现
+    -- paid: 已打款
+    -- disputed: 争议中
+  payoutReadyAt     TIMESTAMPTZ,           -- 冷却期结束时间（now + 14 days）
+  creatorTransferId TEXT,                  -- Stripe Transfer ID
+  disputeId         TEXT,
+  disputeStatus     TEXT,
+  createdAt         TIMESTAMPTZ DEFAULT now()
+);
+
+-- ps_user 扩展：Stripe Connect 账户相关字段
+ALTER TABLE ps_user ADD COLUMN IF NOT EXISTS stripe_account_id TEXT;
+ALTER TABLE ps_user ADD COLUMN IF NOT EXISTS stripe_connected BOOLEAN DEFAULT false;
+ALTER TABLE ps_user ADD COLUMN IF NOT EXISTS is_trusted_user BOOLEAN DEFAULT false;
+```
+
+#### 1c. API — Stripe Connect 入驻流程
+
+- [ ] **`POST /api/stripe/connect`** — 创建 Stripe Express 账户 + 生成 onboarding link
+  - 如果用户已有 `stripe_account_id`，复用
+  - 返回 `{ url: "https://connect.stripe.com/..." }` 前端跳转
+  - `refresh_url` → `/dashboard/settings`，`return_url` → `/dashboard/settings?stripe_connected=true`
+- [ ] **`POST /api/stripe/verify-connection`** — 查询 `stripe.accounts.retrieve()` → `details_submitted`
+  - 如果 `true` → 更新 `ps_user.stripe_connected = true`
+- [ ] **`POST /api/stripe/dashboard`** — `stripe.accounts.createLoginLink()` 返回 Express Dashboard URL
+
+#### 1d. API — 收益 + 提现
+
+- [ ] **`GET /api/earnings/balance`** — 返回当前用户的 `pendingAmount`（冷却中）和 `availableAmount`（可提现），参考 stuncreator 的 `GET /api/earnings/balance`
+- [ ] **`POST /api/earnings/withdraw`** — 需要 `stripe_connected = true`，聚合所有 `payout_status = 'available'` 的订单 → `stripe.transfers.create()` → 标记 `payout_status = 'paid'`，最小提现额 $1.00
+- [ ] **Webhook 处理 `checkout.session.completed`** — 创建 `ps_order`，计算分账（`platformFee` + `creatorRevenue`），设置 `payoutReadyAt = now + 14 days`
+
+#### 1e. 前端 — Settings 页面 Stripe 状态
+
+- [ ] **已连接**：绿色徽章 + 账号 ID + "Manage Stripe Dashboard" 按钮
+- [ ] **未连接**：提示 "你可以先卖，累计收益后需绑定 Stripe 账户来提现" + "Connect Stripe" 按钮
+- [ ] **Dashboard 首页**：收益卡片（可用余额 + 待入账余额）
+
+#### 1f. 分账规则
+
+| 项目 | 比例 | 说明 |
+|------|:---:|------|
+| 平台抽成 | 15% | 从消费总额中扣除 |
+| 创作者收益 | 85% | 平台抽成后剩余 |
+| 冷却期 | 14 天 | 防止 chargeback |
+| 最低提现 | $1.00 | 低于此金额不可提现 |
 
 ### 2. 创作者按案例分级收费模式
 
