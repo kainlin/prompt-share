@@ -12,7 +12,7 @@ export default async function DashboardPage() {
     include: { _count: { select: { cases: true, subscriptions: true } } },
   })
 
-  // Pastel theme classes to cycle through (matching Image 1 styles)
+  // Pastel theme classes to cycle through (matching Notion spec in docs)
   const themeClasses = [
     styles.roseCard,
     styles.orangeCard,
@@ -20,7 +20,7 @@ export default async function DashboardPage() {
     styles.mintCard
   ]
 
-  // Category labels based on index or fallback
+  // Category labels based on index (Mastercard Orbit/Service style)
   const storeCategories = [
     '写实摄影 Store',
     '产品渲染 Store',
@@ -34,7 +34,7 @@ export default async function DashboardPage() {
 
       {tenants.length === 0 ? (
         <div className={styles.emptyState}>
-          <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🏬</div>
+          <div style={{ fontSize: '3.5rem', marginBottom: '20px' }}>🏬</div>
           <h3 className={styles.emptyTitle}>你还没有创建提示词店铺</h3>
           <p className={styles.emptyText}>
             创建一个专属店铺，上传你的 AI 图像生成提示词，开启你的订阅变现之旅吧。
@@ -55,11 +55,11 @@ export default async function DashboardPage() {
                 href={`/dashboard/cases?tenant=${t.id}`}
                 className={`${styles.card} ${themeClass}`}
               >
-                {/* Card Header */}
+                {/* Card Header with Mastercard category label & Satellite micro-CTA */}
                 <div className={styles.cardHeader}>
                   <span className={styles.badge}>{categoryText}</span>
                   <div className={styles.cardArrow}>
-                    <svg style={{ width: '16px', height: '16px' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <svg style={{ width: '18px', height: '18px' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
                   </div>
@@ -68,9 +68,11 @@ export default async function DashboardPage() {
                 {/* Card Body */}
                 <h3 className={styles.storeSlug}>@{t.slug}</h3>
                 <p className={styles.storeMeta}>
-                  <span>{t._count.cases} 个案例 (Cases)</span>
+                  <span className="tnum" style={{ fontWeight: 700 }}>{t._count.cases}</span>
+                  <span>个案例 (Cases)</span>
                   <span className={styles.metaDot} />
-                  <span>{t._count.subscriptions} 位订阅者 (Subscribers)</span>
+                  <span className="tnum" style={{ fontWeight: 700 }}>{t._count.subscriptions}</span>
+                  <span>位订阅者 (Subscribers)</span>
                 </p>
               </Link>
             )

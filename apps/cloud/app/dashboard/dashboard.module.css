@@ -4,44 +4,46 @@
   background-color: var(--saas-bg);
 }
 
-/* Sidebar Styling - Narrow & Round Icons (Image 1 Style) */
+/* Sidebar Styling - Mastercard Clay Sidebar with Stripe Electric Indigo Active Links */
 .sidebar {
-  width: 90px;
+  width: 96px;
   background-color: var(--saas-panel);
   border-right: 1px solid var(--saas-border);
-  padding: 24px 12px;
+  padding: 32px 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
+  gap: 40px;
   position: sticky;
   top: 0;
   height: 100vh;
   z-index: 100;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.01);
+  box-shadow: 2px 0 12px rgba(20, 20, 19, 0.01);
 }
 
 .logo {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 800;
   cursor: pointer;
   transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
+  background-color: var(--saas-bg);
+  border-radius: 50%;
 }
 
 .logo:hover {
-  transform: rotate(15deg) scale(1.1);
+  transform: rotate(15deg) scale(1.08);
 }
 
 .nav {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   width: 100%;
 }
 
@@ -56,43 +58,46 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   color: var(--saas-text-secondary);
   background-color: transparent;
   transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
   cursor: pointer;
+  border: 1.5px solid transparent;
 }
 
 .navLink:hover {
   color: var(--saas-text-primary);
-  background-color: var(--saas-sidebar);
+  background-color: var(--saas-bg);
   transform: translateY(-2px);
+  border-color: var(--saas-border);
 }
 
 .activeLink {
   color: #ffffff !important;
-  background-color: var(--saas-accent) !important;
-  box-shadow: 0 4px 12px rgba(18, 19, 26, 0.2);
+  background-color: var(--saas-accent) !important; /* Stripe Electric Indigo */
+  box-shadow: 0 8px 16px rgba(83, 58, 253, 0.25);
+  border-color: var(--saas-accent) !important;
 }
 
-/* Tooltips for Narrow Nav Items */
+/* Tooltips for Sidebar Items */
 .tooltip {
   position: absolute;
-  left: 64px;
+  left: 72px;
   background: var(--saas-text-primary);
   color: #ffffff;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
   transform: translateX(-10px);
   transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(20, 20, 19, 0.12);
   z-index: 101;
 }
 
@@ -107,7 +112,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
   width: 100%;
 }
 
@@ -115,41 +120,42 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   color: var(--saas-text-secondary);
-  border: 1px solid var(--saas-border);
+  border: 1.5px solid var(--saas-border);
   background: transparent;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .signOutBtn:hover {
-  background: #fdf0d5;
-  color: #d97706;
-  border-color: #f59e0b;
+  background: var(--saas-orange); /* Notion Soft Peach tint */
+  color: var(--saas-coral); /* Mastercard Signal Orange */
+  border-color: var(--saas-coral);
   transform: rotate(-10deg);
 }
 
 .avatar {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   border: 2px solid var(--saas-border);
   object-fit: cover;
-  transition: transform 0.2s;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   cursor: pointer;
 }
 
 .avatar:hover {
-  transform: scale(1.08);
+  transform: scale(1.1);
+  border-color: var(--saas-accent);
 }
 
 /* Main Workspace */
 .main {
   flex: 1;
-  padding: 40px 48px;
+  padding: 48px 64px;
   overflow-y: auto;
   max-width: 1200px;
   margin: 0 auto;
@@ -164,7 +170,7 @@
     width: 100%;
     height: auto;
     flex-direction: row;
-    padding: 12px 24px;
+    padding: 16px 24px;
     gap: 16px;
     position: static;
   }
@@ -183,42 +189,42 @@
   }
 }
 
-/* Store Cards styling (Overview) */
+/* Store Cards Grid - Mastercard Oversized Radius (40px) + Notion Pastels */
 .pageTitle {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 2.2rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
+  font-family: 'Sofia Sans', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em; /* Tight negative letter-spacing for editorial density */
   color: var(--saas-text-primary);
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 32px;
   margin-top: 16px;
 }
 
 .card {
   display: block;
-  border-radius: var(--saas-radius-card);
-  padding: 32px;
+  border-radius: var(--saas-radius-card); /* Mastercard 40px radius */
+  padding: 40px;
   text-decoration: none;
   color: var(--saas-text-primary);
   box-shadow: var(--saas-shadow);
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  border: 1px solid rgba(0, 0, 0, 0.02);
+  transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border: 1px solid rgba(20, 20, 19, 0.03);
   position: relative;
   overflow: hidden;
 }
 
 .card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--saas-shadow-hover);
+  transform: translateY(-8px);
+  box-shadow: var(--saas-shadow-hover); /* Mastercard deep shadow halo */
 }
 
-/* Pastel theme mappings for cards */
+/* Pastel theme mappings (Notion specifications) */
 .roseCard { background-color: var(--saas-rose); }
 .orangeCard { background-color: var(--saas-orange); }
 .lavenderCard { background-color: var(--saas-lavender); }
@@ -227,49 +233,66 @@
 .cardHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 32px;
+  align-items: center;
+  margin-bottom: 40px;
 }
 
+/* Mastercard Category Eyebrow style: dot + uppercase + bold tracking */
 .badge {
   background-color: #ffffff;
-  padding: 4px 10px;
-  border-radius: 9999px;
-  font-size: 0.6875rem;
+  padding: 6px 14px;
+  border-radius: var(--saas-radius-btn);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 4px 8px rgba(20, 20, 19, 0.03);
+  color: var(--saas-text-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
+.badge::before {
+  content: '•';
+  color: var(--saas-coral); /* Mastercard rust dot */
+  font-size: 1.1rem;
+  line-height: 0;
+}
+
+/* Mastercard Satellite-CTA circle holding the arrow */
 .cardArrow {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s;
+  box-shadow: 0 4px 10px rgba(20, 20, 19, 0.06);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  color: var(--saas-text-primary);
 }
 
 .card:hover .cardArrow {
   transform: translateX(4px) scale(1.08);
+  background-color: var(--saas-text-primary);
+  color: #ffffff;
 }
 
 .storeSlug {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 1.4rem;
-  font-weight: 800;
-  margin: 0 0 12px 0;
+  font-family: 'Sofia Sans', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 16px 0;
   letter-spacing: -0.02em;
 }
 
+/* Stripe body-tabular numbers formatting */
 .storeMeta {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   color: var(--saas-text-secondary);
-  font-weight: 600;
+  font-weight: 500;
   margin: 0;
   display: flex;
   align-items: center;
@@ -277,11 +300,11 @@
 }
 
 .metaDot {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background-color: var(--saas-text-secondary);
-  opacity: 0.5;
+  opacity: 0.3;
 }
 
 /* Empty State Card */
@@ -289,102 +312,110 @@
   background: var(--saas-panel);
   border: 1px solid var(--saas-border);
   border-radius: var(--saas-radius-card);
-  padding: 60px 40px;
+  padding: 72px 48px;
   text-align: center;
   box-shadow: var(--saas-shadow);
-  max-width: 600px;
+  max-width: 640px;
   margin: 40px auto 0;
 }
 
 .emptyTitle {
-  font-size: 1.25rem;
+  font-family: 'Sofia Sans', sans-serif;
+  font-size: 1.5rem;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   color: var(--saas-text-primary);
 }
 
 .emptyText {
   color: var(--saas-text-secondary);
-  font-size: 0.875rem;
-  margin-bottom: 24px;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  margin-bottom: 32px;
 }
 
+/* Mastercard Ink Pill shape button */
 .createBtn {
   display: inline-block;
-  padding: 12px 28px;
-  background-color: var(--saas-accent);
-  color: #ffffff;
+  padding: 12px 32px;
+  background-color: var(--saas-text-primary); /* Mastercard Ink Black primary bg */
+  color: var(--saas-bg); /* Warm cream text on ink pill button */
   border-radius: var(--saas-radius-btn);
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   text-decoration: none;
-  box-shadow: 0 4px 12px rgba(18, 19, 26, 0.15);
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 6px 18px rgba(20, 20, 19, 0.15);
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border: 1.5px solid var(--saas-text-primary);
 }
 
 .createBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(18, 19, 26, 0.25);
+  box-shadow: 0 8px 24px rgba(20, 20, 19, 0.25);
+  background-color: var(--saas-accent); /* Focus transition to Stripe Indigo */
+  border-color: var(--saas-accent);
+  color: #ffffff;
 }
 
-/* Cases / Settings layouts */
+/* Cases & Lists styling - Stripe Hairline Precision */
 .pageHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 
 .capsuleGroup {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 24px;
+  gap: 10px;
+  margin-bottom: 32px;
 }
 
 .capsule {
   display: inline-block;
-  padding: 8px 18px;
-  border-radius: var(--saas-radius-btn);
+  padding: 10px 22px;
+  border-radius: var(--saas-radius-btn); /* Pill shapes */
   background-color: var(--saas-panel);
   border: 1px solid var(--saas-border);
   color: var(--saas-text-secondary);
-  font-size: 0.8125rem;
-  font-weight: 700;
+  font-size: 0.875rem;
+  font-weight: 600;
   text-decoration: none;
   transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   cursor: pointer;
 }
 
 .capsule:hover {
-  background-color: var(--saas-sidebar);
+  background-color: var(--saas-bg);
   color: var(--saas-text-primary);
   transform: translateY(-1px);
 }
 
 .activeCapsule {
-  background-color: var(--saas-accent) !important;
-  color: #ffffff !important;
-  border-color: var(--saas-accent) !important;
-  box-shadow: 0 4px 10px rgba(18, 19, 26, 0.15);
+  background-color: var(--saas-text-primary) !important; /* Mastercard active pill style */
+  color: var(--saas-bg) !important;
+  border-color: var(--saas-text-primary) !important;
+  box-shadow: 0 6px 12px rgba(20, 20, 19, 0.15);
 }
 
 .listGroup {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
+/* Stripe structured list item with hairline border */
 .listItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
+  padding: 20px 28px;
   background-color: var(--saas-panel);
-  border: 1px solid var(--saas-border);
-  border-radius: 16px;
+  border: 1px solid var(--saas-border); /* Stripe precise hairline border */
+  border-radius: 20px; /* Precise rounded */
   box-shadow: var(--saas-shadow);
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .listItem:hover {
@@ -396,42 +427,46 @@
 .listInfo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .listTitle {
+  font-family: 'Sofia Sans', sans-serif;
   font-weight: 700;
   color: var(--saas-text-primary);
-  font-size: 0.9375rem;
+  font-size: 1.05rem;
 }
 
+/* Stripe Subdued features/badges tags */
 .listBadge {
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--saas-text-secondary);
-  background: var(--saas-sidebar);
-  padding: 2px 8px;
-  border-radius: 4px;
+  background: var(--saas-bg);
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
 }
 
 .listActions {
   display: flex;
-  gap: 16px;
+  gap: 20px;
 }
 
 .actionLinkPrimary {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  color: var(--saas-accent);
+  color: var(--saas-accent); /* Stripe Electric Indigo primary action link */
   text-decoration: none;
 }
 
 .actionLinkPrimary:hover {
   text-decoration: underline;
+  color: var(--saas-text-primary);
 }
 
 .actionLinkSecondary {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--saas-text-secondary);
   text-decoration: none;
@@ -442,72 +477,78 @@
   text-decoration: underline;
 }
 
-/* Form and Settings styling */
+/* Forms & Settings Panel - Notion Paper Laid on Paper */
 .section {
-  background-color: var(--saas-panel);
+  background-color: var(--saas-panel); /* Paper face */
   border: 1px solid var(--saas-border);
-  border-radius: var(--saas-radius-card);
-  padding: 32px;
-  margin-bottom: 24px;
+  border-radius: var(--saas-radius-card); /* Mastercard 40px radius card */
+  padding: 40px;
+  margin-bottom: 32px;
   box-shadow: var(--saas-shadow);
 }
 
 .sectionTitle {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 800;
+  font-family: 'Sofia Sans', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
   color: var(--saas-text-primary);
-  margin: 0 0 16px 0;
-  border-bottom: 1px solid var(--saas-border);
-  padding-bottom: 12px;
+  margin: 0 0 24px 0;
+  border-bottom: 1.5px solid var(--saas-border);
+  padding-bottom: 16px;
+  letter-spacing: -0.02em;
 }
 
 .inputGroup {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
+/* Stripe high-precision text inputs */
 .input {
   width: 100%;
-  padding: 12px 16px;
-  margin-top: 6px;
-  border: 1.5px solid var(--saas-border);
+  padding: 14px 18px;
+  margin-top: 8px;
+  border: 1.5px solid var(--saas-border); /* Stripe input border */
   border-radius: 12px;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   background-color: var(--saas-bg);
   color: var(--saas-text-primary);
   outline: none;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
   box-sizing: border-box;
 }
 
 .input:focus {
-  border-color: var(--saas-accent);
+  border-color: var(--saas-accent); /* Stripe focused Electric Indigo */
   background-color: var(--saas-panel);
-  box-shadow: 0 0 0 3px rgba(18, 19, 26, 0.05);
+  box-shadow: 0 0 0 4px rgba(83, 58, 253, 0.08); /* Focused soft blue-indigo glow */
 }
 
+/* Mastercard Ink primary submit pill */
 .btnSubmit {
-  margin-top: 12px;
-  padding: 12px 28px;
-  background-color: var(--saas-accent);
-  color: #ffffff;
-  border: none;
+  margin-top: 16px;
+  padding: 14px 32px;
+  background-color: var(--saas-text-primary);
+  color: var(--saas-bg);
+  border: 1.5px solid var(--saas-text-primary);
   border-radius: var(--saas-radius-btn);
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(18, 19, 26, 0.15);
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 6px 18px rgba(20, 20, 19, 0.15);
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
   width: 100%;
 }
 
 .btnSubmit:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(18, 19, 26, 0.25);
+  box-shadow: 0 8px 24px rgba(20, 20, 19, 0.25);
+  background-color: var(--saas-accent);
+  border-color: var(--saas-accent);
+  color: #ffffff;
 }
 
 .storeListItem {
-  padding: 16px 0;
+  padding: 20px 0;
   border-bottom: 1px solid var(--saas-border);
   display: flex;
   justify-content: space-between;
@@ -520,16 +561,15 @@
 }
 
 .storeListTitle {
+  font-family: 'Sofia Sans', sans-serif;
   font-weight: 700;
-  font-size: 0.9375rem;
+  font-size: 1.1rem;
   color: var(--saas-text-primary);
 }
 
 .storeListMeta {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: var(--saas-text-secondary);
   font-weight: 500;
-  margin-top: 2px;
+  margin-top: 4px;
 }
-
-

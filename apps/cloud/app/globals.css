@@ -1,36 +1,49 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sofia+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --saas-bg: #FAF8F5; /* Oatmeal Cream */
+  /* Mastercard Warm Putty-Cream Background & Warm Ink */
+  --saas-bg: #F3F0EE; 
   --saas-panel: #FFFFFF;
-  --saas-sidebar: #F4EFEB; /* Soft Warm Gray */
-  --saas-text-primary: #12131A; /* Deep Indigo Black */
-  --saas-text-secondary: #7D7D8A; /* Muted Warm Gray */
-  --saas-border: #EFEAE4; /* Warm Border */
-  --saas-accent: #12131A; /* Brand color */
-  --saas-coral: #F43F5E; /* Red notice */
+  --saas-sidebar: #EBE6E2; /* Warm clay/stone sidebar */
+  --saas-text-primary: #141413; /* Mastercard Warm Ink Black */
+  --saas-text-secondary: #696969; /* Mastercard Slate Gray */
   
-  /* Pastels */
-  --saas-rose: #FCE7E6;
-  --saas-orange: #FDF0D5;
-  --saas-lavender: #E8E5F7;
-  --saas-mint: #E1F4EC;
+  /* Stripe Precise Hairline & Accent */
+  --saas-border: #E3E8EE; /* Stripe Hairline */
+  --saas-accent: #533AFD; /* Stripe Electric Indigo Primary */
+  --saas-coral: #CF4500; /* Mastercard Signal Orange */
   
-  --saas-radius-card: 24px;
-  --saas-radius-btn: 9999px;
-  --saas-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-  --saas-shadow-hover: 0 12px 30px rgba(18, 19, 26, 0.05);
+  /* Notion Soft Pastel Tints */
+  --saas-rose: #FDE0EC;
+  --saas-orange: #FFE8D4;
+  --saas-lavender: #E6E0F5;
+  --saas-mint: #D9F3E1;
+  --saas-sky: #DCECFA;
+  
+  /* Mastercard Oversized Radiuses & Shadows */
+  --saas-radius-card: 40px; /* Mastercard 40px oversized radius */
+  --saas-radius-btn: 9999px; /* Mastercard Pill/Stadium shape buttons */
+  --saas-shadow: 0 4px 20px rgba(20, 20, 19, 0.02);
+  --saas-shadow-hover: 0 24px 48px rgba(20, 20, 19, 0.08); /* Mastercard deep shadow halo */
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Sofia Sans', 'Inter', system-ui, -apple-system, sans-serif;
   color: var(--saas-text-primary);
   background: var(--saas-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Stripe code & tabular numbers font styling */
+.tnum {
+  font-family: 'Inter', system-ui, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.42px;
 }
 
 a {
   color: var(--saas-text-primary);
-  transition: color 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 a:hover {

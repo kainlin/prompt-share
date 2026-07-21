@@ -1,0 +1,340 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+/* Navbar (Nextra Style) */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+  padding: 0 24px;
+  border-bottom: 1px solid #eaeaea;
+  position: sticky;
+  top: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+}
+
+.brand {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #111111;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand:hover {
+  opacity: 0.8;
+}
+
+/* Nextra Premium Search Box with Focus Expansion & Non-wrapping Kbd Badge */
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 6px 12px;
+  width: 240px;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+  cursor: text;
+}
+
+.searchWrapper:hover {
+  background-color: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+.searchWrapper:focus-within {
+  background-color: #ffffff;
+  border-color: #5645d4;
+  box-shadow: 0 0 0 3px rgba(86, 69, 212, 0.15);
+  width: 280px;
+}
+
+.searchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.875rem;
+  color: #111111;
+  width: 100%;
+}
+
+.searchInput::placeholder {
+  color: #9ca3af;
+}
+
+.kbd {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #9ca3af;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 5px;
+  padding: 3px 6px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  margin-left: 8px;
+}
+
+.searchWrapper:focus-within .kbd {
+  opacity: 0;
+  width: 0;
+  padding: 0;
+  border-color: transparent;
+  margin-left: 0;
+  overflow: hidden;
+}
+
+/* Content Area */
+.body {
+  display: flex;
+  flex: 1;
+}
+
+/* Sidebar - Outer Container is fixed, inner navigation is scrollable */
+.sidebar {
+  width: 260px;
+  border-right: 1px solid #eaeaea;
+  background-color: #fafafa;
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden; /* Fix outer container */
+}
+
+.sidebarNav {
+  flex: 1;
+  overflow-y: auto; /* Scroll navigation cases */
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sidebarLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #4b5563;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.sidebarLink:hover {
+  background-color: #f3f4f6;
+  color: #111111;
+}
+
+.activeSidebarLink {
+  background-color: #e5e7eb !important;
+  color: #111111 !important;
+  font-weight: 600;
+}
+
+/* Sidebar Categories */
+.categoryGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.categoryTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.caseList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 12px;
+  border-left: 1px solid #e5e7eb;
+  margin-left: 20px;
+}
+
+.caseLink {
+  font-size: 0.85rem;
+  color: #6b7280;
+  padding: 6px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.caseLink:hover {
+  color: #111111;
+  background-color: #f3f4f6;
+}
+
+.activeCaseLink {
+  color: #5645d4 !important;
+  font-weight: 600;
+  background-color: #e5e7eb;
+}
+
+/* Sidebar Footer (Fixed at the bottom) */
+.sidebarFooter {
+  padding: 16px;
+  border-top: 1px solid #eaeaea;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Space switcher and icons apart */
+  background-color: #fafafa;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+/* Nextra style language toggle button with label */
+.langButton {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #4b5563;
+  transition: all 0.2s ease;
+}
+
+.langButton:hover {
+  background-color: #f3f4f6;
+  color: #111111;
+}
+
+/* Theme / Collapse control icons */
+.iconBtn {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #4b5563;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.iconBtn:hover {
+  background-color: #f3f4f6;
+  color: #111111;
+}
+
+/* Main Area */
+.main {
+  flex: 1;
+  padding: 40px 60px;
+  background-color: #ffffff;
+  overflow-y: auto;
+}
+
+/* Right Sidebar (On This Page) */
+.rightSidebar {
+  width: 220px;
+  padding: 32px 24px;
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+  border-left: 1px solid #f3f4f6;
+}
+
+.rightSidebarTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.tocList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tocLink {
+  font-size: 0.8rem;
+  color: #6b7280;
+  text-decoration: none;
+}
+
+.tocLink:hover {
+  color: #111111;
+}
+
+@media (max-width: 1024px) {
+  .rightSidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .body {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    border-right: none;
+    border-bottom: 1px solid #eaeaea;
+  }
+  .caseList {
+    display: none;
+  }
+  .sidebarFooter {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 12px;
+  }
+  .main {
+    padding: 24px;
+  }
+}
