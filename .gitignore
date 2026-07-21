@@ -7,3 +7,5 @@ dist/
 *.tsbuildinfo
 public/_pagefind/
 .agents
+.claude
+skills-lock.json
