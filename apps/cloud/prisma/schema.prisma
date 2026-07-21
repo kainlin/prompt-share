@@ -16,12 +16,17 @@ model User {
   emailVerified Boolean   @default(false)
   name          String?
   image         String?
-  password      String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  tenants       Tenant[]
-  sessions      Session[]
-  accounts      Account[]
+  password        String?
+  // Stripe Connect
+  stripeAccountId String?   @map("stripe_account_id")
+  stripeConnected Boolean   @default(false) @map("stripe_connected")
+  isTrustedUser   Boolean   @default(false) @map("is_trusted_user")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  tenants         Tenant[]
+  sessions        Session[]
+  accounts        Account[]
+  orders          Order[]   @relation("BuyerOrders")
 
   @@map("ps_user")
   @@schema("public")
@@ -77,10 +82,16 @@ model Tenant {
   avatarUrl     String?
   ownerId       String
   owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  cases         PromptCase[]
-  subscriptions Subscription[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  cases           PromptCase[]
+  subscriptions   Subscription[]
+  orders          Order[]
+  monthlyPrice    Int?       @map("monthly_price")
+  lifetimePrice   Int?       @map("lifetime_price")
+  monthlyPriceId  String?    @map("monthly_price_id")
+  lifetimePriceId String?    @map("lifetime_price_id")
+  priceChangedAt  DateTime?  @map("price_changed_at")
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
   @@map("ps_tenant")
   @@schema("public")
@@ -105,6 +116,11 @@ model PromptCase {
   previewSource  String?
   previewPoster  String?
   published      Boolean  @default(true)
+  // Paywall
+  paywallMode      String   @default("free") @map("paywall_mode")
+  allowCopy        Boolean  @default(true)   @map("allow_copy")
+  freePreviewCount Int      @default(0)      @map("free_preview_count")
+  watermarkEnabled Boolean  @default(false)  @map("watermark_enabled")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -128,5 +144,28 @@ model Subscription {
 
   @@index([userId, tenantId])
   @@map("ps_subscription")
+  @@schema("public")
+}
+
+model Order {
+  id                String    @id @default(uuid())
+  userId            String
+  user              User      @relation("BuyerOrders", fields: [userId], references: [id], onDelete: Cascade)
+  tenantId          String
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  stripeSessionId   String    @unique @map("stripe_session_id")
+  amountTotal       Int       @map("amount_total")
+  platformFee       Int       @default(0) @map("platform_fee")
+  creatorRevenue    Int       @default(0) @map("creator_revenue")
+  payoutStatus      String    @default("pending") @map("payout_status")
+  payoutReadyAt     DateTime? @map("payout_ready_at")
+  creatorTransferId String?   @map("creator_transfer_id")
+  disputeId         String?   @map("dispute_id")
+  disputeStatus     String?   @map("dispute_status")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([creatorRevenue], map: "idx_order_creator_revenue")
+  @@map("ps_order")
   @@schema("public")
 }
