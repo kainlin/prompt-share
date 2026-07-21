@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
-import { stripe, STRIPE_PRICE_MONTHLY, STRIPE_PRICE_LIFETIME } from '@/lib/stripe'
+import { stripe } from '@/lib/stripe'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 
@@ -10,15 +10,15 @@ export async function POST(request: Request) {
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { tenantId, plan = 'monthly' } = await request.json()
-    const priceId = plan === 'lifetime' ? STRIPE_PRICE_LIFETIME : STRIPE_PRICE_MONTHLY
 
+    // Check if tenant exists and has a configured price
+    const tenant = await db.tenant.findUnique({ where: { id: tenantId } })
+    if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 })
+
+    const priceId = plan === 'lifetime' ? tenant.lifetimePriceId : tenant.monthlyPriceId
     if (!priceId) {
       return NextResponse.json({ error: 'Price not configured' }, { status: 400 })
     }
-
-    // Check if tenant exists
-    const tenant = await db.tenant.findUnique({ where: { id: tenantId } })
-    if (!tenant) return NextResponse.json({ error: 'Tenant not found' }, { status: 404 })
 
     const origin = request.headers.get('origin') || ''
     const stripeSession = await stripe.checkout.sessions.create({
