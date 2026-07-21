@@ -18,12 +18,19 @@ vi.mock('@/lib/db', () => ({
     },
     subscription: {
       create: vi.fn(),
+      upsert: vi.fn(),
       findFirst: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
+    },
+    order: {
+      create: vi.fn(),
       update: vi.fn(),
       updateMany: vi.fn(),
     },
     user: {
       upsert: vi.fn(),
+      findUnique: vi.fn(),
     },
   },
 }))
@@ -47,12 +54,23 @@ vi.mock('@/lib/auth', () => ({
 const mockStripeClient = {
   checkout: { sessions: { create: vi.fn() } },
   webhooks: { constructEvent: vi.fn() },
+  paymentIntents: { retrieve: vi.fn() },
+  transfers: { create: vi.fn() },
 }
 
 vi.mock('@/lib/stripe', () => ({
   stripe: mockStripeClient,
   STRIPE_PRICE_MONTHLY: 'price_monthly_test',
   STRIPE_PRICE_LIFETIME: 'price_lifetime_test',
+  calculateSplit: (amountTotalCents: number) => {
+    const platformFeeCents = Math.round(amountTotalCents * 15 / 100)
+    return {
+      grossCents: amountTotalCents,
+      platformFeeCents,
+      creatorRevenueCents: amountTotalCents - platformFeeCents,
+    }
+  },
+  PAYOUT_COOLDOWN_DAYS: 14,
 }))
 
 // ---------------------------------------------------------------------------
