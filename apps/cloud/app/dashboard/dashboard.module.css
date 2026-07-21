@@ -573,3 +573,166 @@
   font-weight: 500;
   margin-top: 4px;
 }
+
+/* Pricing & Stripe Connect Panel */
+.pricingPanel {
+  padding: 16px 0 20px 0;
+  border-bottom: 1px solid var(--saas-border);
+}
+
+.connectBanner {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background-color: var(--saas-bg);
+  margin-bottom: 16px;
+}
+
+.connectStatus {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.875rem;
+  color: var(--saas-text-secondary);
+  font-weight: 500;
+}
+
+.greenBadge {
+  color: #1a7f4b;
+  font-weight: 700;
+}
+
+.btnSmall {
+  padding: 8px 18px;
+  border-radius: var(--saas-radius-btn);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border: 1.5px solid var(--saas-accent);
+  background-color: var(--saas-accent);
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.btnSmall:hover {
+  background-color: var(--saas-text-primary);
+  border-color: var(--saas-text-primary);
+  transform: translateY(-1px);
+}
+
+.btnSmallOutline {
+  background-color: transparent;
+  color: var(--saas-accent);
+}
+
+.btnSmallOutline:hover {
+  background-color: var(--saas-accent);
+  color: #ffffff;
+}
+
+.btnSmall:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pricingRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.pricingInputGroup {
+  flex: 1;
+}
+
+.pricingLabel {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--saas-text-secondary);
+  margin-bottom: 6px;
+}
+
+.pricingInput {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--saas-border);
+  border-radius: 10px;
+  font-size: 0.875rem;
+  background-color: var(--saas-bg);
+  color: var(--saas-text-primary);
+  outline: none;
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+}
+
+.pricingInput:focus {
+  border-color: var(--saas-accent);
+  box-shadow: 0 0 0 3px rgba(83, 58, 253, 0.08);
+}
+
+.pricingInput:disabled {
+  opacity: 0.5;
+  background-color: var(--saas-panel);
+  cursor: not-allowed;
+}
+
+.btnSave {
+  padding: 10px 24px;
+  background-color: var(--saas-text-primary);
+  color: var(--saas-bg);
+  border: 1.5px solid var(--saas-text-primary);
+  border-radius: var(--saas-radius-btn);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  white-space: nowrap;
+  height: 42px;
+}
+
+.btnSave:hover {
+  background-color: var(--saas-accent);
+  border-color: var(--saas-accent);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btnSave:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--saas-coral);
+  font-weight: 500;
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.successMsg {
+  font-size: 0.8125rem;
+  color: #1a7f4b;
+  font-weight: 600;
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.errorMsg {
+  font-size: 0.8125rem;
+  color: var(--saas-coral);
+  font-weight: 600;
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.currentPrice {
+  font-size: 0.75rem;
+  color: var(--saas-text-secondary);
+  font-weight: 500;
+  margin-top: 4px;
+}
