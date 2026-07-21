@@ -54,8 +54,9 @@ describe('/api/stripe/webhook', () => {
       } as any)
 
       mockDb.subscription.upsert.mockResolvedValue({ id: 'sub-1' } as any)
-      mockDb.order.create.mockResolvedValue({ id: 'ord-1' } as any)
+      mockDb.order.upsert.mockResolvedValue({ id: 'ord-1' } as any)
       mockDb.user.findUnique.mockResolvedValue(null)
+      mockStripeClient.paymentIntents.update.mockResolvedValue({} as any)
 
       const req = new Request('http://localhost/api/stripe/webhook', {
         method: 'POST',
@@ -90,8 +91,9 @@ describe('/api/stripe/webhook', () => {
       } as any)
 
       mockDb.subscription.upsert.mockResolvedValue({ id: 'sub-1' } as any)
-      mockDb.order.create.mockResolvedValue({ id: 'ord-1' } as any)
+      mockDb.order.upsert.mockResolvedValue({ id: 'ord-1' } as any)
       mockDb.user.findUnique.mockResolvedValue(null)
+      mockStripeClient.paymentIntents.update.mockResolvedValue({} as any)
 
       const req = new Request('http://localhost/api/stripe/webhook', {
         method: 'POST',
@@ -100,9 +102,9 @@ describe('/api/stripe/webhook', () => {
       })
       await POST(req)
 
-      expect(mockDb.order.create).toHaveBeenCalledWith(
+      expect(mockDb.order.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({
+          create: expect.objectContaining({
             userId: 'user-1',
             tenantId: 't-1',
             stripeSessionId: 'cs_test_123',
@@ -123,7 +125,7 @@ describe('/api/stripe/webhook', () => {
       } as any)
 
       mockDb.subscription.upsert.mockResolvedValue({ id: 'sub-1' } as any)
-      mockDb.order.create.mockResolvedValue({ id: 'ord-1' } as any)
+      mockDb.order.upsert.mockResolvedValue({ id: 'ord-1' } as any)
       mockDb.user.findUnique.mockResolvedValue({
         id: 'user-1',
         isTrustedUser: true,
@@ -131,6 +133,7 @@ describe('/api/stripe/webhook', () => {
         stripeConnected: true,
       } as any)
 
+      mockStripeClient.paymentIntents.update.mockResolvedValue({} as any)
       mockStripeClient.paymentIntents.retrieve.mockResolvedValue({
         latest_charge: 'ch_test_001',
       } as any)
@@ -172,7 +175,7 @@ describe('/api/stripe/webhook', () => {
       } as any)
 
       mockDb.subscription.upsert.mockResolvedValue({ id: 'sub-1' } as any)
-      mockDb.order.create.mockResolvedValue({ id: 'ord-1' } as any)
+      mockDb.order.upsert.mockResolvedValue({ id: 'ord-1' } as any)
       mockDb.user.findUnique.mockResolvedValue({
         id: 'user-1',
         isTrustedUser: true,
@@ -180,6 +183,7 @@ describe('/api/stripe/webhook', () => {
         stripeConnected: true,
       } as any)
 
+      mockStripeClient.paymentIntents.update.mockResolvedValue({} as any)
       mockStripeClient.paymentIntents.retrieve.mockRejectedValue(new Error('API error'))
 
       const req = new Request('http://localhost/api/stripe/webhook', {
@@ -190,7 +194,7 @@ describe('/api/stripe/webhook', () => {
       const res = await POST(req)
       expect(res.status).toBe(200)
       // Order should still be created (pending) — transfer failure is non-fatal
-      expect(mockDb.order.create).toHaveBeenCalled()
+      expect(mockDb.order.upsert).toHaveBeenCalled()
       expect(mockDb.order.update).not.toHaveBeenCalled()
     })
 
@@ -201,13 +205,15 @@ describe('/api/stripe/webhook', () => {
       } as any)
 
       mockDb.subscription.upsert.mockResolvedValue({ id: 'sub-1' } as any)
-      mockDb.order.create.mockResolvedValue({ id: 'ord-1' } as any)
+      mockDb.order.upsert.mockResolvedValue({ id: 'ord-1' } as any)
       mockDb.user.findUnique.mockResolvedValue({
         id: 'user-1',
         isTrustedUser: false,
         stripeAccountId: 'acct_123',
         stripeConnected: true,
       } as any)
+
+      mockStripeClient.paymentIntents.update.mockResolvedValue({} as any)
 
       const req = new Request('http://localhost/api/stripe/webhook', {
         method: 'POST',
@@ -216,6 +222,7 @@ describe('/api/stripe/webhook', () => {
       })
       await POST(req)
 
+      expect(mockStripeClient.paymentIntents.update).toHaveBeenCalled()
       expect(mockStripeClient.paymentIntents.retrieve).not.toHaveBeenCalled()
       expect(mockStripeClient.transfers.create).not.toHaveBeenCalled()
     })
@@ -241,7 +248,7 @@ describe('/api/stripe/webhook', () => {
       expect(res.status).toBe(200)
       // Neither subscription nor order should be created when metadata is missing
       expect(mockDb.subscription.upsert).not.toHaveBeenCalled()
-      expect(mockDb.order.create).not.toHaveBeenCalled()
+      expect(mockDb.order.upsert).not.toHaveBeenCalled()
     })
   })
 
@@ -282,6 +289,7 @@ describe('/api/stripe/webhook', () => {
         id: 'dp_test_001',
         object: 'dispute' as const,
         status: 'needs_response',
+        payment_intent: 'pi_test_001',
       }
 
       mockStripeClient.webhooks.constructEvent.mockReturnValue({
@@ -289,6 +297,9 @@ describe('/api/stripe/webhook', () => {
         data: { object: dispute },
       } as any)
 
+      mockStripeClient.paymentIntents.retrieve.mockResolvedValue({
+        metadata: { stripeSessionId: 'cs_test_123' },
+      } as any)
       mockDb.order.updateMany.mockResolvedValue({ count: 1 } as any)
 
       const req = new Request('http://localhost/api/stripe/webhook', {
@@ -299,9 +310,10 @@ describe('/api/stripe/webhook', () => {
       const res = await POST(req)
       expect(res.status).toBe(200)
 
+      expect(mockStripeClient.paymentIntents.retrieve).toHaveBeenCalledWith('pi_test_001')
       expect(mockDb.order.updateMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { stripeSessionId: 'dp_test_001' },
+          where: { stripeSessionId: 'cs_test_123' },
           data: expect.objectContaining({
             payoutStatus: 'disputed',
             disputeId: 'dp_test_001',
@@ -318,6 +330,7 @@ describe('/api/stripe/webhook', () => {
         id: 'dp_test_001',
         object: 'dispute' as const,
         status: 'won',
+        payment_intent: 'pi_test_001',
       }
 
       mockStripeClient.webhooks.constructEvent.mockReturnValue({
@@ -325,6 +338,9 @@ describe('/api/stripe/webhook', () => {
         data: { object: dispute },
       } as any)
 
+      mockStripeClient.paymentIntents.retrieve.mockResolvedValue({
+        metadata: { stripeSessionId: 'cs_test_123' },
+      } as any)
       mockDb.order.updateMany.mockResolvedValue({ count: 1 } as any)
 
       const req = new Request('http://localhost/api/stripe/webhook', {
@@ -335,8 +351,10 @@ describe('/api/stripe/webhook', () => {
       const res = await POST(req)
       expect(res.status).toBe(200)
 
+      expect(mockStripeClient.paymentIntents.retrieve).toHaveBeenCalledWith('pi_test_001')
       expect(mockDb.order.updateMany).toHaveBeenCalledWith(
         expect.objectContaining({
+          where: { stripeSessionId: 'cs_test_123' },
           data: expect.objectContaining({ payoutStatus: 'pending', disputeStatus: 'won' }),
         })
       )
@@ -347,6 +365,7 @@ describe('/api/stripe/webhook', () => {
         id: 'dp_test_001',
         object: 'dispute' as const,
         status: 'lost',
+        payment_intent: 'pi_test_001',
       }
 
       mockStripeClient.webhooks.constructEvent.mockReturnValue({
@@ -354,6 +373,9 @@ describe('/api/stripe/webhook', () => {
         data: { object: dispute },
       } as any)
 
+      mockStripeClient.paymentIntents.retrieve.mockResolvedValue({
+        metadata: { stripeSessionId: 'cs_test_123' },
+      } as any)
       mockDb.order.updateMany.mockResolvedValue({ count: 1 } as any)
 
       const req = new Request('http://localhost/api/stripe/webhook', {
@@ -364,8 +386,10 @@ describe('/api/stripe/webhook', () => {
       const res = await POST(req)
       expect(res.status).toBe(200)
 
+      expect(mockStripeClient.paymentIntents.retrieve).toHaveBeenCalledWith('pi_test_001')
       expect(mockDb.order.updateMany).toHaveBeenCalledWith(
         expect.objectContaining({
+          where: { stripeSessionId: 'cs_test_123' },
           data: expect.objectContaining({ payoutStatus: 'disputed', disputeStatus: 'lost' }),
         })
       )
@@ -392,7 +416,7 @@ describe('/api/stripe/webhook', () => {
       // No DB writes should happen
       expect(mockDb.subscription.upsert).not.toHaveBeenCalled()
       expect(mockDb.subscription.updateMany).not.toHaveBeenCalled()
-      expect(mockDb.order.create).not.toHaveBeenCalled()
+      expect(mockDb.order.upsert).not.toHaveBeenCalled()
       expect(mockDb.order.updateMany).not.toHaveBeenCalled()
     })
   })

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { stripe, calculateSplit, PAYOUT_COOLDOWN_DAYS } from '@/lib/stripe'
+import { stripe, PAYOUT_COOLDOWN_DAYS } from '@/lib/stripe'
 import { db } from '@/lib/db'
 import Stripe from 'stripe'
 
@@ -42,8 +42,10 @@ export async function POST(request: Request) {
 
       // Create order record for revenue tracking
       const payoutReadyAt = new Date(Date.now() + PAYOUT_COOLDOWN_DAYS * 24 * 60 * 60 * 1000)
-      await db.order.create({
-        data: {
+      await db.order.upsert({
+        where: { stripeSessionId: s.id },
+        update: { amountTotal, platformFee: fee, creatorRevenue: rev },
+        create: {
           userId,
           tenantId,
           stripeSessionId: s.id,
@@ -55,11 +57,22 @@ export async function POST(request: Request) {
         },
       })
 
+      // Store stripeSessionId on PaymentIntent metadata for dispute lookup
+      const paymentIntentId = (s.payment_intent as string) || ''
+      if (paymentIntentId) {
+        try {
+          await stripe.paymentIntents.update(paymentIntentId, {
+            metadata: { stripeSessionId: s.id },
+          })
+        } catch {
+          console.warn(`Failed to update PaymentIntent metadata for session ${s.id}`)
+        }
+      }
+
       // Instant transfer for trusted users with Connect account
       const user = await db.user.findUnique({ where: { id: userId } })
       if (user?.isTrustedUser && user?.stripeAccountId && user?.stripeConnected) {
         try {
-          const paymentIntentId = (s.payment_intent as string) || ''
           if (paymentIntentId) {
             const pi = await stripe.paymentIntents.retrieve(paymentIntentId)
             const chargeId = pi.latest_charge as string
@@ -100,20 +113,42 @@ export async function POST(request: Request) {
   // ── charge.dispute.created ─────────────────────────
   if (event.type === 'charge.dispute.created') {
     const dispute = event.data.object as Stripe.Dispute
-    await db.order.updateMany({
-      where: { stripeSessionId: dispute.id },
-      data: { payoutStatus: 'disputed', disputeId: dispute.id, disputeStatus: dispute.status },
-    })
+    const piId = dispute.payment_intent as string
+    if (piId) {
+      try {
+        const paymentIntent = await stripe.paymentIntents.retrieve(piId)
+        const stripeSessionId = paymentIntent.metadata?.stripeSessionId
+        if (stripeSessionId) {
+          await db.order.updateMany({
+            where: { stripeSessionId },
+            data: { payoutStatus: 'disputed', disputeId: dispute.id, disputeStatus: dispute.status },
+          })
+        }
+      } catch {
+        console.warn(`Failed to lookup PaymentIntent for dispute ${dispute.id}`)
+      }
+    }
   }
 
   // ── charge.dispute.closed ──────────────────────────
   if (event.type === 'charge.dispute.closed') {
     const dispute = event.data.object as Stripe.Dispute
-    const newStatus = dispute.status === 'won' ? 'pending' : 'disputed'
-    await db.order.updateMany({
-      where: { stripeSessionId: dispute.id },
-      data: { payoutStatus: newStatus, disputeStatus: dispute.status },
-    })
+    const piId = dispute.payment_intent as string
+    if (piId) {
+      try {
+        const paymentIntent = await stripe.paymentIntents.retrieve(piId)
+        const stripeSessionId = paymentIntent.metadata?.stripeSessionId
+        if (stripeSessionId) {
+          const newStatus = dispute.status === 'won' ? 'pending' : 'disputed'
+          await db.order.updateMany({
+            where: { stripeSessionId },
+            data: { payoutStatus: newStatus, disputeStatus: dispute.status },
+          })
+        }
+      } catch {
+        console.warn(`Failed to lookup PaymentIntent for dispute ${dispute.id}`)
+      }
+    }
   }
 
   return NextResponse.json({ received: true })

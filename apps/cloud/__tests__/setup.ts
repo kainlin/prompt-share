@@ -25,6 +25,7 @@ vi.mock('@/lib/db', () => ({
     },
     order: {
       create: vi.fn(),
+      upsert: vi.fn(),
       update: vi.fn(),
       updateMany: vi.fn(),
     },
@@ -54,7 +55,7 @@ vi.mock('@/lib/auth', () => ({
 const mockStripeClient = {
   checkout: { sessions: { create: vi.fn() } },
   webhooks: { constructEvent: vi.fn() },
-  paymentIntents: { retrieve: vi.fn() },
+  paymentIntents: { retrieve: vi.fn(), update: vi.fn() },
   transfers: { create: vi.fn() },
 }
 
