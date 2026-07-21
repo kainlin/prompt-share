@@ -79,8 +79,18 @@ export default async function CasePage({ params }: Props) {
         {dict?.prompt?.title || '提示词'}
       </h2>
 
-      <PaywallGuard isSubscribed={isSubscribed} tenantId={tenant.id}>
-        <PromptBlock emoji="💬">{promptCase.promptText}</PromptBlock>
+      <PaywallGuard
+        isSubscribed={isSubscribed}
+        tenantId={tenant.id}
+        paywallMode={(promptCase.paywallMode as 'free' | 'prompt_only' | 'full_lock') || 'free'}
+        watermarkText={promptCase.watermarkEnabled ? tenant.displayName : undefined}
+      >
+        <PromptBlock
+          emoji="💬"
+          copyDisabled={!isSubscribed && promptCase.paywallMode !== 'free'}
+        >
+          {promptCase.promptText}
+        </PromptBlock>
       </PaywallGuard>
     </div>
   )

@@ -36,7 +36,7 @@ export async function PUT(request: Request, context: Context) {
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
-    const { title, category, emoji, promptText, images, coverImageUrl, sourcePlatform, sourceAuthor, tags, published, previewType, previewSource, previewPoster } = body
+    const { title, category, emoji, promptText, images, coverImageUrl, sourcePlatform, sourceAuthor, tags, published, previewType, previewSource, previewPoster, paywallMode, allowCopy, watermarkEnabled } = body
 
     if (!title || !promptText) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -74,6 +74,9 @@ export async function PUT(request: Request, context: Context) {
         ...(previewType !== undefined && { previewType }),
         ...(previewSource !== undefined && { previewSource }),
         ...(previewPoster !== undefined && { previewPoster }),
+        ...(paywallMode !== undefined && { paywallMode }),
+        ...(allowCopy !== undefined && { allowCopy }),
+        ...(watermarkEnabled !== undefined && { watermarkEnabled }),
       },
     })
 

@@ -25,6 +25,9 @@ export default function EditCasePage({ params }: Props) {
   const [previewType, setPreviewType] = useState('image')
   const [previewSource, setPreviewSource] = useState('')
   const [previewPoster, setPreviewPoster] = useState('')
+  const [paywallMode, setPaywallMode] = useState('free')
+  const [allowCopy, setAllowCopy] = useState(true)
+  const [watermarkEnabled, setWatermarkEnabled] = useState(false)
   const [tenantId, setTenantId] = useState('')
 
   const [loading, setLoading] = useState(true)
@@ -52,6 +55,9 @@ export default function EditCasePage({ params }: Props) {
         setPreviewType(data.previewType || 'image')
         setPreviewSource(data.previewSource || '')
         setPreviewPoster(data.previewPoster || '')
+        setPaywallMode(data.paywallMode || 'free')
+        setAllowCopy(data.allowCopy !== undefined ? data.allowCopy : true)
+        setWatermarkEnabled(data.watermarkEnabled || false)
         setTenantId(data.tenantId)
       } catch (err: any) {
         setError(err.message)
@@ -88,6 +94,9 @@ export default function EditCasePage({ params }: Props) {
           previewType,
           previewSource,
           previewPoster,
+          paywallMode,
+          allowCopy,
+          watermarkEnabled,
         }),
       })
 
@@ -256,6 +265,64 @@ export default function EditCasePage({ params }: Props) {
               />
             </div>
           )}
+        </section>
+
+        {/* ── Paywall Mode Section ── */}
+        <section style={{ padding: '1rem', border: '1px solid var(--feishu-border)', borderRadius: '8px', background: 'var(--feishu-card-bg)' }}>
+          <label style={labelStyle}>Paywall Mode</label>
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+            {[
+              { value: 'free', emoji: '🆓', label: 'Free', desc: 'No restrictions' },
+              { value: 'prompt_only', emoji: '👁️', label: 'Prompt Only', desc: 'Images visible, prompt locked' },
+              { value: 'full_lock', emoji: '🔒', label: 'Full Lock', desc: 'All locked + watermark' },
+            ].map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setPaywallMode(opt.value)}
+                style={{
+                  flex: 1,
+                  padding: '0.5rem',
+                  borderRadius: '6px',
+                  border: paywallMode === opt.value ? '2px solid var(--feishu-accent)' : '1px solid var(--feishu-border)',
+                  background: paywallMode === opt.value ? 'var(--feishu-accent-light)' : 'var(--feishu-bg)',
+                  color: 'var(--feishu-text-primary)',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  fontWeight: paywallMode === opt.value ? 600 : 400,
+                  textAlign: 'left' as const,
+                }}
+              >
+                <div>{opt.emoji} {opt.label}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--feishu-text-secondary)', marginTop: '2px' }}>{opt.desc}</div>
+              </button>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <input
+                type="checkbox"
+                id="allowCopy"
+                checked={allowCopy}
+                onChange={e => setAllowCopy(e.target.checked)}
+              />
+              <label htmlFor="allowCopy" style={{ fontSize: '0.85rem', cursor: 'pointer' }}>
+                Allow Copy for Subscribers
+              </label>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <input
+                type="checkbox"
+                id="watermarkEnabled"
+                checked={watermarkEnabled}
+                onChange={e => setWatermarkEnabled(e.target.checked)}
+              />
+              <label htmlFor="watermarkEnabled" style={{ fontSize: '0.85rem', cursor: 'pointer' }}>
+                Enable Watermark
+              </label>
+            </div>
+          </div>
         </section>
 
         <div>

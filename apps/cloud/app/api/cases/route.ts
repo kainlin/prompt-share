@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const { tenantId, title, category, emoji, promptText, images, coverImageUrl, sourcePlatform, sourceAuthor, tags, previewType, previewSource, previewPoster } = body
+  const { tenantId, title, category, emoji, promptText, images, coverImageUrl, sourcePlatform, sourceAuthor, tags, previewType, previewSource, previewPoster, paywallMode, allowCopy, watermarkEnabled } = body
 
   if (!tenantId || !title || !promptText) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -62,6 +62,9 @@ export async function POST(request: Request) {
       previewType: previewType || 'image',
       previewSource: previewSource || null,
       previewPoster: previewPoster || null,
+      paywallMode: paywallMode || 'free',
+      allowCopy: allowCopy !== undefined ? allowCopy : true,
+      watermarkEnabled: watermarkEnabled || false,
     },
   })
 
