@@ -80,10 +80,58 @@ P3 ─ 消费者发现体验 ...................... 有流量后
     创作者手动提现 → stripe.transfers.create() → 资金到创作者账户
 ```
 
-#### 1a. 平台级 Stripe 配置
+#### 1a. 创作者自定义定价（替代全局固定价格）
+
+> 定价权归属创作者，平台动态创建 Stripe Price，并设护栏防滥用。
+
+**Tenant 新增字段：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `monthlyPrice` | INT | 月付价格（美分），NULL = 未设置，默认 NULL |
+| `lifetimePrice` | INT | 买断价格（美分），NULL = 未设置，默认 NULL |
+| `monthlyPriceId` | TEXT | Stripe Price ID（平台动态创建），如 `price_xxx` |
+| `lifetimePriceId` | TEXT | Stripe Price ID，同上 |
+| `priceChangedAt` | TIMESTAMPTZ | 最近一次调价时间，用于频率限制 |
+
+```sql
+ALTER TABLE ps_tenant ADD COLUMN IF NOT EXISTS "monthlyPrice" INT;
+ALTER TABLE ps_tenant ADD COLUMN IF NOT EXISTS "lifetimePrice" INT;
+ALTER TABLE ps_tenant ADD COLUMN IF NOT EXISTS "monthlyPriceId" TEXT;
+ALTER TABLE ps_tenant ADD COLUMN IF NOT EXISTS "lifetimePriceId" TEXT;
+ALTER TABLE ps_tenant ADD COLUMN IF NOT EXISTS "priceChangedAt" TIMESTAMPTZ;
+```
+
+**定价护栏（`/api/tenants/pricing` PUT）：**
+
+| 规则 | 值 | 原因 |
+|------|:---:|------|
+| 最低月付 | $1.99 | 低于此 Stripe 手续费占比过高 |
+| 最高月付 | $199.99 | 防止恶意标价 |
+| 最低买断 | $4.99 | 至少相当于 2-3 个月月付 |
+| 最高买断 | $999.99 | 硬上限 |
+| 调价频率 | 30 天内最多 1 次 | 防止通过改价绕过 Stripe 风控 |
+| 活跃 Price 上限 | 2 个（monthly + lifetime） | 旧 Price 在调价时 `active=false` |
+
+**定价变更流程：**
+
+```
+创作者在 Settings 输入新价格
+  → 前端校验：价格在 [min, max] 区间 + 30 天内未调过价
+  → POST /api/tenants/pricing { monthlyPrice, lifetimePrice }
+  → 服务端二次校验 + 查询 ps_tenant.priceChangedAt
+  → stripe.prices.create({ product, unit_amount, currency, recurring }) → 新 Price ID
+  → stripe.prices.update(oldPriceId, { active: false }) → 停用旧 Price
+  → 更新 ps_tenant: monthlyPriceId / lifetimePriceId / priceChangedAt = now()
+```
+
+> **为什么动态创建每一分钱都不同价**：Stripe Checkout 的 `line_items` 引用的是 Price ID，不是裸金额。如果不给创作者创建独立 Price，就没法在 Stripe 侧体现差异化定价。一个创作者 2 个 Price，几百个创作者也仅几百个 Price，Stripe 不限 Price 数量，无额外费用。
+
+#### 1b. 平台级 Stripe 配置
 
 - [ ] **真实密钥**：`STRIPE_SECRET_KEY`、`STRIPE_WEBHOOK_SECRET` 从 Stripe Dashboard 获取
-- [ ] **产品创建**：Monthly（$9.99/mo subscription）+ Lifetime（$49.99 one-time payment），Price ID 填入 `STRIPE_PRICE_MONTHLY` / `STRIPE_PRICE_LIFETIME`
+- [ ] **平台 Product 创建**：在 Stripe Dashboard 创建一个 Product（如 "PromptShare Creator Subscription"），用作所有创作者 Price 的父 Product
+- [ ] **移除全局 Price 环境变量**：删掉 `STRIPE_PRICE_MONTHLY` / `STRIPE_PRICE_LIFETIME`，Checkout API 改为从 `ps_tenant` 读取 `monthlyPriceId` / `lifetimePriceId`
 - [ ] **Webhook 注册**：`https://<domain>/api/stripe/webhook`，监听 `checkout.session.completed`、`customer.subscription.deleted`、`charge.dispute.created`、`charge.dispute.closed`
 
 #### 1b. Database — `ps_order` 表 + `ps_user` 扩展
@@ -132,7 +180,12 @@ ALTER TABLE ps_user ADD COLUMN IF NOT EXISTS is_trusted_user BOOLEAN DEFAULT fal
 - [ ] **`POST /api/earnings/withdraw`** — 需要 `stripe_connected = true`，聚合所有 `payout_status = 'available'` 的订单 → `stripe.transfers.create()` → 标记 `payout_status = 'paid'`，最小提现额 $1.00
 - [ ] **Webhook 处理 `checkout.session.completed`** — 创建 `ps_order`，计算分账（`platformFee` + `creatorRevenue`），设置 `payoutReadyAt = now + 14 days`
 
-#### 1e. 前端 — Settings 页面 Stripe 状态
+#### 1e. 前端 — Settings 页面（Stripe 状态 + 定价管理）
+
+- [ ] **定价设置区域**：月付价格（$ 输入框）+ 买断价格（$ 输入框）+ 保存按钮
+  - 显示当前生效价格 + 上次调价时间
+  - 30 天内调过价 → 输入框 disabled + "下次可调价：YYYY-MM-DD"
+- [ ] **Stripe 已连接**：绿色徽章 + 账号 ID + "Manage Stripe Dashboard" 按钮
 
 - [ ] **已连接**：绿色徽章 + 账号 ID + "Manage Stripe Dashboard" 按钮
 - [ ] **未连接**：提示 "你可以先卖，累计收益后需绑定 Stripe 账户来提现" + "Connect Stripe" 按钮
@@ -230,7 +283,7 @@ ALTER TABLE ps_prompt_case ADD COLUMN IF NOT EXISTS "watermarkEnabled" BOOLEAN N
 - [ ] **`instrumentation.ts` 或预检查脚本**：启动时检查所有必需环境变量是否存在
   - `DATABASE_URL`、`DIRECT_URL`
   - `NEXT_PUBLIC_SUPABASE_URL`、`SUPABASE_SERVICE_ROLE_KEY`
-  - `STRIPE_SECRET_KEY`、`STRIPE_WEBHOOK_SECRET`、`STRIPE_PRICE_MONTHLY`、`STRIPE_PRICE_LIFETIME`
+  - `STRIPE_SECRET_KEY`、`STRIPE_WEBHOOK_SECRET`
   - `NEXT_PUBLIC_APP_URL`
 - [ ] 缺失时在控制台输出清晰的错误信息而非运行时崩溃
 
