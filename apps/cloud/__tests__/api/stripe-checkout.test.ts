@@ -6,7 +6,7 @@ import { mockGetSession, mockStripeClient } from '../setup'
 const mockDb = vi.mocked(db)
 
 const user = { id: 'user-1', email: 'a@b.com' }
-const tenant = { id: 't-1', slug: 'demo', displayName: 'Demo', ownerId: 'user-1' }
+const tenant = { id: 't-1', slug: 'demo', displayName: 'Demo', ownerId: 'user-1', monthlyPriceId: 'price_monthly_test', lifetimePriceId: 'price_lifetime_test' }
 
 import { POST } from '@/app/api/stripe/checkout/route'
 

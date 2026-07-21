@@ -55,7 +55,7 @@ describe('/api/stripe/webhook', () => {
 
       mockDb.subscription.upsert.mockResolvedValue({ id: 'sub-1' } as any)
       mockDb.order.upsert.mockResolvedValue({ id: 'ord-1' } as any)
-      mockDb.user.findUnique.mockResolvedValue(null)
+      mockDb.tenant.findUnique.mockResolvedValue(null) // no tenant owner → skip transfer
       mockStripeClient.paymentIntents.update.mockResolvedValue({} as any)
 
       const req = new Request('http://localhost/api/stripe/webhook', {
@@ -92,7 +92,7 @@ describe('/api/stripe/webhook', () => {
 
       mockDb.subscription.upsert.mockResolvedValue({ id: 'sub-1' } as any)
       mockDb.order.upsert.mockResolvedValue({ id: 'ord-1' } as any)
-      mockDb.user.findUnique.mockResolvedValue(null)
+      mockDb.tenant.findUnique.mockResolvedValue(null) // no tenant owner → skip transfer
       mockStripeClient.paymentIntents.update.mockResolvedValue({} as any)
 
       const req = new Request('http://localhost/api/stripe/webhook', {
@@ -126,11 +126,14 @@ describe('/api/stripe/webhook', () => {
 
       mockDb.subscription.upsert.mockResolvedValue({ id: 'sub-1' } as any)
       mockDb.order.upsert.mockResolvedValue({ id: 'ord-1' } as any)
-      mockDb.user.findUnique.mockResolvedValue({
-        id: 'user-1',
-        isTrustedUser: true,
-        stripeAccountId: 'acct_123',
-        stripeConnected: true,
+      mockDb.tenant.findUnique.mockResolvedValue({
+        id: 't-1',
+        owner: {
+          id: 'owner-1',
+          isTrustedUser: true,
+          stripeAccountId: 'acct_123',
+          stripeConnected: true,
+        },
       } as any)
 
       mockStripeClient.paymentIntents.update.mockResolvedValue({} as any)
@@ -176,11 +179,14 @@ describe('/api/stripe/webhook', () => {
 
       mockDb.subscription.upsert.mockResolvedValue({ id: 'sub-1' } as any)
       mockDb.order.upsert.mockResolvedValue({ id: 'ord-1' } as any)
-      mockDb.user.findUnique.mockResolvedValue({
-        id: 'user-1',
-        isTrustedUser: true,
-        stripeAccountId: 'acct_123',
-        stripeConnected: true,
+      mockDb.tenant.findUnique.mockResolvedValue({
+        id: 't-1',
+        owner: {
+          id: 'owner-1',
+          isTrustedUser: true,
+          stripeAccountId: 'acct_123',
+          stripeConnected: true,
+        },
       } as any)
 
       mockStripeClient.paymentIntents.update.mockResolvedValue({} as any)
@@ -206,11 +212,14 @@ describe('/api/stripe/webhook', () => {
 
       mockDb.subscription.upsert.mockResolvedValue({ id: 'sub-1' } as any)
       mockDb.order.upsert.mockResolvedValue({ id: 'ord-1' } as any)
-      mockDb.user.findUnique.mockResolvedValue({
-        id: 'user-1',
-        isTrustedUser: false,
-        stripeAccountId: 'acct_123',
-        stripeConnected: true,
+      mockDb.tenant.findUnique.mockResolvedValue({
+        id: 't-1',
+        owner: {
+          id: 'owner-1',
+          isTrustedUser: false,
+          stripeAccountId: 'acct_123',
+          stripeConnected: true,
+        },
       } as any)
 
       mockStripeClient.paymentIntents.update.mockResolvedValue({} as any)
