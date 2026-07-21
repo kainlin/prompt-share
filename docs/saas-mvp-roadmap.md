@@ -62,13 +62,15 @@ P3 ─ 消费者发现体验 ...................... 有流量后
 
 **现状**：PaywallGuard 是全局二元的——要么全锁要么全开，无法按案例粒度差异化。创作者不能决定「哪些免费、哪些付费、哪些半锁」。
 
-**目标**：每个案例支持三种收费模式：
+**目标**：每个案例支持三种收费模式，复制能力作为独立权利与可见性解耦：
 
-| 模式 | `paywallMode` | 免费用户体验 | 订阅用户体验 |
+| 模式 | `paywallMode` | 免费用户 | 订阅用户 |
 |------|:---:|---|---|
-| 🆓 免费公开 | `free` | 图片/视频/网页 + 提示词全文 + 一键复制 | 同免费 |
-| 👁️ 图片可见，提示词付费 | `prompt_only` | 图片/视频正常浏览，提示词模糊 + 锁定浮层 | 全部可见 |
-| 🔒 全部锁定 | `full_lock` | 图片水印/模糊 + 提示词锁定 | 全部可见 |
+| 🆓 全部开放 | `free` | 全可见 + 可复制 | 同免费 |
+| 👁️ 仅锁定提示词 | `prompt_only` | 图片/视频正常浏览 + 提示词可见但**禁止复制** | 全部可见 + 可复制 |
+| 🔒 全部锁定 | `full_lock` | 图片水印/模糊 + 提示词不可见**且禁止复制** | 全部可见 + 可复制 |
+
+> **核心规则**：复制提示词是独立权利。即使免费用户能看到提示词文本（`prompt_only` 模式），PromptBlock 的 Copy 按钮也不可用，hover 时提示「订阅后可复制」。这给创作者提供了真正的转化钩子——「你看得到，但拿不走」。
 
 **可选增强**（可后续迭代）：
 
@@ -80,6 +82,7 @@ P3 ─ 消费者发现体验 ...................... 有流量后
 ```
 ps_prompt_case 新增字段：
   paywallMode      TEXT    DEFAULT 'free'    -- free | prompt_only | full_lock
+  allowCopy        BOOLEAN DEFAULT true     -- 订阅用户是否可复制（prompt_only/full_lock 时免费用户始终不可复制）
   freePreviewCount INT     DEFAULT 0         -- 0 = 无免费预览
   watermarkEnabled BOOLEAN DEFAULT false
 ```
@@ -88,17 +91,19 @@ ps_prompt_case 新增字段：
 
 | 文件 | 改动 |
 |------|------|
-| `prisma/schema.prisma` | PromptCase 加 3 个字段 |
+| `prisma/schema.prisma` | PromptCase 加 4 个字段 |
 | `/api/cases` POST/PUT | 接受新字段 |
 | `new-case-form.tsx` | 收费模式选择器（3 个 radio/button）+ 可选配置项 |
 | `edit/page.tsx` | 同步新增字段 |
+| `PromptBlock` | 根据 `paywallMode` + `isSubscribed` 决定 Copy 按钮是否可点击 |
 | `PaywallGuard` | 根据 `paywallMode` 决定锁什么（文本、图片、全锁） |
-| `[tenant]/[caseId]/page.tsx` | 透传 `paywallMode` 给 PaywallGuard + ImageGallery |
+| `[tenant]/[caseId]/page.tsx` | 透传 `paywallMode` 给 PaywallGuard + ImageGallery + PromptBlock |
 
 **SQL（在新字段加入 schema 后执行）**：
 
 ```sql
 ALTER TABLE ps_prompt_case ADD COLUMN IF NOT EXISTS "paywallMode" TEXT NOT NULL DEFAULT 'free';
+ALTER TABLE ps_prompt_case ADD COLUMN IF NOT EXISTS "allowCopy" BOOLEAN NOT NULL DEFAULT true;
 ALTER TABLE ps_prompt_case ADD COLUMN IF NOT EXISTS "freePreviewCount" INT NOT NULL DEFAULT 0;
 ALTER TABLE ps_prompt_case ADD COLUMN IF NOT EXISTS "watermarkEnabled" BOOLEAN NOT NULL DEFAULT false;
 ```
@@ -110,8 +115,8 @@ ALTER TABLE ps_prompt_case ADD COLUMN IF NOT EXISTS "watermarkEnabled" BOOLEAN N
 > 需要 #2 的 `paywallMode` 完成后才能实现，「锁什么」取决于案例的收费模式。
 
 - [ ] **`full_lock` 模式**：ImageGallery 所有图片模糊 + 居中水印叠加层 + 锁定浮层；VideoPlayer 显示模糊封面 + 锁定浮层；IframeSandbox 不渲染 iframe，显示锁定浮层
-- [ ] **`prompt_only` 模式**：图片/视频正常可见，仅 PromptBlock 被模糊 + 锁定浮层（当前已有）
-- [ ] **`free` 模式**：全部内容可见，无锁定浮层
+- [ ] **`prompt_only` 模式**：图片/视频正常可见，PromptBlock 内容可见但 Copy 按钮 disabled + tooltip「订阅后可复制」（不模糊文本，而是显示但不可操作）
+- [ ] **`free` 模式**：全部内容可见，Copy 按钮正常可用
 - [ ] **`freePreviewCount` 处理**：如图片 5 张、`freePreviewCount=2`，则前 2 张正常显示，第 3 张起模糊
 - [ ] **`watermarkEnabled` 处理**：云纹文字叠加（CSS `::after` pseudo-element 或绝对定位 div），显示店铺名/logo
 
