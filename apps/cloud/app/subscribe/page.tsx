@@ -45,7 +45,7 @@ export default async function SubscribePage({ searchParams }: Props) {
         </p>
       </div>
 
-      <StripePlans tenantId={tenant.id} />
+      <StripePlans tenantId={tenant.id} monthlyPrice={tenant.monthlyPrice} lifetimePrice={tenant.lifetimePrice} />
     </main>
   )
 }

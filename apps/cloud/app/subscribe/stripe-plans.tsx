@@ -2,7 +2,13 @@
 
 import { useState } from 'react'
 
-export function StripePlans({ tenantId }: { tenantId: string }) {
+interface StripePlansProps {
+  tenantId: string
+  monthlyPrice?: number | null    // cents
+  lifetimePrice?: number | null   // cents
+}
+
+export function StripePlans({ tenantId, monthlyPrice, lifetimePrice }: StripePlansProps) {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
 
   const handleCheckout = async (plan: 'monthly' | 'lifetime') => {
@@ -32,7 +38,10 @@ export function StripePlans({ tenantId }: { tenantId: string }) {
       <div style={cardStyle}>
         <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 600 }}>Monthly Pass</h3>
         <div style={{ fontSize: '2rem', fontWeight: 700, margin: '1rem 0 0.5rem' }}>
-          $9.99<span style={{ fontSize: '1rem', fontWeight: 400, color: 'var(--feishu-text-secondary)' }}>/mo</span>
+          {monthlyPrice != null
+            ? <>${(monthlyPrice / 100).toFixed(2)}<span style={{ fontSize: '1rem', fontWeight: 400, color: 'var(--feishu-text-secondary)' }}>/mo</span></>
+            : <span style={{ fontSize: '1rem', fontWeight: 400, color: 'var(--feishu-text-secondary)' }}>Not configured yet</span>
+          }
         </div>
         <p style={{ fontSize: '0.85rem', color: 'var(--feishu-text-secondary)', margin: '0 0 1.5rem 0', flex: 1 }}>
           Cancel anytime. Unlocks all premium prompt templates in this store.
@@ -53,7 +62,10 @@ export function StripePlans({ tenantId }: { tenantId: string }) {
         </div>
         <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 600 }}>Lifetime Access</h3>
         <div style={{ fontSize: '2rem', fontWeight: 700, margin: '1rem 0 0.5rem' }}>
-          $49.99
+          {lifetimePrice != null
+            ? <>${(lifetimePrice / 100).toFixed(2)}</>
+            : <span style={{ fontSize: '1rem', fontWeight: 400, color: 'var(--feishu-text-secondary)' }}>Not configured yet</span>
+          }
         </div>
         <p style={{ fontSize: '0.85rem', color: 'var(--feishu-text-secondary)', margin: '0 0 1.5rem 0', flex: 1 }}>
           Pay once, own forever. Lifetime updates to all future cases in this store.
