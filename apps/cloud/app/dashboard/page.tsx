@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import Link from 'next/link'
 import { headers } from 'next/headers'
+import { EarningsCard } from './earnings-card'
 import styles from './dashboard.module.css'
 
 export default async function DashboardPage() {
@@ -31,6 +32,8 @@ export default async function DashboardPage() {
   return (
     <div>
       <h1 className={styles.pageTitle}>我的提示词店铺 (Stores)</h1>
+
+      <EarningsCard />
 
       {tenants.length === 0 ? (
         <div className={styles.emptyState}>

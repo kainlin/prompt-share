@@ -736,3 +736,27 @@
   font-weight: 500;
   margin-top: 4px;
 }
+
+/* Earnings Summary Card */
+.earningsCard {
+  background-color: var(--saas-panel);
+  border: 1px solid var(--saas-border);
+  border-radius: var(--saas-radius-card);
+  padding: 40px;
+  margin-bottom: 32px;
+  box-shadow: var(--saas-shadow);
+}
+
+.earningsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--saas-text-primary);
+}
+
+.earningsRow + .earningsRow {
+  border-top: 1px solid var(--saas-border);
+}
