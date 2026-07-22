@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import Link from 'next/link'
 import { headers } from 'next/headers'
+import { CasesList } from './cases-list'
 import styles from '../dashboard.module.css'
 
 interface Props {
@@ -24,20 +25,26 @@ export default async function CasesPage({ searchParams }: Props) {
 
   const selectedTenantDetails = tenants.find(t => t.id === selectedTenant)
 
+  const serializedCases = cases.map(c => ({
+    id: c.id,
+    title: c.title,
+    slug: c.slug,
+    category: c.category,
+    emoji: c.emoji,
+    coverImageUrl: c.coverImageUrl,
+    images: c.images,
+    promptText: c.promptText,
+    published: c.published,
+    paywallMode: c.paywallMode,
+    createdAt: c.createdAt.toISOString(),
+    updatedAt: c.updatedAt.toISOString(),
+  }))
+
   // Map category background badges
   const categoryBadges: Record<string, { bg: string; text: string; label: string }> = {
     photography: { bg: 'var(--saas-sky)', text: '#0277BD', label: 'Photography' },
     product: { bg: 'var(--saas-apricot)', text: '#E65100', label: 'Product' },
     people: { bg: 'var(--saas-rose)', text: '#C2185B', label: 'Character' }
-  }
-
-  // Format date helper
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
   }
 
   return (
@@ -48,7 +55,7 @@ export default async function CasesPage({ searchParams }: Props) {
           <p className={styles.pageEyebrow}>Store Management</p>
           <h1 className={styles.pageTitle}>Prompt Cases</h1>
         </div>
-        
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-black/5 text-[12px] font-bold">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -111,170 +118,15 @@ export default async function CasesPage({ searchParams }: Props) {
           <div style={{ fontSize: '3rem', marginBottom: '16px' }}>📝</div>
           <h3 className={styles.emptyTitle}>这里还没有提示词案例</h3>
           <p className={styles.emptyText}>
-            点击右上角“新建案例”按钮创建一个展示你 AI 绘画/生成模型效果的提示词吧。
+            点击右上角"新建案例"按钮创建一个展示你 AI 绘画/生成模型效果的提示词吧。
           </p>
         </div>
-      ) : view === 'grid' ? (
-        /* DUAL VIEW: GRID VIEW (Primary cover image display) */
-        <div className={styles.casesGrid}>
-          {cases.map(c => {
-            const badge = categoryBadges[c.category] || { bg: '#e5e7eb', text: '#374151', label: c.category }
-            
-            return (
-              <div key={c.id} className={styles.caseGridCard}>
-                <div className={styles.cardCoverWrapper}>
-                  {c.coverImageUrl ? (
-                    <img src={c.coverImageUrl} alt="" className={styles.cardCoverImg} />
-                  ) : (
-                    <div className={styles.cardCoverImg} style={{ backgroundColor: 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}>
-                      📷
-                    </div>
-                  )}
-                  {/* Floating Badges */}
-                  <div className={styles.cardBadgeLeft}>
-                    <span 
-                      className={styles.badge} 
-                      style={{ backgroundColor: badge.bg, color: badge.text, fontSize: '10px', textTransform: 'uppercase' }}
-                    >
-                      {badge.label}
-                    </span>
-                  </div>
-                  <div className={styles.cardBadgeRight}>
-                    <span 
-                      className={styles.badge} 
-                      style={{ 
-                        backgroundColor: c.published ? 'var(--saas-mint)' : 'rgba(0,0,0,0.05)', 
-                        color: c.published ? '#2E7D32' : 'var(--saas-text-secondary)',
-                        fontSize: '10px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}
-                    >
-                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: c.published ? '#2E7D32' : 'var(--saas-text-secondary)' }}></span>
-                      {c.published ? 'Published' : 'Draft'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className={styles.cardBody}>
-                  <h3 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--saas-text-primary)', marginBottom: '8px' }}>
-                    {c.title}
-                  </h3>
-                  <code className={styles.promptCode}>
-                    /imagine prompt: {c.promptText}
-                  </code>
-                  <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span className="tnum" style={{ fontSize: '12px', color: 'var(--saas-text-secondary)', fontWeight: 500 }}>
-                      {formatDate(c.createdAt)}
-                    </span>
-                    <div style={{ display: 'flex', gap: '16px' }}>
-                      <Link href={`/dashboard/cases/${c.id}/edit`} style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--saas-accent)' }}>
-                        Edit
-                      </Link>
-                      {selectedTenantDetails && (
-                        <Link 
-                          href={`/@${selectedTenantDetails.slug}/${c.slug}`} 
-                          target="_blank" 
-                          style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--saas-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
-                        >
-                          Live
-                          <svg style={{ width: '12px', height: '12px' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                          </svg>
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
       ) : (
-        /* DUAL VIEW: LIST VIEW (Dense metadata list table) */
-        <div className={styles.section} style={{ padding: 0, overflow: 'hidden' }}>
-          <div className={styles.tableWrapper}>
-            <table className={styles.table}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                  <th className={styles.th}>Case / Title</th>
-                  <th className={styles.th}>Category</th>
-                  <th className={styles.th}>Status</th>
-                  <th className={styles.th}>Created</th>
-                  <th className={styles.th} style={{ textAlign: 'right' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cases.map(c => {
-                  const badge = categoryBadges[c.category] || { bg: '#e5e7eb', text: '#374151', label: c.category }
-                  
-                  return (
-                    <tr key={c.id} className={styles.rowHover}>
-                      <td className={styles.td}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                          <div style={{ width: '44px', height: '44px', borderRadius: '50%', backgroundColor: 'rgba(0,0,0,0.05)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {c.coverImageUrl ? (
-                              <img src={c.coverImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            ) : (
-                              <span style={{ fontSize: '1.25rem' }}>📷</span>
-                            )}
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--saas-text-primary)' }}>{c.title}</span>
-                            <span className="tnum" style={{ fontSize: '11px', color: 'var(--saas-text-secondary)', fontWeight: 500 }}>{c.slug.toUpperCase()}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className={styles.td}>
-                        <span 
-                          className={styles.badge} 
-                          style={{ backgroundColor: badge.bg, color: badge.text, fontWeight: 700 }}
-                        >
-                          {badge.label}
-                        </span>
-                      </td>
-                      <td className={styles.td}>
-                        <span 
-                          className={styles.badge} 
-                          style={{ 
-                            backgroundColor: c.published ? 'var(--saas-mint)' : 'rgba(0,0,0,0.05)', 
-                            color: c.published ? '#2E7D32' : 'var(--saas-text-secondary)',
-                            fontWeight: 700
-                          }}
-                        >
-                          {c.published ? '🟢 Published' : '⚫ Draft'}
-                        </span>
-                      </td>
-                      <td className={`${styles.td} tnum`} style={{ fontSize: '14px', color: 'var(--saas-text-secondary)', fontWeight: 500 }}>
-                        {formatDate(c.createdAt)}
-                      </td>
-                      <td className={styles.td} style={{ textAlign: 'right' }}>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '24px', fontSize: '13px', fontWeight: 'bold' }}>
-                          <Link href={`/dashboard/cases/${c.id}/edit`} style={{ color: 'var(--saas-accent)' }}>
-                            Edit
-                          </Link>
-                          {selectedTenantDetails && (
-                            <Link 
-                              href={`/@${selectedTenantDetails.slug}/${c.slug}`} 
-                              target="_blank" 
-                              style={{ color: 'var(--saas-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '2px' }}
-                            >
-                              View Live
-                              <svg style={{ width: '12px', height: '12px' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
-                              </svg>
-                            </Link>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <CasesList
+          cases={serializedCases}
+          selectedTenantSlug={selectedTenantDetails?.slug || ''}
+          view={view}
+        />
       )}
 
       {/* PERFORMANCE STRIP (Bottom Metrics Summary) */}
@@ -301,7 +153,7 @@ export default async function CasesPage({ searchParams }: Props) {
               </span>
             </div>
           </div>
-          
+
           <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 'bold', color: 'var(--saas-accent)' }}>
             <span>View detailed analytics</span>
             <svg style={{ width: '12px', height: '12px' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
