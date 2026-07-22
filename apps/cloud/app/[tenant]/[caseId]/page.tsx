@@ -114,12 +114,12 @@ export default async function CasePage({ params }: Props) {
         
         {/* LEFT COLUMN: Visual Preview (Video / Sandbox / Image Gallery) */}
         <div className={styles.splitLeft} style={{ top: '96px' }}>
-          <div 
-            style={{ 
-              boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.12), 0 10px 20px -5px rgba(0, 0, 0, 0.05)', 
-              borderRadius: '24px', 
-              overflow: 'hidden', 
-              backgroundColor: '#ffffff' 
+          <div
+            style={{
+              boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.12), 0 10px 20px -5px rgba(0, 0, 0, 0.05)',
+              borderRadius: '24px',
+              overflow: 'hidden',
+              backgroundColor: '#ffffff'
             }}
           >
             {promptCase.previewType === 'video' && promptCase.previewSource ? (
@@ -129,11 +129,21 @@ export default async function CasePage({ params }: Props) {
               />
             ) : promptCase.previewType === 'web' && promptCase.previewSource ? (
               <IframeSandbox sourceUrl={promptCase.previewSource} />
-            ) : (
-              <ImageGallery 
-                images={promptCase.images && promptCase.images.length > 0 ? promptCase.images : [promptCase.coverImageUrl].filter(Boolean) as string[]} 
-                alt={promptCase.title} 
+            ) : promptCase.images && promptCase.images.length > 0 ? (
+              /* Sub-images provided — ImageGallery handles filenames correctly */
+              <ImageGallery images={promptCase.images} alt={promptCase.title} />
+            ) : promptCase.coverImageUrl ? (
+              /* Cover image is a full URL — cannot pass to ImageGallery (it appends prefix) */
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={promptCase.coverImageUrl}
+                alt={promptCase.title}
+                style={{ width: '100%', display: 'block', objectFit: 'cover' }}
               />
+            ) : (
+              <div style={{ padding: '80px 0', textAlign: 'center', color: 'var(--saas-text-secondary)' }}>
+                📷 No preview available
+              </div>
             )}
           </div>
         </div>
