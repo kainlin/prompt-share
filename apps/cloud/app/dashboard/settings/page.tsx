@@ -52,14 +52,14 @@ export default async function SettingsPage() {
           style={{ marginTop: '24px' }}
         >
           <div className={styles.inputGroup}>
-            <label style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--saas-text-secondary)' }}>
+            <label className={styles.label}>
               店铺唯一标识 (Slug)
             </label>
             <input type="text" name="slug" placeholder="e.g. cyber-avatar" required className={styles.input} />
           </div>
 
           <div className={styles.inputGroup}>
-            <label style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--saas-text-secondary)' }}>
+            <label className={styles.label}>
               店铺展示名称 (Display Name)
             </label>
             <input type="text" name="displayName" placeholder="e.g. Cyberpunk Art Shop" required className={styles.input} />

@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ImageUpload } from '@/components/image-upload'
+import Link from 'next/link'
+import styles from '../../dashboard.module.css'
 
 export function NewCaseForm() {
   const router = useRouter()
@@ -81,104 +83,170 @@ export function NewCaseForm() {
   if (!tenantId) return null
 
   return (
-    <div style={{ maxWidth: 600 }}>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <a href={`/dashboard/cases?tenant=${tenantId}`} style={{ fontSize: '0.85rem', color: 'var(--feishu-text-secondary)', textDecoration: 'none' }}>
-          ← Back to Cases
-        </a>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0.5rem 0 0' }}>New Prompt Case</h1>
+    <div className={styles.editContainer}>
+      {/* Header */}
+      <div className={styles.pageHeader} style={{ marginBottom: '40px' }}>
+        <div>
+          <Link href={`/dashboard/cases?tenant=${tenantId}`} className={styles.pageEyebrow} style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+            <svg style={{ width: '12px', height: '12px' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15m0 0l6.75-6.75M4.5 12l6.75 6.75" />
+            </svg>
+            Back to Cases
+          </Link>
+          <h1 className={styles.pageTitle} style={{ fontSize: '2.25rem', marginTop: '4px' }}>New Prompt Case</h1>
+        </div>
       </div>
 
-      {error && <p style={{ color: 'red', marginBottom: '1rem' }}>{error}</p>}
+      {error && <p style={{ color: 'red', marginBottom: '1.5rem', fontWeight: 600 }}>{error}</p>}
 
-      <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem' }}>
-        <div>
-          <label style={labelStyle}>Title</label>
-          <input type="text" value={title} onChange={e => setTitle(e.target.value)} required style={inputStyle} placeholder="e.g. 赛博朋克霓虹街景" />
-        </div>
+      <form onSubmit={handleSubmit} className={styles.formTwoColumn}>
+        {/* LEFT COLUMN: Core Content & Preview (70%) */}
+        <div className={styles.formMainCol}>
+          {/* Section 1: Basic Info */}
+          <section className={styles.formSection}>
+            <h2 className={styles.formSectionTitle}>
+              <span style={{ fontSize: '1.25rem' }}>ℹ️</span>
+              Basic Information
+            </h2>
+            
+            <div className="space-y-6">
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Case Title</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  required
+                  className={styles.input}
+                  placeholder="e.g. 赛博朋克霓虹街景"
+                />
+              </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div>
-            <label style={labelStyle}>Category</label>
-            <select value={category} onChange={e => setCategory(e.target.value)} style={inputStyle}>
-              <option value="photography">Photography & Realism</option>
-              <option value="product">Products & E-commerce</option>
-              <option value="people">Characters & People</option>
-            </select>
-          </div>
-          <div>
-            <label style={labelStyle}>Emoji Icon</label>
-            <input type="text" value={emoji} onChange={e => setEmoji(e.target.value)} required style={inputStyle} />
-          </div>
-        </div>
+              <div className={styles.formRowGrid2}>
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>Category</label>
+                  <select
+                    value={category}
+                    onChange={e => setCategory(e.target.value)}
+                    className={styles.input}
+                  >
+                    <option value="photography">Photography & Realism</option>
+                    <option value="product">Products & E-commerce</option>
+                    <option value="people">Characters & People</option>
+                  </select>
+                </div>
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>Hero Emoji</label>
+                  <input
+                    type="text"
+                    value={emoji}
+                    onChange={e => setEmoji(e.target.value)}
+                    required
+                    className={styles.input}
+                    style={{ textAlign: 'center', fontSize: '1.25rem' }}
+                  />
+                </div>
+              </div>
 
-        <div>
-          <label style={labelStyle}>Prompt Text</label>
-          <textarea
-            value={promptText}
-            onChange={e => setPromptText(e.target.value)}
-            required
-            rows={6}
-            style={{ ...inputStyle, fontFamily: 'monospace' }}
-            placeholder={`{
-  "style": "cyberpunk",
-  "subject": "neon streets",
-  "detail": "{argument name=\\"detail\\" default=\\"wet rain reflections\\"}"
-}`}
-          />
-        </div>
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Prompt Text</label>
+                <textarea
+                  value={promptText}
+                  onChange={e => setPromptText(e.target.value)}
+                  required
+                  rows={6}
+                  className={styles.input}
+                  style={{ fontFamily: 'monospace', resize: 'none', lineHeight: '1.6' }}
+                  placeholder="Paste your prompt template text here..."
+                />
+              </div>
+            </div>
+          </section>
 
-        <ImageUpload
-          value={coverImageUrl}
-          onChange={setCoverImageUrl}
-          label="Cover Image"
-          required
-        />
+          {/* Section 2: Assets & Gallery */}
+          <section className={styles.formSection}>
+            <h2 className={styles.formSectionTitle}>
+              <span style={{ fontSize: '1.25rem' }}>🖼️</span>
+              Assets & Gallery
+            </h2>
+            
+            <div className="space-y-6">
+              <ImageUpload
+                value={coverImageUrl}
+                onChange={setCoverImageUrl}
+                label="Cover Image"
+                required
+              />
 
-        {/* ── Multi-modal Preview Section ── */}
-        <section style={{ padding: '1rem', border: '1px solid var(--feishu-border)', borderRadius: '8px', background: 'var(--feishu-card-bg)' }}>
-          <label style={labelStyle}>Preview Type</label>
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
-            {[
-              { value: 'image', emoji: '🖼️', label: 'Image Gallery' },
-              { value: 'video', emoji: '🎬', label: 'Video Player' },
-              { value: 'web', emoji: '🌐', label: 'Web Sandbox' },
-            ].map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setPreviewType(opt.value)}
-                style={{
-                  flex: 1,
-                  padding: '0.5rem',
-                  borderRadius: '6px',
-                  border: previewType === opt.value ? '2px solid var(--feishu-accent)' : '1px solid var(--feishu-border)',
-                  background: previewType === opt.value ? 'var(--feishu-accent-light)' : 'var(--feishu-bg)',
-                  color: 'var(--feishu-text-primary)',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  fontWeight: previewType === opt.value ? 600 : 400,
-                }}
-              >
-                {opt.emoji} {opt.label}
-              </button>
-            ))}
-          </div>
+              <div className={styles.inputGroup} style={{ marginTop: '24px' }}>
+                <label className={styles.label}>Sub-images (Comma separated URLs)</label>
+                <input
+                  type="text"
+                  value={imagesText}
+                  onChange={e => setImagesText(e.target.value)}
+                  className={styles.input}
+                  placeholder="e.g. case1_sub1.jpg, case1_sub2.jpg"
+                />
+                {imagesText && (
+                  <div className={styles.subImagesGrid}>
+                    {imagesText.split(',').map((url, i) => {
+                      const trimmedUrl = url.trim()
+                      if (!trimmedUrl) return null
+                      return (
+                        <div key={i} className={styles.subImageWrapper}>
+                          <img
+                            src={trimmedUrl}
+                            alt=""
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                          />
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* Section 3: Preview Mode */}
+          <section className={styles.formSection}>
+            <h2 className={styles.formSectionTitle}>
+              <span style={{ fontSize: '1.25rem' }}>👀</span>
+              Preview Mode
+            </h2>
+
+            <div className={styles.segmentControl} style={{ marginBottom: '24px' }}>
+              {[
+                { value: 'image', label: '🖼️ Image Gallery' },
+                { value: 'video', label: '🎬 Video Player' },
+                { value: 'web', label: '🌐 Web Sandbox' },
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setPreviewType(opt.value)}
+                  className={`${styles.segmentBtn} ${previewType === opt.value ? styles.segmentBtnActive : styles.segmentBtnInactive}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
 
           {previewType !== 'image' && (
-            <div style={{ marginTop: '0.75rem' }}>
-              <label style={labelStyle}>
-                {previewType === 'video' ? '🎬 Video URL' : '🌐 Web URL'}
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>
+                {previewType === 'video' ? '🎬 Video URL' : '🌐 Web Sandbox URL'}
               </label>
               <input
                 type="url"
                 value={previewSource}
                 onChange={e => setPreviewSource(e.target.value)}
                 required={previewType !== 'image'}
-                style={inputStyle}
+                className={styles.input}
                 placeholder={
                   previewType === 'video'
-                    ? 'https://.../my-video.mp4'
+                    ? 'https://example.com/video.mp4'
                     : 'https://v0.dev/r/xxxxx'
                 }
               />
@@ -186,146 +254,159 @@ export function NewCaseForm() {
           )}
 
           {previewType === 'video' && (
-            <div style={{ marginTop: '0.5rem' }}>
-              <label style={labelStyle}>🖼️ Poster Image URL (optional)</label>
+            <div className={styles.inputGroup} style={{ marginTop: '16px' }}>
+              <label className={styles.label}>🖼️ Poster Image URL (optional)</label>
               <input
                 type="url"
                 value={previewPoster}
                 onChange={e => setPreviewPoster(e.target.value)}
-                style={inputStyle}
-                placeholder="https://.../video-cover.jpg"
+                className={styles.input}
+                placeholder="https://example.com/video-poster.jpg"
               />
             </div>
           )}
-        </section>
+          </section>
+        </div>
 
-        {/* ── Paywall Mode Section ── */}
-        <section style={{ padding: '1rem', border: '1px solid var(--feishu-border)', borderRadius: '8px', background: 'var(--feishu-card-bg)' }}>
-          <label style={labelStyle}>Paywall Mode</label>
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
-            {[
-              { value: 'free', emoji: '🆓', label: 'Free', desc: 'No restrictions' },
-              { value: 'prompt_only', emoji: '👁️', label: 'Prompt Only', desc: 'Images visible, prompt locked' },
-              { value: 'full_lock', emoji: '🔒', label: 'Full Lock', desc: 'All locked + watermark' },
-            ].map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setPaywallMode(opt.value)}
-                style={{
-                  flex: 1,
-                  padding: '0.5rem',
-                  borderRadius: '6px',
-                  border: paywallMode === opt.value ? '2px solid var(--feishu-accent)' : '1px solid var(--feishu-border)',
-                  background: paywallMode === opt.value ? 'var(--feishu-accent-light)' : 'var(--feishu-bg)',
-                  color: 'var(--feishu-text-primary)',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  fontWeight: paywallMode === opt.value ? 600 : 400,
-                  textAlign: 'left' as const,
-                }}
-              >
-                <div>{opt.emoji} {opt.label}</div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--feishu-text-secondary)', marginTop: '2px' }}>{opt.desc}</div>
-              </button>
-            ))}
-          </div>
+        {/* RIGHT COLUMN: Settings & Paywall sidebar (30%) */}
+        <div className={styles.formSideCol}>
+          {/* Section 4: Access Control */}
+          <section className={styles.formSection}>
+            <h2 className={styles.formSectionTitle}>
+              <span style={{ fontSize: '1.25rem' }}>🔒</span>
+              Access Control
+            </h2>
 
-          <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <input
-                type="checkbox"
-                id="allowCopy"
-                checked={allowCopy}
-                onChange={e => setAllowCopy(e.target.checked)}
-              />
-              <label htmlFor="allowCopy" style={{ fontSize: '0.85rem', cursor: 'pointer' }}>
-                Allow Copy for Subscribers
-              </label>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <input
-                type="checkbox"
-                id="watermarkEnabled"
-                checked={watermarkEnabled}
-                onChange={e => setWatermarkEnabled(e.target.checked)}
-              />
-              <label htmlFor="watermarkEnabled" style={{ fontSize: '0.85rem', cursor: 'pointer' }}>
-                Enable Watermark
-              </label>
-            </div>
-          </div>
-        </section>
-
-        <div>
-          <label style={labelStyle}>Sub-images (Comma separated URLs)</label>
-          <input type="text" value={imagesText} onChange={e => setImagesText(e.target.value)} style={inputStyle} placeholder="e.g. case139_full.jpg (or upload via /api/upload first)" />
-          {imagesText && (
-            <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}>
-              {imagesText.split(',').map((url, i) => url.trim() && (
-                <img
-                  key={i}
-                  src={url.trim()}
-                  alt=""
-                  style={{ width: 60, height: 40, objectFit: 'cover', borderRadius: 4, border: '1px solid var(--feishu-border)' }}
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
+              {[
+                { value: 'free', emoji: '🆓', label: 'Free', desc: 'Visible to all visitors.' },
+                { value: 'prompt_only', emoji: '👁️', label: 'Prompt Only', desc: 'Hide prompt template text.' },
+                { value: 'full_lock', emoji: '🔒', label: 'Full Lock', desc: 'Subscribers only.' },
+              ].map(opt => (
+                <label
+                  key={opt.value}
+                  className={`${styles.radioCard} ${paywallMode === opt.value ? styles.radioCardActive : ''}`}
+                >
+                  <input
+                    type="radio"
+                    name="access"
+                    value={opt.value}
+                    checked={paywallMode === opt.value}
+                    onChange={() => setPaywallMode(opt.value)}
+                    style={{ marginTop: '4px', color: 'var(--saas-accent)' }}
+                  />
+                  <div>
+                    <span style={{ fontWeight: 'bold', display: 'block', marginBottom: '2px', fontSize: '0.9rem' }}>{opt.emoji} {opt.label}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--saas-text-secondary)', lineHeight: '1.4' }}>{opt.desc}</span>
+                  </div>
+                </label>
               ))}
             </div>
-          )}
-        </div>
 
-        <div>
-          <label style={labelStyle}>Tags (Comma separated)</label>
-          <input type="text" value={tagsText} onChange={e => setTagsText(e.target.value)} style={inputStyle} placeholder="e.g. 赛博朋克, 霓虹" />
-        </div>
+            <div style={{ display: 'flex', flexDirection: 'column', borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: '16px' }}>
+              <div className={styles.toggleWrapper}>
+                <div>
+                  <span style={{ fontWeight: 'bold', display: 'block', fontSize: '0.9rem' }}>Allow Copy</span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={allowCopy}
+                  onChange={e => setAllowCopy(e.target.checked)}
+                  style={{ width: '18px', height: '18px', accentColor: 'var(--saas-accent)' }}
+                />
+              </div>
+              <div className={styles.toggleWrapper}>
+                <div>
+                  <span style={{ fontWeight: 'bold', display: 'block', fontSize: '0.9rem' }}>Watermark</span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={watermarkEnabled}
+                  onChange={e => setWatermarkEnabled(e.target.checked)}
+                  style={{ width: '18px', height: '18px', accentColor: 'var(--saas-accent)' }}
+                />
+              </div>
+            </div>
+          </section>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div>
-            <label style={labelStyle}>Source Platform</label>
-            <input type="text" value={sourcePlatform} onChange={e => setSourcePlatform(e.target.value)} style={inputStyle} placeholder="e.g. Midjourney" />
+          {/* Section 5: Status & Metadata */}
+          <section className={styles.formSection}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h2 className={styles.formSectionTitle} style={{ margin: 0, fontSize: '1.15rem' }}>
+                <span style={{ fontSize: '1.15rem' }}>🏷️</span>
+                Status
+              </h2>
+            </div>
+
+            <div className="space-y-6">
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Tags</label>
+                <input
+                  type="text"
+                  value={tagsText}
+                  onChange={e => setTagsText(e.target.value)}
+                  className={styles.input}
+                  placeholder="e.g. cyber, portrait"
+                />
+                {tagsText && (
+                  <div className={styles.tagContainer}>
+                    {tagsText.split(',').map((tag, i) => {
+                      const trimmed = tag.trim()
+                      if (!trimmed) return null
+                      return (
+                        <span key={i} className={styles.tagPill}>
+                          {trimmed}
+                        </span>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Source Engine</label>
+                <input
+                  type="text"
+                  value={sourcePlatform}
+                  onChange={e => setSourcePlatform(e.target.value)}
+                  className={styles.input}
+                  placeholder="e.g. Midjourney"
+                />
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Author Alias</label>
+                <input
+                  type="text"
+                  value={sourceAuthor}
+                  onChange={e => setSourceAuthor(e.target.value)}
+                  className={styles.input}
+                  placeholder="e.g. @ nakazakifam"
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Side Footer Actions */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
+            <button
+              type="submit"
+              disabled={loading}
+              className={styles.createBtn}
+              style={{ width: '100%', padding: '16px 0', fontSize: '1.05rem', justifyContent: 'center' }}
+            >
+              {loading ? 'Creating...' : 'Create Case'}
+            </button>
+            <Link
+              href={`/dashboard/cases?tenant=${tenantId}`}
+              className={styles.cancelBtn}
+              style={{ width: '100%', padding: '16px 0', fontSize: '1.05rem', justifyContent: 'center' }}
+            >
+              Cancel & Discard
+            </Link>
           </div>
-          <div>
-            <label style={labelStyle}>Source Author</label>
-            <input type="text" value={sourceAuthor} onChange={e => setSourceAuthor(e.target.value)} style={inputStyle} placeholder="e.g. @nakazakifam" />
-          </div>
         </div>
-
-        <button type="submit" disabled={loading} style={btnStyle}>
-          {loading ? 'Creating...' : 'Create Case'}
-        </button>
       </form>
     </div>
   )
-}
-
-const labelStyle: React.CSSProperties = {
-  fontSize: '0.85rem',
-  fontWeight: 600,
-  color: 'var(--feishu-text-primary)',
-  marginBottom: '0.25rem',
-  display: 'block',
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '0.6rem',
-  border: '1px solid var(--feishu-border)',
-  borderRadius: '6px',
-  fontSize: '0.9rem',
-  boxSizing: 'border-box' as const,
-  background: 'var(--feishu-bg)',
-  color: 'var(--feishu-text-primary)',
-}
-
-const btnStyle: React.CSSProperties = {
-  marginTop: '1rem',
-  padding: '0.75rem',
-  background: 'var(--feishu-accent)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: '8px',
-  fontWeight: 600,
-  fontSize: '0.95rem',
-  cursor: 'pointer',
 }

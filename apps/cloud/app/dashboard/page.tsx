@@ -2,7 +2,6 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import Link from 'next/link'
 import { headers } from 'next/headers'
-import { EarningsCard } from './earnings-card'
 import styles from './dashboard.module.css'
 
 export default async function DashboardPage() {
@@ -13,27 +12,37 @@ export default async function DashboardPage() {
     include: { _count: { select: { cases: true, subscriptions: true } } },
   })
 
-  // Pastel theme classes to cycle through (matching Notion spec in docs)
+  // Pastel theme classes matching Stitch's macaron tokens
   const themeClasses = [
-    styles.roseCard,
-    styles.orangeCard,
-    styles.lavenderCard,
-    styles.mintCard
+    styles.lavenderCard, // Soft Sky
+    styles.roseCard,     // Soft Rose
+    styles.mintCard,     // Soft Mint
+    styles.orangeCard    // Soft Apricot
   ]
 
-  // Category labels based on index (Mastercard Orbit/Service style)
   const storeCategories = [
-    '写实摄影 Store',
-    '产品渲染 Store',
-    '人物角色 Store',
-    '网页组件 Store'
+    { id: 'photography', emoji: '📷', label: 'Photography' },
+    { id: 'product', emoji: '🛍️', label: 'Product' },
+    { id: 'people', emoji: '🧍', label: 'Character' }
   ]
 
   return (
     <div>
-      <h1 className={styles.pageTitle}>我的提示词店铺 (Stores)</h1>
-
-      <EarningsCard />
+      {/* Dashboard Top Header Section */}
+      <div className={styles.pageHeader}>
+        <div>
+          <p className={styles.pageEyebrow}>Console Overview</p>
+          <h1 className={styles.pageTitle}>Dashboard</h1>
+        </div>
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <Link href="/dashboard/settings" className={styles.createBtn}>
+            <svg style={{ width: '18px', height: '18px' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            新建店铺 (New Store)
+          </Link>
+        </div>
+      </div>
 
       {tenants.length === 0 ? (
         <div className={styles.emptyState}>
@@ -50,7 +59,7 @@ export default async function DashboardPage() {
         <div className={styles.grid}>
           {tenants.map((t, index) => {
             const themeClass = themeClasses[index % themeClasses.length]
-            const categoryText = storeCategories[index % storeCategories.length]
+            const category = storeCategories[index % storeCategories.length]
             
             return (
               <Link
@@ -58,25 +67,38 @@ export default async function DashboardPage() {
                 href={`/dashboard/cases?tenant=${t.id}`}
                 className={`${styles.card} ${themeClass}`}
               >
-                {/* Card Header with Mastercard category label & Satellite micro-CTA */}
-                <div className={styles.cardHeader}>
-                  <span className={styles.badge}>{categoryText}</span>
+                {/* Top Section */}
+                <div>
+                  <div className={styles.cardHeader}>
+                    <div className={styles.iconWrapper}>
+                      <span style={{ fontSize: '1.75rem' }}>{category.emoji}</span>
+                    </div>
+                    <span className={styles.badge}>{category.label}</span>
+                  </div>
+                  <h3 className={styles.storeSlug}>@{t.slug}</h3>
+                  <p className={styles.storeDesc}>
+                    {t.bio || '探索高品质的 AI 图像生成提示词，包括多模态预览与一键复制功能。'}
+                  </p>
+                </div>
+
+                {/* Bottom Section */}
+                <div className={styles.cardFooter}>
+                  <div className={styles.cardStats}>
+                    <div className={styles.statItem}>
+                      <span className={styles.statLabel}>Cases</span>
+                      <span className={`${styles.statValue} tnum`}>{t._count.cases}</span>
+                    </div>
+                    <div className={styles.statItem}>
+                      <span className={styles.statLabel}>Subscribers</span>
+                      <span className={`${styles.statValue} tnum`}>{t._count.subscriptions}</span>
+                    </div>
+                  </div>
                   <div className={styles.cardArrow}>
-                    <svg style={{ width: '18px', height: '18px' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    <svg style={{ width: '20px', height: '20px' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                     </svg>
                   </div>
                 </div>
-
-                {/* Card Body */}
-                <h3 className={styles.storeSlug}>@{t.slug}</h3>
-                <p className={styles.storeMeta}>
-                  <span className="tnum" style={{ fontWeight: 700 }}>{t._count.cases}</span>
-                  <span>个案例 (Cases)</span>
-                  <span className={styles.metaDot} />
-                  <span className="tnum" style={{ fontWeight: 700 }}>{t._count.subscriptions}</span>
-                  <span>位订阅者 (Subscribers)</span>
-                </p>
               </Link>
             )
           })}

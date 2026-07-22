@@ -62,12 +62,19 @@ export function TenantSidebar({ rawTenant, cases, dict, currentLocale }: TenantS
           if (categoryCasesFiltered.length === 0) return null
 
           const translatedTitle = dict?.category?.[cat.id] || cat.title
+          const categoryUrl = `/${rawTenant}/${cat.id}`
+          const decodedCategoryUrl = decodeURIComponent(categoryUrl)
+          const isCategoryActive = decodedPathname === decodedCategoryUrl
 
           return (
             <div key={cat.id} className={styles.categoryGroup}>
-              <div className={styles.categoryTitle}>
+              <Link 
+                href={categoryUrl}
+                className={`${styles.categoryTitleLink} ${isCategoryActive ? styles.activeCategoryTitleLink : ''}`}
+              >
                 <span>{translatedTitle}</span>
-              </div>
+                <span className="material-symbols-outlined text-[14px]">arrow_right</span>
+              </Link>
               <div className={styles.caseList}>
                 {categoryCasesFiltered.map(c => {
                   const caseUrl = `/${rawTenant}/${c.slug}`
