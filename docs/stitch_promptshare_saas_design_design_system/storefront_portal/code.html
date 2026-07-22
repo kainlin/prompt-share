@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PromptShare | Library</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#ffb59b",
+                    "on-primary-fixed-variant": "#474745",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed-variant": "#3600e1",
+                    "on-surface-variant": "#464742",
+                    "surface-container-low": "#f6f3f1",
+                    "inverse-surface": "#31302f",
+                    "on-surface": "#1c1c1b",
+                    "on-tertiary-fixed-variant": "#822800",
+                    "secondary-fixed-dim": "#c5c0ff",
+                    "on-tertiary": "#ffffff",
+                    "outline-variant": "#c7c7c0",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed": "#130067",
+                    "on-error": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "inverse-primary": "#c9c6c4",
+                    "primary-fixed-dim": "#c9c6c4",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#000000",
+                    "outline": "#767872",
+                    "surface-container-high": "#eae8e6",
+                    "surface-container-highest": "#e5e2e0",
+                    "primary-fixed": "#e5e2e0",
+                    "tertiary-container": "#380d00",
+                    "on-primary-fixed": "#1c1c1a",
+                    "primary": "#000000",
+                    "on-tertiary-container": "#e45415",
+                    "surface-container": "#f0edeb",
+                    "tertiary-fixed": "#ffdbcf",
+                    "surface-dim": "#dcd9d8",
+                    "on-tertiary-fixed": "#380d00",
+                    "primary-container": "#1c1c1a",
+                    "surface": "#fcf9f7",
+                    "inverse-on-surface": "#f3f0ee",
+                    "on-primary-container": "#858382",
+                    "secondary-fixed": "#e3dfff",
+                    "secondary": "#3b0de9",
+                    "surface-tint": "#5f5e5d",
+                    "surface-bright": "#fcf9f7",
+                    "background": "#fcf9f7",
+                    "secondary-container": "#553dff",
+                    "on-background": "#1c1c1b",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#e1dcff",
+                    "surface-variant": "#e5e2e0"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "docs-sidebar-width": "260px",
+                    "admin-sidebar-width": "96px",
+                    "gutter": "24px",
+                    "margin-desktop": "40px",
+                    "navbar-height": "64px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "display-lg-mobile": ["Plus Jakarta Sans"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "body-sm": ["Plus Jakarta Sans"],
+                    "stats-mono": ["Plus Jakarta Sans"],
+                    "body-main": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "display-lg-mobile": ["32px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "450"}],
+                    "stats-mono": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "body-main": ["16px", {"lineHeight": "24px", "fontWeight": "450"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-nav {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .canvas-bg { background-color: #fcf9f7; }
+        .sidebar-bg { background-color: #EBE6E2; }
+        .hairline { border: 1px solid rgba(0, 0, 0, 0.08); }
+        .toc-marker { position: absolute; left: -1px; height: 20px; width: 2px; transition: top 0.3s ease; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #E5E2E0; border-radius: 10px; }
+    </style>
+</head>
+<body class="canvas-bg text-on-surface antialiased">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full h-navbar-height z-50 glass-nav bg-surface/80 dark:bg-surface-dim/80 flex justify-between items-center px-margin-desktop max-w-full border-b border-outline-variant/30">
+<div class="flex items-center gap-8">
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-on-primary-fixed">✨ Prompt Share</span>
+<div class="hidden md:flex gap-6 items-center">
+<a class="text-primary font-bold border-b-2 border-secondary pb-1 text-body-main font-body-main transition-colors" href="#">Explore</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors text-body-main font-body-main" href="#">Community</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors text-body-main font-body-main" href="#">Resources</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative w-[240px]">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-body-sm focus:ring-4 focus:ring-secondary/10 transition-all outline-none" placeholder="Search prompts..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 hover:bg-surface-container-high transition-colors rounded-full">
+<span class="material-symbols-outlined">dark_mode</span>
+</button>
+<button class="p-2 hover:bg-surface-container-high transition-colors rounded-full">
+<span class="material-symbols-outlined">language</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant ml-2">
+<img class="w-full h-full object-cover" data-alt="Close-up professional headshot of a creative director in a minimalist studio. Soft daylight from a side window highlights sharp facial features and stylish black-framed glasses. The background is a clean, neutral grey concrete wall, embodying a professional and sophisticated tech-industry aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoDMlDCGRxUrcDzTRp_OYMon0MQvNWLuw2WggSZJFEKf-R1L_f3_WwOhbvceCw4vOT-aC3aefvX0dyYpTzjyzM96X0zh5Web2MkFj_iCyQSCTN9Xzj8oZIDsGulr6YSn6rG-9wqlVkK2I1mJC6OFe228qyt4ZD3I05wBSyZpvYc-GvjKp9YfIC-NKaoyPTA3fKoFO4IJCvxEcNf5qhNdF0AcNrXF3pDOfmpz3G_i0RK_vWLTJutuuQgOORPkHz2gl9OODbPd0DOAb7"/>
+</div>
+</div>
+</div>
+</nav>
+<div class="flex pt-navbar-height min-h-screen">
+<!-- SideNavBar (Documentation/Discovery Style) -->
+<aside class="fixed left-0 top-navbar-height h-[calc(100vh-64px)] w-docs-sidebar-width bg-surface-container-low dark:bg-surface-container-lowest flex flex-col gap-2 pt-8 px-4 overflow-y-auto">
+<div class="mb-4 px-4">
+<p class="text-on-surface-variant text-[11px] uppercase tracking-widest font-bold mb-2">Library</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Categories</p>
+</div>
+<nav class="flex flex-col gap-1">
+<!-- Photography (Expanded) -->
+<div>
+<button class="w-full flex items-center justify-between py-2 px-4 hover:bg-surface-container-high/50 rounded-lg transition-all text-primary font-bold">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px]">photo_camera</span>
+<span class="text-body-main font-body-main">Photography</span>
+</div>
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+<div class="mt-1 ml-4 border-l-2 border-outline-variant/30 flex flex-col">
+<a class="text-primary font-bold border-l-2 border-secondary-container pl-4 py-2 text-body-sm transition-all" href="#">Cinematic Portrait</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high/50 pl-4 py-2 text-body-sm transition-all" href="#">Architectural Brutalism</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high/50 pl-4 py-2 text-body-sm transition-all" href="#">Macro Nature</a>
+<a class="text-on-surface-variant hover:bg-surface-container-high/50 pl-4 py-2 text-body-sm transition-all" href="#">Vintage Film Stock</a>
+</div>
+</div>
+<!-- Product -->
+<button class="w-full flex items-center justify-between py-2 px-4 hover:bg-surface-container-high/50 rounded-lg transition-all text-on-surface-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="text-body-main font-body-main">Product</span>
+</div>
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+<!-- Character -->
+<button class="w-full flex items-center justify-between py-2 px-4 hover:bg-surface-container-high/50 rounded-lg transition-all text-on-surface-variant">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px]">person</span>
+<span class="text-body-main font-body-main">Character</span>
+</div>
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</nav>
+<div class="mt-auto pb-8 px-4 flex flex-col gap-4">
+<button class="w-full py-3 bg-primary text-on-primary rounded-full font-bold text-body-sm hover:opacity-90 transition-all">
+                    Submit Prompt
+                </button>
+<div class="flex items-center justify-between pt-4 border-t border-outline-variant/30">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">translate</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">settings</span>
+</div>
+</div>
+</aside>
+<!-- Main Workspace -->
+<main class="ml-docs-sidebar-width mr-[220px] flex-1 px-12 py-12">
+<div class="max-w-4xl mx-auto">
+<!-- Breadcrumbs -->
+<div class="flex items-center gap-2 text-body-sm text-on-surface-variant mb-6">
+<span>Library</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span>Photography</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-primary font-bold">Cinematic Portrait</span>
+</div>
+<!-- Hero Section -->
+<section class="mb-12" id="overview">
+<h1 class="text-display-lg font-display-lg text-primary mb-4">Hyper-Realistic Noir Cinematic Portrait</h1>
+<p class="text-body-main text-on-surface-variant mb-8 max-w-2xl">A high-precision prompt designed to replicate the atmospheric lighting and sharp textures of 1950s cinematic photography with modern digital clarity.</p>
+<div class="relative w-full aspect-[16/9] rounded-xl overflow-hidden hairline group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A masterful cinematic portrait of an elderly man with deep, expressive wrinkles, captured in a moody noir style. High-contrast lighting creates dramatic shadows across half his face, while sharp rim light defines his silver hair and the texture of his heavy wool coat. The setting is a dim, fog-filled alleyway at night, lit by a single flickering street lamp. The overall mood is mysterious, gritty, and incredibly detailed, reflecting high-end photography standards." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdvLPvREoVciu_OPHiN-Af_XF928108cLL_Cm-k5Htgy0fLbUIig0e6tyBCtiLV_CLZIs8LC-9k5a_sSQdtv9Yt4T-0kH9JSiESi_9IY_71CJE5qMryeVDb8wAGjE9fHiDf1Vqc-blvqzONg28WIpeVBWCEPedVsfLPD39XVndcRnbM7Eue6sUSr9sgaKn2ix6G11VWtlt1rp705GS7lfWvGYUObo1VreC_kzxYfAI8VHKVgfbSpDYwax90UN8Rp7EQf19UvxHQ_Sc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+<div class="absolute bottom-6 left-6 flex gap-3">
+<span class="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 text-white text-[12px] font-bold rounded-full">Midjourney v6</span>
+<span class="px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 text-white text-[12px] font-bold rounded-full">RAW Style</span>
+</div>
+</div>
+</section>
+<!-- The Prompt Section -->
+<section class="mb-12" id="prompt-details">
+<div class="bg-surface-container-lowest rounded-xl p-8 hairline shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<h3 class="text-headline-md font-headline-md text-primary">The Prompt</h3>
+</div>
+<button class="flex items-center gap-2 px-4 py-2 hover:bg-surface-container-low rounded-lg transition-all text-on-surface-variant text-body-sm font-bold">
+<span class="material-symbols-outlined text-[18px]">content_copy</span>
+                                Copy Prompt
+                            </button>
+</div>
+<div class="p-6 bg-surface-container-low rounded-xl border border-outline-variant/30 relative">
+<p class="text-body-main font-stats-mono leading-relaxed text-on-surface selection:bg-secondary-container/30">
+                                Extreme close-up portrait of [Subject], intense gaze, chiaroscuro lighting, deep shadows, 35mm film grain, Hasselblad H6D, 80mm lens, f/2.8, cinematic noir atmosphere, smoke swirls in background, highly detailed skin texture, silver-tone monochrome palette --ar 16:9 --v 6.0 --style raw
+                            </p>
+</div>
+</div>
+</section>
+<!-- Parameters Grid -->
+<section class="mb-12" id="generations">
+<h3 class="text-headline-md font-headline-md text-primary mb-6">Parameters</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-white p-6 rounded-xl hairline flex flex-col gap-2">
+<span class="text-on-surface-variant text-body-sm font-bold uppercase tracking-wide">Aspect Ratio</span>
+<p class="text-headline-md font-stats-mono">16:9</p>
+<div class="w-full bg-surface-container-low h-1 rounded-full mt-2">
+<div class="w-2/3 h-full bg-secondary rounded-full"></div>
+</div>
+</div>
+<div class="bg-white p-6 rounded-xl hairline flex flex-col gap-2">
+<span class="text-on-surface-variant text-body-sm font-bold uppercase tracking-wide">Stylize</span>
+<p class="text-headline-md font-stats-mono">750</p>
+<div class="w-full bg-surface-container-low h-1 rounded-full mt-2">
+<div class="w-3/4 h-full bg-secondary rounded-full"></div>
+</div>
+</div>
+<div class="bg-white p-6 rounded-xl hairline flex flex-col gap-2">
+<span class="text-on-surface-variant text-body-sm font-bold uppercase tracking-wide">Chaos</span>
+<p class="text-headline-md font-stats-mono">15</p>
+<div class="w-full bg-surface-container-low h-1 rounded-full mt-2">
+<div class="w-1/4 h-full bg-secondary rounded-full"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="w-full py-8 border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center mt-auto">
+<p class="text-body-sm font-body-sm text-on-surface-variant">© 2024 PromptShare SaaS. Built for precision.</p>
+<div class="flex gap-6 mt-4 md:mt-0">
+<a class="text-on-surface-variant hover:text-secondary text-body-sm transition-colors" href="#">Privacy</a>
+<a class="text-on-surface-variant hover:text-secondary text-body-sm transition-colors" href="#">Terms</a>
+<a class="text-on-surface-variant hover:text-secondary text-body-sm transition-colors" href="#">API Status</a>
+</div>
+</footer>
+</div>
+</main>
+<!-- Right TOC -->
+<aside class="fixed right-0 top-navbar-height h-[calc(100vh-64px)] w-[220px] border-l border-outline-variant/20 py-12 px-6">
+<p class="text-on-surface-variant text-[11px] uppercase tracking-widest font-bold mb-6">On this page</p>
+<div class="flex flex-col gap-4 relative">
+<div class="toc-marker bg-secondary" id="toc-marker"></div>
+<a class="text-body-sm text-primary font-bold hover:text-secondary transition-colors" href="#overview" onclick="updateMarker(0)">Overview</a>
+<a class="text-body-sm text-on-surface-variant hover:text-secondary transition-colors" href="#prompt-details" onclick="updateMarker(1)">Prompt Details</a>
+<a class="text-body-sm text-on-surface-variant hover:text-secondary transition-colors" href="#generations" onclick="updateMarker(2)">Generations</a>
+</div>
+<div class="mt-12 p-4 bg-secondary-fixed/10 rounded-xl border border-secondary/10">
+<p class="text-body-sm font-bold text-secondary mb-2">Need help?</p>
+<p class="text-[12px] text-on-surface-variant leading-tight">Our engineers are available 24/7 for prompt tuning consultations.</p>
+<button class="mt-4 text-[12px] font-bold text-secondary hover:underline underline-offset-4 flex items-center gap-1">
+                    Contact Support
+                    <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</aside>
+</div>
+<script>
+        function updateMarker(index) {
+            const marker = document.getElementById('toc-marker');
+            const links = document.querySelectorAll('aside:last-child nav a, aside:last-child .flex-col a');
+            
+            links.forEach((link, i) => {
+                if(i === index) {
+                    link.classList.add('text-primary', 'font-bold');
+                    link.classList.remove('text-on-surface-variant');
+                } else {
+                    link.classList.remove('text-primary', 'font-bold');
+                    link.classList.add('text-on-surface-variant');
+                }
+            });
+            
+            // Adjust marker position based on index (rough estimation for static UI)
+            marker.style.top = (index * 36) + 'px';
+        }
+
+        // Simple scroll spy behavior
+        window.addEventListener('scroll', () => {
+            const sections = ['overview', 'prompt-details', 'generations'];
+            sections.forEach((id, index) => {
+                const rect = document.getElementById(id).getBoundingClientRect();
+                if (rect.top >= 0 && rect.top <= 300) {
+                    updateMarker(index);
+                }
+            });
+        });
+
+        // Micro-interaction for parameter cards
+        document.querySelectorAll('.bg-white.p-6').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px)';
+                card.classList.add('shadow-md');
+                card.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+                card.classList.remove('shadow-md');
+            });
+        });
+    </script>
+</body></html>

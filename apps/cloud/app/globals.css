@@ -1,36 +1,52 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;450;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --saas-bg: #FAF8F5; /* Oatmeal Cream */
-  --saas-panel: #FFFFFF;
-  --saas-sidebar: #F4EFEB; /* Soft Warm Gray */
-  --saas-text-primary: #12131A; /* Deep Indigo Black */
-  --saas-text-secondary: #7D7D8A; /* Muted Warm Gray */
-  --saas-border: #EFEAE4; /* Warm Border */
-  --saas-accent: #12131A; /* Brand color */
-  --saas-coral: #F43F5E; /* Red notice */
+  /* Stitch Editorial Precision Colors */
+  --saas-bg: #F3F0EE; /* Canvas Cream background base */
+  --saas-panel: #FFFFFF; /* Pure Panel container surface */
+  --saas-sidebar: #F6F3F1; /* clay / container-low surface */
+  --saas-text-primary: #1C1C1B; /* Ink Black primary text */
+  --saas-text-secondary: #464742; /* Warm Slate / variant text */
   
-  /* Pastels */
-  --saas-rose: #FCE7E6;
-  --saas-orange: #FDF0D5;
-  --saas-lavender: #E8E5F7;
-  --saas-mint: #E1F4EC;
+  /* Outline & Accents */
+  --saas-border: rgba(0, 0, 0, 0.08); /* Precise hairline outline-variant border */
+  --saas-accent: #3B0DE9; /* Stitch primary digital accent (Electric Indigo) */
+  --saas-accent-hover: #553DFF; /* Secondary container accent hover */
+  --saas-error: #BA1A1A;
   
-  --saas-radius-card: 24px;
-  --saas-radius-btn: 9999px;
-  --saas-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-  --saas-shadow-hover: 0 12px 30px rgba(18, 19, 26, 0.05);
+  /* Notion Macaron Category Tints */
+  --saas-sky: #E1F5FE;
+  --saas-rose: #FCE4EC;
+  --saas-mint: #E8F5E9;
+  --saas-apricot: #FFF3E0;
+  
+  /* Stitch Rounded Corner Shapes */
+  --saas-radius-card: 2rem; /* 32px cards */
+  --saas-radius-btn: 9999px; /* Stadium pills */
+  --saas-radius-nested: 1rem; /* 16px nested containers */
+  
+  /* Focus Glow Shadow */
+  --saas-shadow-focus: 0 0 0 4px rgba(83, 58, 253, 0.08);
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   color: var(--saas-text-primary);
-  background: var(--saas-bg);
+  background-color: var(--saas-bg);
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+}
+
+/* Tabular Lining settings for precise numbers column alignment */
+.tnum {
+  font-variant-numeric: tabular-nums;
 }
 
 a {
-  color: var(--saas-text-primary);
-  transition: color 0.2s ease;
+  color: inherit;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 a:hover {

@@ -8,6 +8,7 @@ interface PromptBlockProps {
   children: string
   label?: string
   emoji?: string
+  copyDisabled?: boolean
 }
 
 interface ParsedArgument {
@@ -22,7 +23,8 @@ const ARG_REGEX = /\{argument\s+name=\\?"((?:[^"\\]|\\.)*)\\?"\s+default=\\?"((?
 export function PromptBlock({
   children,
   label = 'Prompt',
-  emoji = '✍️'
+  emoji = '✍️',
+  copyDisabled = false,
 }: PromptBlockProps) {
   const showToast = useToast()
 
@@ -157,7 +159,14 @@ export function PromptBlock({
             <span className={styles.emoji}>{emoji}</span>
             {label}
           </span>
-          <button type="button" className={styles.copyBtn} onClick={handleCopyRaw}>
+          <button
+            type="button"
+            className={styles.copyBtn}
+            onClick={copyDisabled ? undefined : handleCopyRaw}
+            disabled={copyDisabled}
+            title={copyDisabled ? '订阅后可复制' : undefined}
+            style={copyDisabled ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+          >
             📋 Copy
           </button>
         </div>
@@ -222,10 +231,24 @@ export function PromptBlock({
               🔄 重置
             </button>
           )}
-          <button type="button" className={styles.rawBtn} onClick={handleCopyRaw}>
+          <button
+            type="button"
+            className={styles.rawBtn}
+            onClick={copyDisabled ? undefined : handleCopyRaw}
+            disabled={copyDisabled}
+            title={copyDisabled ? '订阅后可复制' : undefined}
+            style={copyDisabled ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+          >
             📄 复制模板
           </button>
-          <button type="button" className={styles.primaryBtn} onClick={handleCopyCompiled}>
+          <button
+            type="button"
+            className={styles.primaryBtn}
+            onClick={copyDisabled ? undefined : handleCopyCompiled}
+            disabled={copyDisabled}
+            title={copyDisabled ? '订阅后可复制' : undefined}
+            style={copyDisabled ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+          >
             📋 复制生成词
           </button>
         </div>

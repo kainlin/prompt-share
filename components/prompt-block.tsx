@@ -8,41 +8,67 @@ interface PromptBlockProps {
   children: string
   label?: string
   emoji?: string
+  copyDisabled?: boolean
 }
 
 interface ParsedArgument {
   raw: string
   name: string
   defaultValue: string
+  index: number
 }
 
-// Regex to find {argument name="..." default="..."} supporting optional backslashes before quotes
-const ARG_REGEX = /\{argument\s+name=\\?"((?:[^"\\]|\\.)*)\\?"\s+default=\\?"((?:[^"\\]|\\.)*)\\?"\}/g
+// 1. Old syntax: {argument name="..." default="..."}
+const ARG_REGEX_OLD = /\{argument\s+name=\\?"((?:[^"\\]|\\.)*)\\?"\s+default=\\?"((?:[^"\\]|\\.)*)\\?"\}/g
+// 2. New syntax: {variable_name:default_value} or {variable_name}
+const ARG_REGEX_NEW = /\{([a-zA-Z0-9_-]+)(?::([^}]+))?\}/g
+
+function parseArguments(text: string): ParsedArgument[] {
+  const found: ParsedArgument[] = []
+
+  // 1. Match old syntax first
+  let match
+  ARG_REGEX_OLD.lastIndex = 0
+  while ((match = ARG_REGEX_OLD.exec(text)) !== null) {
+    found.push({
+      raw: match[0],
+      name: match[1],
+      defaultValue: match[2],
+      index: match.index
+    })
+  }
+
+  // 2. Match new syntax
+  ARG_REGEX_NEW.lastIndex = 0
+  while ((match = ARG_REGEX_NEW.exec(text)) !== null) {
+    const raw = match[0]
+    if (raw.startsWith('{argument')) continue
+
+    found.push({
+      raw,
+      name: match[1],
+      defaultValue: match[2] || '',
+      index: match.index
+    })
+  }
+
+  // Sort by index to maintain appearance order
+  found.sort((a, b) => a.index - b.index)
+  return found
+}
 
 export function PromptBlock({
   children,
   label = 'Prompt',
-  emoji = '✍️'
+  emoji = '✍️',
+  copyDisabled = false
 }: PromptBlockProps) {
   const showToast = useToast()
 
-  // 1. Parse arguments from template
-  const args = useMemo(() => {
-    const found: ParsedArgument[] = []
-    let match
-    // Reset regex index
-    ARG_REGEX.lastIndex = 0
-    while ((match = ARG_REGEX.exec(children)) !== null) {
-      found.push({
-        raw: match[0],
-        name: match[1],
-        defaultValue: match[2]
-      })
-    }
-    return found
-  }, [children])
+  // Parse arguments from template
+  const args = useMemo(() => parseArguments(children), [children])
 
-  // 2. Initialize input state
+  // Initialize input state
   const initialValues = useMemo(() => {
     const vals: Record<string, string> = {}
     args.forEach(arg => {
@@ -69,11 +95,11 @@ export function PromptBlock({
     return Object.keys(values).some(key => values[key] !== initialValues[key])
   }, [values, initialValues])
 
-  // 3. Compile prompt (substitute user values)
+  // Compile prompt (substitute user values or default fallbacks)
   const compiledPrompt = useMemo(() => {
     let result = children
     args.forEach(arg => {
-      const val = values[arg.name] !== undefined ? values[arg.name] : arg.defaultValue
+      const val = values[arg.name] !== undefined && values[arg.name] !== '' ? values[arg.name] : arg.defaultValue
       result = result.replaceAll(arg.raw, val)
     })
     return result
@@ -81,19 +107,27 @@ export function PromptBlock({
 
   // Copy compiled
   const handleCopyCompiled = useCallback(() => {
+    if (copyDisabled) {
+      showToast('已为你锁定关键参数，订阅后即可免去手抄、一键复制运行。')
+      return
+    }
     navigator.clipboard.writeText(compiledPrompt).then(
       () => showToast('已复制定制提示词！'),
       () => showToast('复制失败，请重试')
     )
-  }, [compiledPrompt, showToast])
+  }, [compiledPrompt, copyDisabled, showToast])
 
   // Copy raw template
   const handleCopyRaw = useCallback(() => {
+    if (copyDisabled) {
+      showToast('已为你锁定关键参数，订阅后即可免去手抄、一键复制运行。')
+      return
+    }
     navigator.clipboard.writeText(children).then(
       () => showToast('已复制原始模板！'),
       () => showToast('复制失败，请重试')
     )
-  }, [children, showToast])
+  }, [children, copyDisabled, showToast])
 
   // Input change handler
   const handleInputChange = (name: string, val: string) => {
@@ -114,24 +148,24 @@ export function PromptBlock({
   const renderFormattedPrompt = (text: string) => {
     const trimmed = text.trim()
     const isJson = trimmed.startsWith('{') && trimmed.endsWith('}')
-    
+
     if (isJson) {
       return <span>{text}</span>
     }
-    
+
     const parts = text.split(',')
     if (parts.length <= 2) {
       return <span>{text}</span>
     }
-    
+
     return parts.map((part, index) => {
       const isLast = index === parts.length - 1
       const trimmedPart = part.trim()
       if (!trimmedPart) return null
-      
+
       const leadingSpace = part.startsWith(' ') || part.startsWith('\n') ? ' ' : ''
       const trailingSpace = part.endsWith(' ') ? ' ' : ''
-      
+
       return (
         <span key={index}>
           {leadingSpace}
@@ -166,18 +200,16 @@ export function PromptBlock({
     )
   }
 
-  // 4. Render Preview with clickable highlights
+  // Render Preview with clickable highlights
   const renderPreview = () => {
     const elements: React.ReactNode[] = []
     let lastIndex = 0
-    ARG_REGEX.lastIndex = 0
-    let match
     let keyIdx = 0
 
-    while ((match = ARG_REGEX.exec(children)) !== null) {
-      const matchIndex = match.index
-      const name = match[1]
-      const rawText = match[0]
+    args.forEach(arg => {
+      const matchIndex = arg.index
+      const name = arg.name
+      const rawText = arg.raw
 
       // Add text before match
       if (matchIndex > lastIndex) {
@@ -185,7 +217,7 @@ export function PromptBlock({
       }
 
       // Add pill
-      const currentValue = values[name] !== undefined ? values[name] : match[2]
+      const currentValue = values[name] !== undefined && values[name] !== '' ? values[name] : arg.defaultValue
       elements.push(
         <span
           key={`pill-${keyIdx++}`}
@@ -198,7 +230,7 @@ export function PromptBlock({
       )
 
       lastIndex = matchIndex + rawText.length
-    }
+    })
 
     // Add trailing text
     if (lastIndex < children.length) {

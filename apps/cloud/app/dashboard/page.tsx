@@ -12,29 +12,41 @@ export default async function DashboardPage() {
     include: { _count: { select: { cases: true, subscriptions: true } } },
   })
 
-  // Pastel theme classes to cycle through (matching Image 1 styles)
+  // Pastel theme classes matching Stitch's macaron tokens
   const themeClasses = [
-    styles.roseCard,
-    styles.orangeCard,
-    styles.lavenderCard,
-    styles.mintCard
+    styles.lavenderCard, // Soft Sky
+    styles.roseCard,     // Soft Rose
+    styles.mintCard,     // Soft Mint
+    styles.orangeCard    // Soft Apricot
   ]
 
-  // Category labels based on index or fallback
   const storeCategories = [
-    '写实摄影 Store',
-    '产品渲染 Store',
-    '人物角色 Store',
-    '网页组件 Store'
+    { id: 'photography', emoji: '📷', label: 'Photography' },
+    { id: 'product', emoji: '🛍️', label: 'Product' },
+    { id: 'people', emoji: '🧍', label: 'Character' }
   ]
 
   return (
     <div>
-      <h1 className={styles.pageTitle}>我的提示词店铺 (Stores)</h1>
+      {/* Dashboard Top Header Section */}
+      <div className={styles.pageHeader}>
+        <div>
+          <p className={styles.pageEyebrow}>Console Overview</p>
+          <h1 className={styles.pageTitle}>Dashboard</h1>
+        </div>
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <Link href="/dashboard/settings" className={styles.createBtn}>
+            <svg style={{ width: '18px', height: '18px' }} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            新建店铺 (New Store)
+          </Link>
+        </div>
+      </div>
 
       {tenants.length === 0 ? (
         <div className={styles.emptyState}>
-          <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🏬</div>
+          <div style={{ fontSize: '3.5rem', marginBottom: '20px' }}>🏬</div>
           <h3 className={styles.emptyTitle}>你还没有创建提示词店铺</h3>
           <p className={styles.emptyText}>
             创建一个专属店铺，上传你的 AI 图像生成提示词，开启你的订阅变现之旅吧。
@@ -47,7 +59,7 @@ export default async function DashboardPage() {
         <div className={styles.grid}>
           {tenants.map((t, index) => {
             const themeClass = themeClasses[index % themeClasses.length]
-            const categoryText = storeCategories[index % storeCategories.length]
+            const category = storeCategories[index % storeCategories.length]
             
             return (
               <Link
@@ -55,23 +67,38 @@ export default async function DashboardPage() {
                 href={`/dashboard/cases?tenant=${t.id}`}
                 className={`${styles.card} ${themeClass}`}
               >
-                {/* Card Header */}
-                <div className={styles.cardHeader}>
-                  <span className={styles.badge}>{categoryText}</span>
+                {/* Top Section */}
+                <div>
+                  <div className={styles.cardHeader}>
+                    <div className={styles.iconWrapper}>
+                      <span style={{ fontSize: '1.75rem' }}>{category.emoji}</span>
+                    </div>
+                    <span className={styles.badge}>{category.label}</span>
+                  </div>
+                  <h3 className={styles.storeSlug}>@{t.slug}</h3>
+                  <p className={styles.storeDesc}>
+                    {t.bio || '探索高品质的 AI 图像生成提示词，包括多模态预览与一键复制功能。'}
+                  </p>
+                </div>
+
+                {/* Bottom Section */}
+                <div className={styles.cardFooter}>
+                  <div className={styles.cardStats}>
+                    <div className={styles.statItem}>
+                      <span className={styles.statLabel}>Cases</span>
+                      <span className={`${styles.statValue} tnum`}>{t._count.cases}</span>
+                    </div>
+                    <div className={styles.statItem}>
+                      <span className={styles.statLabel}>Subscribers</span>
+                      <span className={`${styles.statValue} tnum`}>{t._count.subscriptions}</span>
+                    </div>
+                  </div>
                   <div className={styles.cardArrow}>
-                    <svg style={{ width: '16px', height: '16px' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    <svg style={{ width: '20px', height: '20px' }} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                     </svg>
                   </div>
                 </div>
-
-                {/* Card Body */}
-                <h3 className={styles.storeSlug}>@{t.slug}</h3>
-                <p className={styles.storeMeta}>
-                  <span>{t._count.cases} 个案例 (Cases)</span>
-                  <span className={styles.metaDot} />
-                  <span>{t._count.subscriptions} 位订阅者 (Subscribers)</span>
-                </p>
               </Link>
             )
           })}

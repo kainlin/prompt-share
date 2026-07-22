@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Edit Prompt Case | PromptShare Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#c5c0ff",
+                    "primary-container": "#1c1c1a",
+                    "on-primary-fixed": "#1c1c1a",
+                    "on-surface-variant": "#464742",
+                    "on-primary-fixed-variant": "#474745",
+                    "on-primary": "#ffffff",
+                    "inverse-surface": "#31302f",
+                    "tertiary-fixed": "#ffdbcf",
+                    "secondary": "#3b0de9",
+                    "inverse-on-surface": "#f3f0ee",
+                    "on-error": "#ffffff",
+                    "on-secondary-container": "#e1dcff",
+                    "surface-container-high": "#eae8e6",
+                    "on-tertiary-fixed": "#380d00",
+                    "on-secondary-fixed-variant": "#3600e1",
+                    "on-primary-container": "#858382",
+                    "on-tertiary-fixed-variant": "#822800",
+                    "on-tertiary-container": "#e45415",
+                    "surface-container-lowest": "#ffffff",
+                    "on-background": "#1c1c1b",
+                    "surface-tint": "#5f5e5d",
+                    "surface": "#fcf9f7",
+                    "background": "#fcf9f7",
+                    "surface-container-low": "#f6f3f1",
+                    "tertiary": "#000000",
+                    "tertiary-fixed-dim": "#ffb59b",
+                    "surface-bright": "#fcf9f7",
+                    "on-tertiary": "#ffffff",
+                    "on-surface": "#1c1c1b",
+                    "outline": "#767872",
+                    "secondary-container": "#553dff",
+                    "inverse-primary": "#c9c6c4",
+                    "surface-container": "#f0edeb",
+                    "primary-fixed": "#e5e2e0",
+                    "tertiary-container": "#380d00",
+                    "surface-container-highest": "#e5e2e0",
+                    "error": "#ba1a1a",
+                    "surface-dim": "#dcd9d8",
+                    "on-secondary-fixed": "#130067",
+                    "on-secondary": "#ffffff",
+                    "secondary-fixed": "#e3dfff",
+                    "surface-variant": "#e5e2e0",
+                    "primary-fixed-dim": "#c9c6c4",
+                    "on-error-container": "#93000a",
+                    "primary": "#000000",
+                    "outline-variant": "#c7c7c0",
+                    "error-container": "#ffdad6",
+                    "canvas-cream": "#F3F0EE",
+                    "clay-sidebar": "#EBE6E2"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-desktop": "40px",
+                    "gutter": "24px",
+                    "margin-mobile": "16px",
+                    "admin-sidebar-width": "96px",
+                    "navbar-height": "64px",
+                    "docs-sidebar-width": "260px"
+            },
+            "fontFamily": {
+                    "body-main": ["Plus Jakarta Sans", "sans-serif"],
+                    "headline-md": ["Plus Jakarta Sans", "sans-serif"],
+                    "body-sm": ["Plus Jakarta Sans", "sans-serif"],
+                    "mono": ["JetBrains Mono", "monospace"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F3F0EE; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .focus-indigo:focus-within { box-shadow: 0 0 0 4px rgba(83, 58, 253, 0.08); border-color: #533AFD; }
+        .hairline { border: 1px solid #E3E8EE; }
+        input:focus, textarea:focus { outline: none; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e2e0; border-radius: 10px; }
+        
+        /* Segment Control Logic */
+        .segment-active { background: #FFFFFF; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- Fixed Side Navigation -->
+<aside class="fixed left-0 top-0 h-screen w-admin-sidebar-width bg-clay-sidebar flex flex-col items-center py-8 gap-8 z-50">
+<div class="text-primary font-black text-2xl mb-4">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1">terminal</span>
+</div>
+<nav class="flex flex-col gap-4">
+<button class="w-14 h-14 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-xl">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+</button>
+<button class="w-14 h-14 flex items-center justify-center text-secondary bg-secondary-fixed/10 rounded-xl">
+<span class="material-symbols-outlined" data-icon="work" style="font-variation-settings: 'FILL' 1">work</span>
+</button>
+<button class="w-14 h-14 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-xl">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</nav>
+<div class="mt-auto flex flex-col gap-4">
+<button class="w-14 h-14 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-xl">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-admin-sidebar-width min-h-screen p-margin-desktop">
+<!-- Header -->
+<header class="flex justify-between items-end mb-10">
+<div>
+<a class="flex items-center gap-2 text-on-surface-variant font-medium mb-2 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+                    Back to Cases
+                </a>
+<h1 class="text-display-lg-mobile font-display-lg-mobile text-primary">Edit Prompt Case</h1>
+</div>
+<button class="px-6 py-3 rounded-full hairline text-error font-semibold hover:bg-error/5 transition-all active:scale-95">
+                Delete Case
+            </button>
+</header>
+<!-- Form Layout -->
+<div class="max-w-[720px]">
+<form class="flex flex-col gap-8">
+<!-- Section 1: Basic Info -->
+<section class="bg-surface-container-lowest rounded-[24px] p-8 shadow-sm">
+<h2 class="text-headline-md font-headline-md mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">info</span>
+                        Basic Information
+                    </h2>
+<div class="space-y-6">
+<div>
+<label class="block text-body-sm font-body-sm text-on-surface-variant mb-2 ml-1">Case Title</label>
+<input class="w-full bg-surface-container-low hairline rounded-xl px-4 py-3 text-body-main focus-indigo transition-all" placeholder="Enter case title..." type="text" value="Hyper-Realistic Cybernetic Portraiture"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-body-sm font-body-sm text-on-surface-variant mb-2 ml-1">Category</label>
+<div class="relative">
+<select class="w-full bg-surface-container-low hairline rounded-xl px-4 py-3 text-body-main appearance-none focus-indigo transition-all">
+<option>Photography</option>
+<option selected="">Character</option>
+<option>Product</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div>
+<label class="block text-body-sm font-body-sm text-on-surface-variant mb-2 ml-1">Hero Emoji</label>
+<input class="w-full bg-surface-container-low hairline rounded-xl px-4 py-3 text-center text-xl focus-indigo transition-all" type="text" value="🤖"/>
+</div>
+</div>
+<div>
+<label class="block text-body-sm font-body-sm text-on-surface-variant mb-2 ml-1">Prompt Text</label>
+<textarea class="w-full h-48 bg-surface-container-low hairline rounded-xl px-6 py-6 font-mono text-body-sm leading-relaxed focus-indigo transition-all resize-none" spellcheck="false">/imagine prompt: A hyper-realistic close-up portrait of a cybernetic entity, iridescent synthetic skin textures, complex neural wiring visible beneath translucent panels, cinematic rim lighting, 8k resolution, Unreal Engine 5 render style --ar 4:5 --v 6.0</textarea>
+</div>
+</div>
+</section>
+<!-- Section 2: Assets -->
+<section class="bg-surface-container-lowest rounded-[24px] p-8 shadow-sm">
+<h2 class="text-headline-md font-headline-md mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">image</span>
+                        Assets &amp; Gallery
+                    </h2>
+<div class="space-y-6">
+<div class="w-full h-64 border-2 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center bg-surface-container-low/50 hover:bg-surface-container-low transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-4xl text-outline mb-2">cloud_upload</span>
+<p class="text-body-main font-semibold">Drop main cover image here</p>
+<p class="text-body-sm text-on-surface-variant">Recommended: 1200x800px PNG or JPG</p>
+</div>
+<div class="grid grid-cols-4 gap-4">
+<div class="relative group aspect-square rounded-lg overflow-hidden hairline cursor-zoom-in">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="A futuristic cybernetic portrait with glowing neon circuits on translucent skin, high-end digital art style, cinematic lighting, teal and orange palette, 8k resolution." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAzu2SiHFbogCQ4dDPGLPLwxX5-ACDY3IQ705B7sbH9kX5I9eWz4DnEBrqOLtbvhl9sFuEvaAo2ZKdD5Q3TQUdTYjmyWlenCaDkqIsfNedMY0hYKi74zaHlzq2BcEyfHRNBsutzZICahg3POHBJeDW2fdFXhfNk7ZemRtTdv0Wuv_Am6_zwsHcaKRSaQlIw8C3fZOtut1mn5Bry0AKentf7utCWCnw4utS_up6n184d1AiWQVirlQqQ57cqNEQ73__krLAry5jVlJXm')"></div>
+</div>
+<div class="relative group aspect-square rounded-lg overflow-hidden hairline cursor-zoom-in">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="Close up of a robotic eye with intricate mechanical iris details, reflections of a futuristic city in the lens, macro photography style, moody blue lighting, sharp focus." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAvJk7_waJ72LxILy_O2aW-5H3gvBgREjMLS7IPKuaBiFQFEXF1LzyCWx3Py42bLRn20O3CwZqZzxmXwEApTBFlBN8KuCjhiL6NPoJ7KQYuEb-TCZiRDNnSkShMHeRj5cs26Zh_bMRsUNzKF2grrgJ9JaTXf9xPUJaMjJdV0iv7gL6LFrV2V5C9x0bfzQ8eArTU1IqjecKC2v0EDDCPnq3l-37B7SjGGVIPJ5jqsMldNyumgJogoazbu1FCGAgWEFQv04MpRubieGEZ')"></div>
+</div>
+<div class="relative group aspect-square rounded-lg overflow-hidden hairline cursor-zoom-in">
+<div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" data-alt="An abstract 3D render of neural connections in a digital brain, glowing filaments against a dark ink background, minimalist fintech aesthetic, sharp precision, indigo highlights." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB23bKlyoEEHh6cnO4dyRhviOzPoBxWmQB0KAYXGrR2IozJgsyB-ezMypZoL-baAw8xL3L56oY-PKL907mrhuPVbbl3TkebqYj1CrLHMxd1d2bTtJDEExgLQRkxob6l6r9llhDu-bqr1PGK1Qg77KJdDr3Iw2lcI5TIt_L6Twtwz-odERHgAQp_dxGLpXObCpt9lscTX3c8Om0IGbTPQXxMx82VbiPIsb9e20vb8gjU1qZO4NGjNpDiafdwTiv5DvNbt0TQQaygALRZ')"></div>
+</div>
+<button class="aspect-square rounded-lg hairline bg-surface-container flex items-center justify-center text-outline-variant hover:text-secondary hover:bg-secondary/5 transition-all">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Section 3: Preview Type -->
+<section class="bg-surface-container-lowest rounded-[24px] p-8 shadow-sm">
+<h2 class="text-headline-md font-headline-md mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">visibility</span>
+                        Preview Mode
+                    </h2>
+<div class="bg-clay-sidebar p-1.5 rounded-full flex gap-1">
+<button class="flex-1 py-2.5 rounded-full text-body-sm font-semibold segment-active flex items-center justify-center gap-2 transition-all" type="button">
+<span>🖼️</span> Image Gallery
+                        </button>
+<button class="flex-1 py-2.5 rounded-full text-body-sm font-semibold text-on-surface-variant hover:text-primary flex items-center justify-center gap-2 transition-all" type="button">
+<span>🎬</span> Video Player
+                        </button>
+<button class="flex-1 py-2.5 rounded-full text-body-sm font-semibold text-on-surface-variant hover:text-primary flex items-center justify-center gap-2 transition-all" type="button">
+<span>🌐</span> Web Sandbox
+                        </button>
+</div>
+</section>
+<!-- Section 4: Access -->
+<section class="bg-surface-container-lowest rounded-[24px] p-8 shadow-sm">
+<h2 class="text-headline-md font-headline-md mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">lock_open</span>
+                        Access Control
+                    </h2>
+<div class="grid grid-cols-1 gap-4 mb-8">
+<label class="relative flex items-start p-4 rounded-xl hairline bg-surface-container-low cursor-pointer border-secondary/20 ring-1 ring-secondary/20">
+<input checked="" class="mt-1 mr-4 text-secondary focus:ring-secondary" name="access" type="radio"/>
+<div>
+<span class="font-bold block mb-0.5">Free 🆓</span>
+<span class="text-body-sm text-on-surface-variant">Visible to all visitors. Great for portfolio pieces.</span>
+</div>
+</label>
+<label class="relative flex items-start p-4 rounded-xl hairline bg-white hover:bg-surface-container-low transition-colors cursor-pointer">
+<input class="mt-1 mr-4 text-secondary focus:ring-secondary" name="access" type="radio"/>
+<div>
+<span class="font-bold block mb-0.5">Prompt Only 👁️</span>
+<span class="text-body-sm text-on-surface-variant">Image is free, but prompt text requires login.</span>
+</div>
+</label>
+<label class="relative flex items-start p-4 rounded-xl hairline bg-white hover:bg-surface-container-low transition-colors cursor-pointer">
+<input class="mt-1 mr-4 text-secondary focus:ring-secondary" name="access" type="radio"/>
+<div>
+<span class="font-bold block mb-0.5">Full Lock 🔒</span>
+<span class="text-body-sm text-on-surface-variant">Restricted to premium subscribers or token holders.</span>
+</div>
+</label>
+</div>
+<div class="space-y-4 pt-4 border-t border-outline-variant/20">
+<div class="flex items-center justify-between">
+<div>
+<span class="block font-semibold">Allow Copy</span>
+<span class="text-body-sm text-on-surface-variant">Let users click-to-copy prompt text</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<span class="block font-semibold">Apply Watermark</span>
+<span class="text-body-sm text-on-surface-variant">Overlay Brand ID on preview images</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Section 5: Status -->
+<section class="bg-surface-container-lowest rounded-[24px] p-8 shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-headline-md font-headline-md flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">label</span>
+                            Status &amp; Metadata
+                        </h2>
+<div class="flex items-center gap-3 bg-secondary/5 px-4 py-2 rounded-full border border-secondary/10">
+<span class="text-body-sm font-bold text-secondary uppercase tracking-wider">Published</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-14 h-8 bg-surface-dim peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-secondary shadow-lg"></div>
+</label>
+</div>
+</div>
+<div class="space-y-6">
+<div>
+<label class="block text-body-sm font-body-sm text-on-surface-variant mb-3 ml-1">Tags</label>
+<div class="flex flex-wrap gap-2">
+<span class="px-4 py-1.5 rounded-full bg-surface-container-high text-body-sm font-medium flex items-center gap-1.5">
+                                    Cyberpunk <span class="material-symbols-outlined text-xs cursor-pointer">close</span>
+</span>
+<span class="px-4 py-1.5 rounded-full bg-surface-container-high text-body-sm font-medium flex items-center gap-1.5">
+                                    V6.0 <span class="material-symbols-outlined text-xs cursor-pointer">close</span>
+</span>
+<span class="px-4 py-1.5 rounded-full bg-surface-container-high text-body-sm font-medium flex items-center gap-1.5">
+                                    Hyper-real <span class="material-symbols-outlined text-xs cursor-pointer">close</span>
+</span>
+<button class="px-4 py-1.5 rounded-full border border-dashed border-outline-variant text-body-sm font-medium text-on-surface-variant hover:text-secondary transition-colors" type="button">+ Add Tag</button>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div>
+<label class="block text-body-sm font-body-sm text-on-surface-variant mb-2 ml-1">Source Engine</label>
+<input class="w-full bg-surface-container-low hairline rounded-xl px-4 py-3 text-body-main focus-indigo transition-all" type="text" value="Midjourney"/>
+</div>
+<div>
+<label class="block text-body-sm font-body-sm text-on-surface-variant mb-2 ml-1">Author Alias</label>
+<input class="w-full bg-surface-container-low hairline rounded-xl px-4 py-3 text-body-main focus-indigo transition-all" type="text" value="@NeonArchitect"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer Actions -->
+<div class="flex flex-col gap-4 mt-4 pb-20">
+<button class="w-full py-5 bg-primary text-on-primary rounded-xl font-bold text-lg hover:bg-on-primary-fixed-variant transition-all active:scale-[0.98] shadow-lg" type="submit">
+                        Save Changes
+                    </button>
+<button class="w-full py-4 bg-transparent border hairline rounded-full font-semibold text-on-surface hover:bg-surface-container transition-all text-center" type="button">
+                        Cancel &amp; Discard
+                    </button>
+</div>
+</form>
+</div>
+</main>
+<footer class="ml-admin-sidebar-width w-full py-8 border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center px-margin-desktop mt-auto bg-surface">
+<span class="text-body-sm text-on-surface-variant">© 2024 PromptShare SaaS. Built for precision.</span>
+<div class="flex gap-6 mt-4 md:mt-0">
+<a class="text-body-sm text-on-surface-variant hover:text-secondary transition-colors" href="#">Privacy</a>
+<a class="text-body-sm text-on-surface-variant hover:text-secondary transition-colors" href="#">Terms</a>
+<a class="text-body-sm text-on-surface-variant hover:text-secondary transition-colors" href="#">API Status</a>
+</div>
+</footer>
+<script>
+        // Micro-interactions for segment control
+        const segments = document.querySelectorAll('.bg-clay-sidebar button');
+        segments.forEach(btn => {
+            btn.addEventListener('click', () => {
+                segments.forEach(b => {
+                    b.classList.remove('segment-active', 'text-primary');
+                    b.classList.add('text-on-surface-variant');
+                });
+                btn.classList.add('segment-active', 'text-primary');
+                btn.classList.remove('text-on-surface-variant');
+            });
+        });
+
+        // Focus state logic is handled by Tailwind classes but can be enhanced here
+        const inputs = document.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('focus-indigo');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('focus-indigo');
+            });
+        });
+    </script>
+</body></html>

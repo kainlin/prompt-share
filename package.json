@@ -3,19 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "packages/*",
-    "apps/*"
+    "packages/*"
   ],
   "scripts": {
     "build": "next build",
     "dev": "next",
-    "dev:cloud": "npm -w @prompt-share/cloud run dev",
+    "dev:cloud": "cd apps/cloud && npm run dev",
     "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
     "start": "next start",
     "import": "npx tsx scripts/import-cases.ts",
-    "test": "npm -w @prompt-share/ui run test && npm -w @prompt-share/cloud run test",
+    "test": "npm -w @prompt-share/ui run test && cd apps/cloud && npm test",
     "test:ui": "npm -w @prompt-share/ui run test",
-    "test:cloud": "npm -w @prompt-share/cloud run test"
+    "test:cloud": "cd apps/cloud && npm test"
   },
   "dependencies": {
     "@prompt-share/i18n": "*",

@@ -1,0 +1,381 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--saas-bg);
+}
+
+/* Glass Navbar - backdrop blur (12px) with border-bottom outline */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--navbar-height, 64px);
+  padding: 0 var(--margin-desktop, 40px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  background-color: rgba(252, 249, 247, 0.8); /* Canvas Cream Tint */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 100;
+}
+
+.brand {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--saas-text-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.01em;
+}
+
+.brand:hover {
+  opacity: 0.8;
+}
+
+/* Right-aligned navbar controls group */
+.navControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Stitch Search Box with pill shape, left search icon, and CMD+K */
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  background-color: var(--saas-sidebar); /* Clay/Container-low */
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: var(--saas-radius-btn); /* Pill radius */
+  padding: 8px 16px;
+  width: 240px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  cursor: text;
+}
+
+.searchWrapper:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.searchWrapper:focus-within {
+  background-color: #ffffff;
+  border-color: var(--saas-accent);
+  box-shadow: var(--saas-shadow-focus);
+  width: 280px; /* expands slightly */
+}
+
+.searchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.85rem;
+  color: var(--saas-text-primary);
+  width: 100%;
+}
+
+.searchInput::placeholder {
+  color: var(--saas-text-secondary);
+  opacity: 0.6;
+}
+
+.kbd {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--saas-text-secondary);
+  opacity: 0.6;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
+  padding: 2px 6px;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  margin-left: 8px;
+}
+
+.searchWrapper:focus-within .kbd {
+  opacity: 0;
+  width: 0;
+  padding: 0;
+  border-color: transparent;
+  margin-left: 0;
+  overflow: hidden;
+}
+
+/* Content Area */
+.body {
+  display: flex;
+  flex: 1;
+}
+
+/* Sidebar with Clay background and fixed bottom height */
+.sidebar {
+  width: var(--docs-sidebar-width, 260px);
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: var(--saas-sidebar);
+  position: sticky;
+  top: var(--navbar-height, 64px);
+  height: calc(100vh - var(--navbar-height, 64px));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.sidebarNav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sidebarLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--saas-text-secondary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.sidebarLink:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+  color: var(--saas-text-primary);
+}
+
+.activeSidebarLink {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+  color: var(--saas-text-primary) !important;
+}
+
+/* Sidebar Categories */
+.categoryGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.categoryTitle {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--saas-text-secondary);
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 4px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.caseList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 0;
+  margin-left: 16px;
+  border-left: 2px solid rgba(0, 0, 0, 0.06);
+}
+
+.caseLink {
+  font-size: 0.85rem;
+  color: var(--saas-text-secondary);
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.caseLink:hover {
+  color: var(--saas-text-primary);
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.activeCaseLink {
+  color: var(--saas-text-primary) !important;
+  font-weight: 700;
+  border-left: 2px solid var(--saas-accent); /* Active marker line */
+  margin-left: -2px; /* Pull back to align active border */
+}
+
+/* Sidebar Footer (Fixed at the bottom) */
+.sidebarFooter {
+  padding: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--saas-sidebar);
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+/* Nextra style language toggle button with label */
+.langButton {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--saas-text-secondary);
+  transition: all 0.2s ease;
+}
+
+.langButton:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+  color: var(--saas-text-primary);
+}
+
+/* Theme / Collapse control icons */
+.iconBtn {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--saas-text-secondary);
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.iconBtn:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+  color: var(--saas-text-primary);
+}
+
+/* Main Workspace */
+.main {
+  flex: 1;
+  padding: 48px;
+  background-color: var(--saas-bg);
+  overflow-y: auto;
+}
+
+/* Right Sidebar (On This Page) */
+.rightSidebar {
+  width: 220px;
+  padding: 32px 24px;
+  position: sticky;
+  top: var(--navbar-height, 64px);
+  height: calc(100vh - var(--navbar-height, 64px));
+  overflow-y: auto;
+  border-left: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: var(--saas-bg);
+}
+
+.rightSidebarTitle {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--saas-text-secondary);
+  opacity: 0.6;
+  margin-bottom: 16px;
+}
+
+.tocList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+
+.tocLink {
+  font-size: 0.85rem;
+  color: var(--saas-text-secondary);
+  text-decoration: none;
+}
+
+.tocLink:hover {
+  color: var(--saas-text-primary);
+}
+
+@media (max-width: 1200px) {
+  .rightSidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .body {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: static;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+  .caseList {
+    display: none;
+  }
+  .sidebarFooter {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 12px;
+  }
+  .main {
+    padding: 24px;
+  }
+}
+
+.categoryTitleLink {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--saas-text-secondary);
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+}
+
+.categoryTitleLink:hover {
+  opacity: 1;
+  color: var(--saas-text-primary);
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.activeCategoryTitleLink {
+  opacity: 1 !important;
+  color: var(--saas-accent) !important;
+  background-color: rgba(83, 58, 253, 0.04) !important;
+}

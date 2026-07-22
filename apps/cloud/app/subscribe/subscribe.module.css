@@ -1,0 +1,285 @@
+.container {
+  max-width: 1000px;
+  margin: 6rem auto;
+  padding: 0 var(--margin-desktop, 40px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .container {
+    margin: 4rem auto;
+    padding: 0 var(--margin-mobile, 16px);
+  }
+}
+
+.pageHeader {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 16px;
+  background-color: var(--saas-sky);
+  color: var(--saas-accent);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--saas-text-primary);
+  margin: 0 0 16px 0;
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 600px) {
+  .title {
+    font-size: 2.25rem;
+  }
+}
+
+.description {
+  max-width: 640px;
+  margin: 0 auto;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--saas-text-secondary);
+  opacity: 0.75;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 32px;
+  width: 100%;
+  align-items: stretch;
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  position: relative;
+  border-radius: 24px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+}
+
+.monthlyCard {
+  background-color: var(--saas-apricot); /* Soft warm sand/apricot tint */
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.lifetimeCard {
+  background-color: var(--saas-text-primary); /* Ink Black */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.glassTag {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+
+.cardHeader {
+  margin-bottom: 32px;
+}
+
+.cardTitle {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+}
+
+.cardSubTitle {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin: 0;
+}
+
+.priceWrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.priceVal {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.pricePeriod {
+  font-size: 0.95rem;
+  opacity: 0.5;
+  font-weight: 500;
+}
+
+.pulseDot {
+  width: 10px;
+  height: 10px;
+  background-color: var(--saas-accent);
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.25); }
+}
+
+.featureList {
+  list-style: none;
+  padding: 0;
+  margin: 32px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.featureIconCheck {
+  color: #10B981;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.featureIconBolt {
+  color: var(--saas-accent);
+  font-size: 20px;
+}
+
+.subscribeBtn {
+  margin-top: 48px;
+  width: 100%;
+  padding: 16px 0;
+  border-radius: 9999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.monthlyBtn {
+  background-color: var(--saas-text-primary);
+  color: #ffffff;
+}
+
+.monthlyBtn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.lifetimeBtn {
+  background-color: var(--saas-accent);
+  color: #ffffff;
+  box-shadow: 0 10px 25px rgba(83, 58, 253, 0.25);
+}
+
+.lifetimeBtn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+.trustSection {
+  width: 100%;
+  margin-top: 56px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding-top: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.trustBadge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--saas-text-secondary);
+}
+
+.trustIconWrapper {
+  width: 36px;
+  height: 36px;
+  background-color: var(--saas-sidebar);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--saas-text-primary);
+}
+
+.trustIcon {
+  font-size: 18px;
+}
+
+.glowGradient {
+  position: absolute;
+  bottom: -96px;
+  right: -96px;
+  width: 256px;
+  height: 256px;
+  background-color: rgba(83, 58, 253, 0.15);
+  filter: blur(80px);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: background-color 0.4s ease;
+}
+
+.lifetimeCard:hover .glowGradient {
+  background-color: rgba(83, 58, 253, 0.25);
+}

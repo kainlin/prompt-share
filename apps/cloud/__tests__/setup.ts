@@ -14,16 +14,37 @@ vi.mock('@/lib/db', () => ({
       findUnique: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
+      updateMany: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn(),
+    },
+    promptCaseLike: {
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
       delete: vi.fn(),
     },
+    promptCaseView: {
+      findFirst: vi.fn(),
+      create: vi.fn(),
+    },
+    $transaction: vi.fn((ops: any[]) => Promise.all(ops)),
     subscription: {
       create: vi.fn(),
+      upsert: vi.fn(),
       findFirst: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
+    },
+    order: {
+      create: vi.fn(),
+      upsert: vi.fn(),
       update: vi.fn(),
       updateMany: vi.fn(),
     },
     user: {
       upsert: vi.fn(),
+      findUnique: vi.fn(),
     },
   },
 }))
@@ -47,12 +68,23 @@ vi.mock('@/lib/auth', () => ({
 const mockStripeClient = {
   checkout: { sessions: { create: vi.fn() } },
   webhooks: { constructEvent: vi.fn() },
+  paymentIntents: { retrieve: vi.fn(), update: vi.fn() },
+  transfers: { create: vi.fn() },
 }
 
 vi.mock('@/lib/stripe', () => ({
   stripe: mockStripeClient,
   STRIPE_PRICE_MONTHLY: 'price_monthly_test',
   STRIPE_PRICE_LIFETIME: 'price_lifetime_test',
+  calculateSplit: (amountTotalCents: number) => {
+    const platformFeeCents = Math.round(amountTotalCents * 15 / 100)
+    return {
+      grossCents: amountTotalCents,
+      platformFeeCents,
+      creatorRevenueCents: amountTotalCents - platformFeeCents,
+    }
+  },
+  PAYOUT_COOLDOWN_DAYS: 14,
 }))
 
 // ---------------------------------------------------------------------------

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Admin Dashboard | Prompt Share</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;450;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "tertiary-fixed-dim": "#ffb59b",
+                "on-primary-fixed-variant": "#474745",
+                "on-error-container": "#93000a",
+                "on-secondary-fixed-variant": "#3600e1",
+                "on-surface-variant": "#464742",
+                "surface-container-low": "#f6f3f1",
+                "inverse-surface": "#31302f",
+                "on-surface": "#1c1c1b",
+                "on-tertiary-fixed-variant": "#822800",
+                "secondary-fixed-dim": "#c5c0ff",
+                "on-tertiary": "#ffffff",
+                "outline-variant": "#c7c7c0",
+                "error-container": "#ffdad6",
+                "on-secondary-fixed": "#130067",
+                "on-error": "#ffffff",
+                "on-primary": "#ffffff",
+                "error": "#ba1a1a",
+                "inverse-primary": "#c9c6c4",
+                "primary-fixed-dim": "#c9c6c4",
+                "surface-container-lowest": "#ffffff",
+                "tertiary": "#000000",
+                "outline": "#767872",
+                "surface-container-high": "#eae8e6",
+                "surface-container-highest": "#e5e2e0",
+                "primary-fixed": "#e5e2e0",
+                "tertiary-container": "#380d00",
+                "on-primary-fixed": "#1c1c1a",
+                "primary": "#000000",
+                "on-tertiary-container": "#e45415",
+                "surface-container": "#f0edeb",
+                "tertiary-fixed": "#ffdbcf",
+                "surface-dim": "#dcd9d8",
+                "on-tertiary-fixed": "#380d00",
+                "primary-container": "#1c1c1a",
+                "surface": "#fcf9f7",
+                "inverse-on-surface": "#f3f0ee",
+                "on-surface-variant": "#464742",
+                "secondary-fixed": "#e3dfff",
+                "secondary": "#3b0de9",
+                "surface-tint": "#5f5e5d",
+                "surface-bright": "#fcf9f7",
+                "background": "#fcf9f7",
+                "secondary-container": "#553dff",
+                "on-background": "#1c1c1b",
+                "on-secondary": "#ffffff",
+                "on-secondary-container": "#e1dcff",
+                "surface-variant": "#e5e2e0",
+                // Custom Notion Macaron Palette
+                "macaron-sky": "#E1F5FE",
+                "macaron-rose": "#FCE4EC",
+                "macaron-mint": "#E8F5E9",
+                "macaron-apricot": "#FFF3E0"
+            },
+            "borderRadius": {
+                "DEFAULT": "1rem",
+                "lg": "2rem",
+                "xl": "3rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "margin-mobile": "16px",
+                "docs-sidebar-width": "260px",
+                "admin-sidebar-width": "96px",
+                "gutter": "24px",
+                "margin-desktop": "40px",
+                "navbar-height": "64px"
+            },
+            "fontFamily": {
+                "headline-md": ["Plus Jakarta Sans"],
+                "display-lg": ["Plus Jakarta Sans"],
+                "body-sm": ["Plus Jakarta Sans"],
+                "stats-mono": ["Plus Jakarta Sans"],
+                "body-main": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                "display-lg": ["48px", { "lineHeight": "52px", "letterSpacing": "-0.04em", "fontWeight": "800" }],
+                "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "450" }],
+                "stats-mono": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+                "body-main": ["16px", { "lineHeight": "24px", "fontWeight": "450" }]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f3f0ee; /* Canvas Cream */
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-glow {
+            box-shadow: 0 0 0 4px rgba(83, 58, 253, 0.08);
+        }
+        .tabular {
+            font-variant-numeric: tabular-nums;
+        }
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hairline {
+            border: 1px solid #E3E8EE;
+        }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- Admin SideNavBar -->
+<nav class="fixed left-0 top-0 h-screen w-admin-sidebar-width bg-surface-container-low dark:bg-surface-container flex flex-col items-center py-8 gap-8 z-50 border-r border-outline-variant/20">
+<!-- Spherical Logo -->
+<div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white active:scale-95 duration-150 cursor-pointer shadow-lg shadow-primary/10">
+<span class="material-symbols-outlined text-2xl" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<!-- Navigation Tabs -->
+<div class="flex flex-col gap-6 flex-grow items-center">
+<!-- Active: Dashboard -->
+<a class="group relative flex flex-col items-center gap-1 p-3 text-secondary bg-secondary-fixed/10 rounded-xl transition-all duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-[10px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-4 bg-surface-container-highest px-2 py-1 rounded shadow-sm whitespace-nowrap">Dashboard</span>
+</a>
+<a class="group relative flex flex-col items-center gap-1 p-3 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-xl duration-200" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="work">work</span>
+<span class="text-[10px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-4 bg-surface-container-highest px-2 py-1 rounded shadow-sm whitespace-nowrap">Cases</span>
+</a>
+<a class="group relative flex flex-col items-center gap-1 p-3 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-xl duration-200" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="settings">settings</span>
+<span class="text-[10px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity absolute -bottom-4 bg-surface-container-highest px-2 py-1 rounded shadow-sm whitespace-nowrap">Settings</span>
+</a>
+</div>
+<!-- Footer Tab/Avatar -->
+<div class="flex flex-col items-center gap-6 mt-auto">
+<button class="flex flex-col items-center p-3 text-on-surface-variant hover:text-error hover:bg-error-container/10 transition-colors rounded-xl">
+<span class="material-symbols-outlined text-2xl" data-icon="logout">logout</span>
+</button>
+<div class="w-10 h-10 rounded-full border-2 border-outline-variant/30 overflow-hidden cursor-pointer hover:border-secondary transition-colors duration-300">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a female executive with a focused expression, wearing a minimalist black blazer. The lighting is soft and directional, typical of a high-end editorial studio session. The background is a clean, off-white studio wall, maintaining a premium light-mode aesthetic with deep blacks and sharp focus on textural details." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCTbjXa5nW_4sYs28pN9KFJoD1sTkOsjVyFqawjSQ-UN-YuZbpCMJyWiPOCcFXlvYOU5JKe_DVp3E-hudgYIbwLk2Kf1FIfHjNtPbJQN2U6I6ZJPSlBf0WhhUEUYubk6Kf7WhfiXvBOaAoQFsxvQpwQc2hqV1WwBAVG95xy20PBDh4KSGsJMZaju7z2uUZ49W0K9TxzuHty71VZnxprV2hctcngeJSpo69Igik4Nl4xhxxvWEOqSYZIrs8y_5LSNwCtj1ld0HGts6gL"/>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-admin-sidebar-width min-h-screen p-margin-desktop">
+<!-- Header -->
+<header class="mb-12">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-2 uppercase tracking-[0.2em]">Console Overview</p>
+<h1 class="text-display-lg font-display-lg text-primary tracking-tighter">Dashboard</h1>
+</div>
+<div class="flex gap-4">
+<button class="h-12 px-6 rounded-full border border-outline-variant/40 bg-white font-semibold text-body-main hover:bg-surface-container transition-all active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined text-xl" data-icon="download">download</span>
+                        Export Report
+                    </button>
+<button class="h-12 px-6 rounded-full bg-primary text-white font-semibold text-body-main hover:opacity-90 transition-all active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined text-xl" data-icon="add">add</span>
+                        New Store
+                    </button>
+</div>
+</div>
+</header>
+<!-- Stats Overview Row -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+<div class="bg-white p-6 rounded-xl hairline flex flex-col gap-2">
+<span class="text-on-surface-variant text-body-sm">Active Sessions</span>
+<span class="text-headline-md font-headline-md tabular">1,240</span>
+<div class="text-[12px] text-green-600 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+                    12% from yesterday
+                </div>
+</div>
+<div class="bg-white p-6 rounded-xl hairline flex flex-col gap-2">
+<span class="text-on-surface-variant text-body-sm">Avg. Response Time</span>
+<span class="text-headline-md font-headline-md tabular">240ms</span>
+<div class="text-[12px] text-green-600 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span>
+                    Healthy
+                </div>
+</div>
+<div class="bg-white p-6 rounded-xl hairline flex flex-col gap-2">
+<span class="text-on-surface-variant text-body-sm">System Load</span>
+<span class="text-headline-md font-headline-md tabular">42%</span>
+<div class="text-[12px] text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="refresh">refresh</span>
+                    Updated 2m ago
+                </div>
+</div>
+<div class="bg-white p-6 rounded-xl hairline flex flex-col gap-2">
+<span class="text-on-surface-variant text-body-sm">Total Revenue</span>
+<span class="text-headline-md font-headline-md tabular">$14,209.00</span>
+<div class="text-[12px] text-green-600 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+                    5.2% growth
+                </div>
+</div>
+</div>
+<!-- Store Grid (Bento Pattern) -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Store Card 1: Soft Sky -->
+<div class="bg-macaron-sky p-10 rounded-xl flex flex-col justify-between min-h-[400px] hover:shadow-2xl hover:shadow-macaron-sky/40 transition-all duration-500 group border border-white/40">
+<div>
+<div class="flex justify-between items-start mb-8">
+<div class="w-14 h-14 bg-white/60 backdrop-blur rounded-2xl flex items-center justify-center border border-white/20">
+<span class="material-symbols-outlined text-3xl text-secondary" data-icon="camera_alt">camera_alt</span>
+</div>
+<span class="bg-white/40 backdrop-blur px-4 py-1.5 rounded-full text-body-sm font-bold text-secondary uppercase tracking-widest border border-white/20">Photography</span>
+</div>
+<h3 class="text-headline-md font-headline-md text-primary mb-2">Lens &amp; Light</h3>
+<p class="text-body-main text-on-surface-variant opacity-70">Curated high-resolution prompt sets for editorial fashion and cinematic street photography.</p>
+</div>
+<div class="flex items-end justify-between mt-12">
+<div class="flex gap-10">
+<div class="flex flex-col">
+<span class="text-[12px] uppercase font-bold text-on-surface-variant/60 tracking-wider">Cases</span>
+<span class="text-headline-md font-headline-md tabular text-primary">1,482</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[12px] uppercase font-bold text-on-surface-variant/60 tracking-wider">Subscribers</span>
+<span class="text-headline-md font-headline-md tabular text-primary">84k</span>
+</div>
+</div>
+<button class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Store Card 2: Soft Rose -->
+<div class="bg-macaron-rose p-10 rounded-xl flex flex-col justify-between min-h-[400px] hover:shadow-2xl hover:shadow-macaron-rose/40 transition-all duration-500 group border border-white/40">
+<div>
+<div class="flex justify-between items-start mb-8">
+<div class="w-14 h-14 bg-white/60 backdrop-blur rounded-2xl flex items-center justify-center border border-white/20">
+<span class="material-symbols-outlined text-3xl text-primary" data-icon="face_6">face_6</span>
+</div>
+<span class="bg-white/40 backdrop-blur px-4 py-1.5 rounded-full text-body-sm font-bold text-primary uppercase tracking-widest border border-white/20">Character</span>
+</div>
+<h3 class="text-headline-md font-headline-md text-primary mb-2">Persona Forge</h3>
+<p class="text-body-main text-on-surface-variant opacity-70">Consistent character generation prompts optimized for multi-scene visual storytelling.</p>
+</div>
+<div class="flex items-end justify-between mt-12">
+<div class="flex gap-10">
+<div class="flex flex-col">
+<span class="text-[12px] uppercase font-bold text-on-surface-variant/60 tracking-wider">Cases</span>
+<span class="text-headline-md font-headline-md tabular text-primary">924</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[12px] uppercase font-bold text-on-surface-variant/60 tracking-wider">Subscribers</span>
+<span class="text-headline-md font-headline-md tabular text-primary">31k</span>
+</div>
+</div>
+<button class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Store Card 3: Soft Mint -->
+<div class="bg-macaron-mint p-10 rounded-xl flex flex-col justify-between min-h-[400px] hover:shadow-2xl hover:shadow-macaron-mint/40 transition-all duration-500 group border border-white/40">
+<div>
+<div class="flex justify-between items-start mb-8">
+<div class="w-14 h-14 bg-white/60 backdrop-blur rounded-2xl flex items-center justify-center border border-white/20">
+<span class="material-symbols-outlined text-3xl text-primary" data-icon="inventory_2">inventory_2</span>
+</div>
+<span class="bg-white/40 backdrop-blur px-4 py-1.5 rounded-full text-body-sm font-bold text-primary uppercase tracking-widest border border-white/20">Product</span>
+</div>
+<h3 class="text-headline-md font-headline-md text-primary mb-2">Object Studio</h3>
+<p class="text-body-main text-on-surface-variant opacity-70">Minimalist product photography prompts for e-commerce, architecture, and luxury branding.</p>
+</div>
+<div class="flex items-end justify-between mt-12">
+<div class="flex gap-10">
+<div class="flex flex-col">
+<span class="text-[12px] uppercase font-bold text-on-surface-variant/60 tracking-wider">Cases</span>
+<span class="text-headline-md font-headline-md tabular text-primary">2,105</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[12px] uppercase font-bold text-on-surface-variant/60 tracking-wider">Subscribers</span>
+<span class="text-headline-md font-headline-md tabular text-primary">112k</span>
+</div>
+</div>
+<button class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- System Activity (Bottom Section) -->
+<section class="mt-12 bg-white rounded-xl hairline p-8">
+<div class="flex items-center justify-between mb-8">
+<h2 class="text-headline-md font-headline-md">Live Activity</h2>
+<div class="flex items-center gap-2 text-on-surface-variant text-body-sm">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    Live processing
+                </div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="border-b border-outline-variant/20 text-on-surface-variant text-[12px] uppercase tracking-wider font-bold">
+<th class="pb-4">Transaction ID</th>
+<th class="pb-4">Store</th>
+<th class="pb-4">Type</th>
+<th class="pb-4">Status</th>
+<th class="pb-4 text-right">Value</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10 text-body-main">
+<tr>
+<td class="py-4 tabular">#9A-34821</td>
+<td class="py-4">Persona Forge</td>
+<td class="py-4">Subscription</td>
+<td class="py-4">
+<span class="bg-macaron-sky text-secondary px-3 py-1 rounded-full text-body-sm font-bold">Successful</span>
+</td>
+<td class="py-4 text-right tabular">$24.00</td>
+</tr>
+<tr>
+<td class="py-4 tabular">#BC-20912</td>
+<td class="py-4">Lens &amp; Light</td>
+<td class="py-4">Single Purchase</td>
+<td class="py-4">
+<span class="bg-macaron-sky text-secondary px-3 py-1 rounded-full text-body-sm font-bold">Successful</span>
+</td>
+<td class="py-4 text-right tabular">$12.00</td>
+</tr>
+<tr>
+<td class="py-4 tabular">#8F-10293</td>
+<td class="py-4">Object Studio</td>
+<td class="py-4">API Usage</td>
+<td class="py-4">
+<span class="bg-macaron-rose text-primary px-3 py-1 rounded-full text-body-sm font-bold">Pending</span>
+</td>
+<td class="py-4 text-right tabular">$84.50</td>
+</tr>
+<tr>
+<td class="py-4 tabular">#D2-88374</td>
+<td class="py-4">Lens &amp; Light</td>
+<td class="py-4">Subscription</td>
+<td class="py-4">
+<span class="bg-macaron-sky text-secondary px-3 py-1 rounded-full text-body-sm font-bold">Successful</span>
+</td>
+<td class="py-4 text-right tabular">$24.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Footer -->
+<footer class="w-full py-12 mt-12 border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center text-on-surface-variant text-body-sm">
+<p>© 2024 PromptShare SaaS. Built for precision.</p>
+<div class="flex gap-8 mt-4 md:mt-0">
+<a class="hover:text-secondary transition-colors" href="#">Privacy</a>
+<a class="hover:text-secondary transition-colors" href="#">Terms</a>
+<a class="hover:text-secondary transition-colors" href="#">API Status</a>
+</div>
+</footer>
+</main>
+<script>
+        // Micro-interactions for hover effects
+        document.querySelectorAll('.active-glow').forEach(el => {
+            el.addEventListener('mousedown', () => {
+                el.style.transform = 'scale(0.98)';
+            });
+            el.addEventListener('mouseup', () => {
+                el.style.transform = 'scale(1)';
+            });
+        });
+
+        // Simple mock for "live" data updates
+        setInterval(() => {
+            const sessions = document.querySelector('.tabular');
+            if(sessions) {
+                const current = parseInt(sessions.innerText.replace(',', ''));
+                const next = current + Math.floor(Math.random() * 5) - 2;
+                sessions.innerText = next.toLocaleString();
+            }
+        }, 5000);
+    </script>
+</body></html>
