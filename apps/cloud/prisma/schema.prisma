@@ -179,9 +179,9 @@ model Order {
 
 model PromptCaseLike {
   id        String     @id @default(uuid())
-  userId    String
-  caseId    String
-  createdAt DateTime   @default(now())
+  userId    String     @map("user_id")
+  caseId    String     @map("case_id")
+  createdAt DateTime   @default(now()) @map("created_at")
 
   case      PromptCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -194,11 +194,11 @@ model PromptCaseLike {
 
 model PromptCaseView {
   id        String   @id @default(uuid())
-  caseId    String
-  userId    String?
-  ipHash    String
-  userAgent String
-  createdAt DateTime @default(now())
+  caseId    String   @map("case_id")
+  userId    String?  @map("user_id")
+  ipHash    String   @map("ip_hash")
+  userAgent String   @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
 
   case      PromptCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
 
