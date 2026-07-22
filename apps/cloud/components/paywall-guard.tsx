@@ -90,13 +90,26 @@ export function PaywallGuard({ children, isSubscribed, tenantId, paywallMode, wa
               fontWeight: 600,
               fontSize: '1rem',
               cursor: 'pointer',
+              marginBottom: '0.75rem',
             }}
           >
             Subscribe Now
           </button>
-          <p style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--feishu-text-secondary)' }}>
+          <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--feishu-text-secondary)' }}>
             Monthly or lifetime access available
           </p>
+          <a
+            href={`/login?redirect=/${encodeURIComponent(`@${tenantId}`)}`}
+            style={{
+              marginTop: '0.5rem',
+              fontSize: '0.8rem',
+              color: 'var(--feishu-accent)',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+            }}
+          >
+            已订阅？登录即可解锁 →
+          </a>
         </div>
       </div>
     )
@@ -130,6 +143,12 @@ export function PaywallGuard({ children, isSubscribed, tenantId, paywallMode, wa
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: '#a16207' }}>
             You can view the prompt but copying is locked. Subscribe to unlock full access.
           </p>
+          <a
+            href={`/login?redirect=/${encodeURIComponent(`@${tenantId}`)}`}
+            style={{ display: 'inline-block', marginTop: '0.35rem', fontSize: '0.78rem', color: '#92400e', textDecoration: 'underline' }}
+          >
+            已订阅？登录即可解锁 →
+          </a>
         </div>
         <button
           onClick={() => router.push(`/subscribe?tenant=${tenantId}`)}
