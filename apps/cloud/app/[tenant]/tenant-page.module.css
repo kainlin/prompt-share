@@ -262,3 +262,48 @@
   padding: 2px 8px;
   border-radius: 4px;
 }
+
+.heartPop {
+  animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.splitLayout {
+  display: flex;
+  gap: 48px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.splitLeft {
+  flex: 4.5;
+  min-width: 320px;
+  position: sticky;
+  top: 88px;
+  z-index: 5;
+}
+
+.splitRight {
+  flex: 5.5;
+  min-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (max-width: 900px) {
+  .splitLayout {
+    flex-direction: column;
+    gap: 32px;
+  }
+  .splitLeft, .splitRight {
+    width: 100%;
+    min-width: 100%;
+    position: static;
+  }
+}

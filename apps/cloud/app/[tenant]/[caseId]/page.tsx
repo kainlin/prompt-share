@@ -5,7 +5,7 @@ import { db } from '@/lib/db'
 import { auth } from '@/lib/auth'
 import { getDictionary } from '@prompt-share/i18n'
 import { PaywallGuard } from '@/components/paywall-guard'
-import Link from 'next/link'
+import { ViewTracker, PinterestCard } from '@/components/storefront-interactions'
 import styles from '../tenant-page.module.css'
 
 interface Props {
@@ -67,45 +67,14 @@ export default async function CasePage({ params }: Props) {
             {locale === 'zh' ? '该分类下暂无已发布的案例' : 'No published cases under this category yet.'}
           </div>
         ) : (
-          /* Pinterest Masonry Wall */
+          /* Pinterest Masonry Wall utilizing interactive Client Component cards */
           <div className={styles.pinterestGrid}>
             {categoryCases.map(c => (
-              <Link 
+              <PinterestCard 
                 key={c.id} 
-                href={`/${rawTenant}/${c.slug}`} 
-                className={styles.pinterestCard}
-              >
-                <div className={styles.pinterestImgWrapper}>
-                  {c.coverImageUrl ? (
-                    <img src={c.coverImageUrl} alt={c.title} className={styles.pinterestImg} />
-                  ) : (
-                    <div className={styles.pinterestImg} style={{ backgroundColor: 'rgba(0,0,0,0.03)', height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>
-                      📷
-                    </div>
-                  )}
-                  {/* Floating Action Icons */}
-                  <div className={styles.pinterestFloatingBadgeLeft}>
-                    <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-                  </div>
-                  <div className={styles.pinterestFloatingBadgeRight}>
-                    <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
-                  </div>
-                </div>
-
-                <div className={styles.pinterestInfo}>
-                  <h3 className={styles.pinterestTitle}>{c.title}</h3>
-                  <p className={styles.pinterestPromptSnippet}>
-                    {c.promptText}
-                  </p>
-                  <div className={styles.pinterestMeta}>
-                    <div className={styles.pinterestStats}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>❤️ 1</span>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>👁️ 71</span>
-                    </div>
-                    <span className={styles.pinterestHeroBadge}>HERO</span>
-                  </div>
-                </div>
-              </Link>
+                c={c} 
+                rawTenant={rawTenant} 
+              />
             ))}
           </div>
         )}
@@ -113,7 +82,7 @@ export default async function CasePage({ params }: Props) {
     )
   }
 
-  // 2. STANDARD VIEW: Dynamic single case detail view
+  // 2. STANDARD VIEW: Dynamic single case detail view - Upgraded to Split 2-Column Layout (Prompthero style)
   const promptCase = await db.promptCase.findUnique({
     where: { tenantId_slug: { tenantId: tenant.id, slug: caseId } },
   })
@@ -132,59 +101,96 @@ export default async function CasePage({ params }: Props) {
 
   return (
     <div>
-      {/* Category indicator / Breadcrumb */}
-      <div style={{ marginBottom: '16px', fontSize: '0.85rem', color: 'var(--saas-text-secondary)', fontWeight: 600 }}>
-        {categoryLabel} &gt; {promptCase.title}
+      {/* Client-side View Counter trigger */}
+      <ViewTracker caseId={promptCase.id} />
+
+      {/* Prompthero-style Split 2-Column Grid Container */}
+      <div className={styles.splitLayout}>
+        
+        {/* LEFT COLUMN: Visual Preview (Video / Sandbox / Image Gallery) */}
+        <div className={styles.splitLeft}>
+          {promptCase.previewType === 'video' && promptCase.previewSource ? (
+            <VideoPlayer
+              videoUrl={promptCase.previewSource}
+              posterUrl={promptCase.coverImageUrl || promptCase.previewPoster || undefined}
+            />
+          ) : promptCase.previewType === 'web' && promptCase.previewSource ? (
+            <IframeSandbox sourceUrl={promptCase.previewSource} />
+          ) : (
+            <ImageGallery images={promptCase.images} alt={promptCase.title} />
+          )}
+        </div>
+
+        {/* RIGHT COLUMN: Metadata details, statistics, and Prompt Editor */}
+        <div className={styles.splitRight}>
+          <div>
+            {/* Category indicator / Breadcrumb */}
+            <div style={{ marginBottom: '16px', fontSize: '0.85rem', color: 'var(--saas-text-secondary)', fontWeight: 600 }}>
+              {categoryLabel} &gt; {promptCase.title}
+            </div>
+
+            <CaseHeader
+              emoji={promptCase.emoji}
+              title={promptCase.title}
+              tags={promptCase.tags}
+              source={source}
+            />
+          </div>
+
+          {/* Social Proof statistics strip (Views & Likes) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', fontSize: '0.82rem', color: 'var(--saas-text-secondary)', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '16px', marginBottom: '8px' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>visibility</span>
+              <strong className="tnum" style={{ color: 'var(--saas-text-primary)' }}>{promptCase.viewCount}</strong> views
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#E63946', fontVariationSettings: "'FILL' 1" }}>favorite</span>
+              <strong className="tnum" style={{ color: 'var(--saas-text-primary)' }}>{promptCase.likeCount}</strong> favorites
+            </span>
+          </div>
+
+          {/* Model Used Engine information */}
+          {promptCase.sourcePlatform && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--saas-text-secondary)', opacity: 0.6, letterSpacing: '0.05em' }}>
+                Model Used
+              </span>
+              <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--saas-text-primary)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>smart_toy</span>
+                {promptCase.sourcePlatform}
+              </span>
+            </div>
+          )}
+
+          {/* Dynamic Interactive Prompt Block guarded by access control */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <h2 style={{ 
+              margin: 0, 
+              fontSize: '1.25rem', 
+              fontWeight: 700, 
+              color: 'var(--saas-text-primary)',
+              fontFamily: "'Plus Jakarta Sans', sans-serif"
+            }}>
+              {dict?.prompt?.title || '提示词'}
+            </h2>
+
+            <PaywallGuard
+              isSubscribed={isSubscribed}
+              tenantId={tenant.id}
+              paywallMode={(promptCase.paywallMode as 'free' | 'prompt_only' | 'full_lock') || 'free'}
+              watermarkText={promptCase.watermarkEnabled ? tenant.displayName : undefined}
+            >
+              <PromptBlock
+                emoji="💬"
+                copyDisabled={!isSubscribed && promptCase.paywallMode !== 'free'}
+              >
+                {promptCase.promptText}
+              </PromptBlock>
+            </PaywallGuard>
+          </div>
+        </div>
+
       </div>
-
-      <CaseHeader
-        emoji={promptCase.emoji}
-        title={promptCase.title}
-        tags={promptCase.tags}
-        source={source}
-      />
-
-      {/* Multi-modal preview: render based on previewType */}
-      <div style={{ marginTop: '24px', marginBottom: '32px' }}>
-        {promptCase.previewType === 'video' && promptCase.previewSource ? (
-          <VideoPlayer
-            videoUrl={promptCase.previewSource}
-            posterUrl={promptCase.previewPoster || undefined}
-          />
-        ) : promptCase.previewType === 'web' && promptCase.previewSource ? (
-          <IframeSandbox sourceUrl={promptCase.previewSource} />
-        ) : (
-          <ImageGallery images={promptCase.images} alt={promptCase.title} />
-        )}
-      </div>
-
-      {/* H2 Title with translated value from dictionary */}
-      <h2 style={{ 
-        marginTop: '36px', 
-        marginBottom: '16px', 
-        fontSize: '1.5rem', 
-        fontWeight: 700, 
-        borderBottom: '1px solid rgba(0,0,0,0.08)', 
-        paddingBottom: '8px',
-        color: 'var(--saas-text-primary)',
-        fontFamily: "'Plus Jakarta Sans', sans-serif"
-      }}>
-        {dict?.prompt?.title || '提示词'}
-      </h2>
-
-      <PaywallGuard
-        isSubscribed={isSubscribed}
-        tenantId={tenant.id}
-        paywallMode={(promptCase.paywallMode as 'free' | 'prompt_only' | 'full_lock') || 'free'}
-        watermarkText={promptCase.watermarkEnabled ? tenant.displayName : undefined}
-      >
-        <PromptBlock
-          emoji="💬"
-          copyDisabled={!isSubscribed && promptCase.paywallMode !== 'free'}
-        >
-          {promptCase.promptText}
-        </PromptBlock>
-      </PaywallGuard>
     </div>
   )
 }

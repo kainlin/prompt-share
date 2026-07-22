@@ -26,7 +26,6 @@ export default function EditCasePage({ params }: Props) {
   const [published, setPublished] = useState(true)
   const [previewType, setPreviewType] = useState('image')
   const [previewSource, setPreviewSource] = useState('')
-  const [previewPoster, setPreviewPoster] = useState('')
   const [paywallMode, setPaywallMode] = useState('free')
   const [allowCopy, setAllowCopy] = useState(true)
   const [watermarkEnabled, setWatermarkEnabled] = useState(false)
@@ -56,7 +55,6 @@ export default function EditCasePage({ params }: Props) {
         setPublished(data.published)
         setPreviewType(data.previewType || 'image')
         setPreviewSource(data.previewSource || '')
-        setPreviewPoster(data.previewPoster || '')
         setPaywallMode(data.paywallMode || 'free')
         setAllowCopy(data.allowCopy !== undefined ? data.allowCopy : true)
         setWatermarkEnabled(data.watermarkEnabled || false)
@@ -95,7 +93,7 @@ export default function EditCasePage({ params }: Props) {
           published,
           previewType,
           previewSource,
-          previewPoster,
+          previewPoster: coverImageUrl, // Duplicate coverImageUrl to previewPoster for DB schema backwards-compatibility
           paywallMode,
           allowCopy,
           watermarkEnabled,
@@ -173,7 +171,7 @@ export default function EditCasePage({ params }: Props) {
       {error && <p style={{ color: 'red', marginBottom: '1.5rem', fontWeight: 600 }}>{error}</p>}
 
       <form onSubmit={handleSubmit} className={styles.formTwoColumn}>
-        {/* LEFT COLUMN: Core Content & Preview (70%) */}
+        {/* LEFT COLUMN: Core Content & Consolidated Preview (70%) */}
         <div className={styles.formMainCol}>
           {/* Section 1: Basic Info */}
           <section className={styles.formSection}>
@@ -223,6 +221,18 @@ export default function EditCasePage({ params }: Props) {
 
               <div className={styles.inputGroup}>
                 <label className={styles.label}>Prompt Text</label>
+                <div style={{ 
+                  backgroundColor: 'rgba(83, 58, 253, 0.04)', 
+                  border: '1px dashed rgba(83, 58, 253, 0.2)',
+                  borderRadius: '12px',
+                  padding: '12px 16px',
+                  fontSize: '0.78rem',
+                  lineHeight: '1.5',
+                  color: 'var(--saas-text-primary)',
+                  marginBottom: '10px'
+                }}>
+                  ✨ <strong>Parameterized & Default Prompts (支持参数化与默认值)</strong>: Use curly braces <code>{"{variable_name:default_value}"}</code> to define dynamic parameters (e.g. <code>{"{subject:cyberpunk girl}"}</code> or <code>{"{color:neon blue}"}</code>). Unlocked buyers can customize these fields, falling back to your default values if left blank!
+                </div>
                 <textarea
                   value={promptText}
                   onChange={e => setPromptText(e.target.value)}
@@ -230,29 +240,80 @@ export default function EditCasePage({ params }: Props) {
                   rows={6}
                   className={styles.input}
                   style={{ fontFamily: 'monospace', resize: 'none', lineHeight: '1.6' }}
-                  placeholder="Paste your prompt text here..."
+                  placeholder="e.g. /imagine prompt: A high-fashion portrait of {subject}, cinematic lighting, in {color} neon tone --ar 16:9"
                 />
               </div>
             </div>
           </section>
 
-          {/* Section 2: Assets & Gallery */}
+          {/* Consolidated Section 2: Preview & Assets Configuration */}
           <section className={styles.formSection}>
             <h2 className={styles.formSectionTitle}>
-              <span style={{ fontSize: '1.25rem' }}>🖼️</span>
-              Assets & Gallery
+              <span style={{ fontSize: '1.25rem' }}>🎨</span>
+              Preview & Assets
             </h2>
-            
-            <div className="space-y-6">
+
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>Preview Type (呈现方式)</label>
+              <div className={styles.segmentControl}>
+                {[
+                  { value: 'image', label: '🖼️ Image Gallery' },
+                  { value: 'video', label: '🎬 Video Player' },
+                  { value: 'web', label: '🌐 Web Sandbox' },
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setPreviewType(opt.value)}
+                    className={`${styles.segmentBtn} ${previewType === opt.value ? styles.segmentBtnActive : styles.segmentBtnInactive}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Conditional Input for Video / Web URLs */}
+            {previewType !== 'image' && (
+              <div className={styles.inputGroup} style={{ marginTop: '20px' }}>
+                <label className={styles.label}>
+                  {previewType === 'video' ? '🎬 Video URL (mp4) *' : '🌐 Web Sandbox URL *'}
+                </label>
+                <input
+                  type="url"
+                  value={previewSource}
+                  onChange={e => setPreviewSource(e.target.value)}
+                  required={previewType !== 'image'}
+                  className={styles.input}
+                  placeholder={
+                    previewType === 'video'
+                      ? 'https://example.com/video.mp4'
+                      : 'https://v0.dev/r/xxxxx'
+                  }
+                />
+              </div>
+            )}
+
+            {/* Single Core Image Asset Upload */}
+            <div className={styles.inputGroup} style={{ marginTop: '20px' }}>
               <ImageUpload
                 value={coverImageUrl}
                 onChange={setCoverImageUrl}
-                label="Cover Image"
+                label={
+                  previewType === 'video'
+                    ? '视频海报 / 封面图 (Video Poster) *'
+                    : previewType === 'web'
+                    ? '加载占位图 / 封面图 (Sandbox Placeholder) *'
+                    : '封面主图 (Cover Image) *'
+                }
                 required
               />
+            </div>
 
+            {/* Gallery Sub-images list: only shown for Image type */}
+            {previewType === 'image' && (
               <div className={styles.inputGroup} style={{ marginTop: '24px' }}>
-                <label className={styles.label}>Sub-images (Comma separated URLs)</label>
+                <label className={styles.label}>Sub-images (画廊副图 - 逗号分隔 URLs)</label>
                 <input
                   type="text"
                   value={imagesText}
@@ -278,63 +339,6 @@ export default function EditCasePage({ params }: Props) {
                     })}
                   </div>
                 )}
-              </div>
-            </div>
-          </section>
-
-          {/* Section 3: Preview Mode */}
-          <section className={styles.formSection}>
-            <h2 className={styles.formSectionTitle}>
-              <span style={{ fontSize: '1.25rem' }}>👀</span>
-              Preview Mode
-            </h2>
-
-            <div className={styles.segmentControl} style={{ marginBottom: '24px' }}>
-              {[
-                { value: 'image', label: '🖼️ Image Gallery' },
-                { value: 'video', label: '🎬 Video Player' },
-                { value: 'web', label: '🌐 Web Sandbox' },
-              ].map(opt => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setPreviewType(opt.value)}
-                  className={`${styles.segmentBtn} ${previewType === opt.value ? styles.segmentBtnActive : styles.segmentBtnInactive}`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-
-            {previewType !== 'image' && (
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>
-                  {previewType === 'video' ? '🎬 Video URL' : '🌐 Web Sandbox URL'}
-                </label>
-                <input
-                  type="url"
-                  value={previewSource}
-                  onChange={e => setPreviewSource(e.target.value)}
-                  className={styles.input}
-                  placeholder={
-                    previewType === 'video'
-                      ? 'https://example.com/video.mp4'
-                      : 'https://v0.dev/r/xxxxx'
-                  }
-                />
-              </div>
-            )}
-
-            {previewType === 'video' && (
-              <div className={styles.inputGroup} style={{ marginTop: '16px' }}>
-                <label className={styles.label}>🖼️ Poster Image URL (optional)</label>
-                <input
-                  type="url"
-                  value={previewPoster}
-                  onChange={e => setPreviewPoster(e.target.value)}
-                  className={styles.input}
-                  placeholder="https://example.com/video-poster.jpg"
-                />
               </div>
             )}
           </section>
@@ -368,7 +372,7 @@ export default function EditCasePage({ params }: Props) {
                     style={{ marginTop: '4px', color: 'var(--saas-accent)' }}
                   />
                   <div>
-                    <span style={{ fontWeight: 'bold', display: 'block', marginBottom: '2px', fontSize: '0.9rem' }}>{opt.emoji} {opt.label}</span>
+                    <span style={{ fontWeight: 'bold', display: 'block', marginBottom: '4px', fontSize: '0.9rem' }}>{opt.emoji} {opt.label}</span>
                     <span style={{ fontSize: '0.75rem', color: 'var(--saas-text-secondary)', lineHeight: '1.4' }}>{opt.desc}</span>
                   </div>
                 </label>
