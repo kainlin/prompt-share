@@ -275,14 +275,14 @@
 
 .splitLayout {
   display: flex;
-  gap: 48px;
+  gap: 32px;
   align-items: flex-start;
   width: 100%;
 }
 
 .splitLeft {
   flex: 4.5;
-  min-width: 320px;
+  min-width: 280px;
   position: sticky;
   top: 88px;
   z-index: 5;
@@ -290,7 +290,7 @@
 
 .splitRight {
   flex: 5.5;
-  min-width: 360px;
+  min-width: 320px;
   display: flex;
   flex-direction: column;
   gap: 24px;

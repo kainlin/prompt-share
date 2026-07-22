@@ -59,7 +59,7 @@ export default async function TenantStoreLayout({ children, params }: Props) {
         </a>
       </header>
 
-      {/* Main Layout containing Left Sidebar, Workspace and Right Sidebar */}
+      {/* Main Layout containing Left Sidebar and Workspace */}
       <div className={styles.body}>
         <TenantSidebar 
           rawTenant={rawTenant} 
@@ -71,23 +71,6 @@ export default async function TenantStoreLayout({ children, params }: Props) {
         <main className={styles.main}>
           {children}
         </main>
-
-        {/* Right Sidebar - On This Page TOC */}
-        <aside className={styles.rightSidebar}>
-          <div className={styles.rightSidebarTitle}>{tocTitle}</div>
-          <ul className={styles.tocList}>
-            <li>
-              <a href="#" className={styles.tocLink}>
-                {tocDetail}
-              </a>
-            </li>
-            <li>
-              <a href="#" className={styles.tocLink}>
-                {tocPreview}
-              </a>
-            </li>
-          </ul>
-        </aside>
       </div>
     </div>
   )
