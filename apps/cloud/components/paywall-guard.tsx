@@ -9,19 +9,31 @@ interface PaywallGuardProps {
   tenantId: string
   paywallMode: 'free' | 'prompt_only' | 'full_lock'
   watermarkText?: string
+  locale?: string
 }
 
-export function PaywallGuard({ children, isSubscribed, tenantId, paywallMode, watermarkText }: PaywallGuardProps) {
+export function PaywallGuard({ children, isSubscribed, tenantId, paywallMode, watermarkText, locale = 'zh' }: PaywallGuardProps) {
   const router = useRouter()
 
   // 1. Free mode or subscribed — render children normally
   if (paywallMode === 'free' || isSubscribed) return <>{children}</>
 
-  // 2. Full Lock mode — Option A: Double-Column Premium Value Checklist Bento Card
+  // 2. Full Lock mode — Option A: Bento-Split Value Card (User HTML style)
   if (paywallMode === 'full_lock') {
     return (
-      <div style={{ position: 'relative' }}>
-        {/* Watermark text background overlay */}
+      <div 
+        style={{ 
+          position: 'relative',
+          border: '1px solid rgba(0,0,0,0.05)',
+          backgroundColor: '#ffffff',
+          borderRadius: '24px',
+          padding: '32px',
+          boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.08), 0 10px 20px -5px rgba(0, 0, 0, 0.04)',
+          boxSizing: 'border-box',
+          width: '100%'
+        }}
+      >
+        {/* Watermark background overlay */}
         {watermarkText && (
           <div
             style={{
@@ -49,130 +61,122 @@ export function PaywallGuard({ children, isSubscribed, tenantId, paywallMode, wa
           </div>
         )}
 
-        {/* Double-column premium grid */}
-        <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', alignItems: 'stretch' }}>
-          
-          {/* Left Column: Blurred representation of the prompt content (hinting depth of variables/tokens) */}
-          <div 
-            style={{ 
-              flex: 1, 
-              minWidth: '280px', 
-              position: 'relative', 
-              overflow: 'hidden', 
-              borderRadius: '24px', 
-              border: '1px dashed rgba(0,0,0,0.08)', 
-              padding: '24px', 
-              background: 'rgba(255,255,255,0.4)', 
-              filter: 'blur(6px)', 
-              opacity: 0.35, 
-              pointerEvents: 'none', 
-              userSelect: 'none' 
-            }}
-          >
-            {children}
-          </div>
-
-          {/* Right Column: Premium Value Proposition Checklist Box */}
-          <div 
-            style={{ 
-              width: '380px', 
-              minWidth: '320px', 
-              display: 'flex', 
-              flexDirection: 'column', 
-              background: '#ffffff', 
-              border: '1px solid rgba(0,0,0,0.06)', 
-              borderRadius: '24px', 
-              padding: '32px', 
-              boxShadow: '0 12px 40px rgba(0,0,0,0.03)',
-              boxSizing: 'border-box'
-            }}
-          >
-            {/* Value checklist header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(83, 58, 253, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span className="material-symbols-outlined" style={{ color: 'var(--saas-accent)', fontVariationSettings: "'FILL' 1", fontSize: '20px' }}>lock</span>
-              </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: 'var(--saas-text-primary)', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                  Premium Prompt
-                </h3>
-                <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--saas-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  VIP Exclusive Access
-                </span>
-              </div>
-            </div>
-
-            {/* Checklist items */}
-            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px 0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {[
-                '一键解锁该商铺全部 50+ 套高精设计提示词',
-                '支持参数化变量快速调试（如 {subject}，{color}）',
-                '永久去除前台图片与沙箱渲染水印',
-                '获得提示词创作者官方商业授权'
-              ].map((item, idx) => (
-                <li key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '0.82rem', color: 'var(--saas-text-secondary)', lineHeight: '1.5' }}>
-                  <span className="material-symbols-outlined" style={{ color: '#10B981', fontSize: '18px', fontWeight: 'bold' }}>check</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-
-            {/* CTA Subscribe Button */}
-            <button
-              onClick={() => router.push(`/subscribe?tenant=${tenantId}`)}
+        <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* Bento Split layout */}
+          <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', alignItems: 'stretch' }}>
+            
+            {/* Left: Blurred config preview */}
+            <div 
               style={{
-                padding: '14px 0',
-                background: 'var(--saas-text-primary)',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: 'var(--saas-radius-btn)',
-                fontWeight: 700,
-                fontSize: '0.95rem',
-                cursor: 'pointer',
-                transition: 'opacity 0.2s ease',
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px'
+                position: 'relative',
+                minHeight: '200px',
+                borderRadius: '16px',
+                background: 'var(--saas-sidebar)',
+                border: '1px solid rgba(0,0,0,0.06)',
+                padding: '24px',
+                overflow: 'hidden',
+                flex: 1.1,
+                minWidth: '250px',
+                boxSizing: 'border-box'
               }}
-              onMouseOver={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.9' }}
-              onMouseOut={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '1' }}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>workspace_premium</span>
-              立即订阅解锁 (Subscribe Now)
-            </button>
+              <h4 style={{ margin: '0 0 16px 0', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--saas-text-secondary)', letterSpacing: '0.05em' }}>
+                {locale === 'zh' ? '参数配置' : 'Prompt Config'}
+              </h4>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                <span style={{ padding: '4px 10px', background: 'rgba(83, 58, 253, 0.05)', border: '1px solid rgba(83, 58, 253, 0.15)', color: 'var(--saas-accent)', fontSize: '0.75rem', fontWeight: 600, borderRadius: '6px' }}>--ar 4:5</span>
+                <span style={{ padding: '4px 10px', background: 'rgba(83, 58, 253, 0.05)', border: '1px solid rgba(83, 58, 253, 0.15)', color: 'var(--saas-accent)', fontSize: '0.75rem', fontWeight: 600, borderRadius: '6px' }}>--v 6.0</span>
+              </div>
+              <div style={{ filter: 'blur(5px)', opacity: 0.35, userSelect: 'none', fontSize: '0.78rem', lineHeight: 1.6, color: 'var(--saas-text-secondary)' }}>
+                anime_portrait_mastery, masterwork cinematic lighting, extremely high detail, cyber-samurai female character...
+              </div>
 
-            {/* Price anchor caption */}
-            <p style={{ margin: '12px 0 20px 0', fontSize: '0.72rem', color: 'var(--saas-text-secondary)', textAlign: 'center', lineHeight: '1.4', fontStyle: 'italic', opacity: 0.9 }}>
-              “只需一杯咖啡的价格，省去你 10+ 小时在 Discord 调参的时间。”
-            </p>
-
-            {/* Log in link */}
-            <div style={{ marginTop: 'auto', borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: '16px', textAlign: 'center' }}>
-              <a
-                href={`/login?redirect=/${encodeURIComponent(`@${tenantId}`)}`}
+              {/* Lock Gradient & Crystal Button */}
+              <div 
                 style={{
-                  fontSize: '0.8rem',
-                  color: 'var(--saas-accent)',
-                  fontWeight: 600,
-                  textDecoration: 'none',
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'linear-gradient(to bottom, transparent 0%, rgba(255,255,255,1) 90%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '20px'
                 }}
               >
-                已订阅？登录即可解锁 →
-              </a>
+                <button
+                  onClick={() => router.push(`/subscribe?tenant=${tenantId}`)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.85)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                    border: '1px solid rgba(83, 58, 253, 0.3)',
+                    borderRadius: '9999px',
+                    color: 'var(--saas-accent)',
+                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    padding: '12px 24px',
+                    cursor: 'pointer',
+                    boxShadow: '0 8px 24px rgba(83, 58, 253, 0.12)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    transition: 'all 0.2s ease-in-out'
+                  }}
+                  onMouseOver={e => {
+                    const btn = e.currentTarget as HTMLButtonElement
+                    btn.style.transform = 'scale(1.03) translateY(-1px)'
+                    btn.style.boxShadow = '0 10px 28px rgba(83, 58, 253, 0.18)'
+                  }}
+                  onMouseOut={e => {
+                    const btn = e.currentTarget as HTMLButtonElement
+                    btn.style.transform = 'scale(1)'
+                    btn.style.boxShadow = '0 8px 24px rgba(83, 58, 253, 0.12)'
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
+                  <span>{locale === 'zh' ? '一键解锁完整提示词与变量' : 'Unlock Full Prompt'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right: Benefits checklist */}
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', flex: 0.9, minWidth: '230px', boxSizing: 'border-box' }}>
+              <h3 style={{ margin: '0 0 16px 0', fontSize: '1.2rem', fontWeight: 800, color: 'var(--saas-text-primary)', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                {locale === 'zh' ? '订阅会员专属权益' : 'Membership'}
+              </h3>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {[
+                  locale === 'zh' ? '获取完整提示词与调试参数' : 'Full prompt string & parameters',
+                  locale === 'zh' ? '反向提示词优化（避免崩脸与杂线）' : 'Negative prompt optimization',
+                  locale === 'zh' ? '附带模型种子值（Seed）与权重推荐' : 'Model-specific seed & weights'
+                ].map((item, idx) => (
+                  <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--saas-text-secondary)', lineHeight: '1.4' }}>
+                    <span className="material-symbols-outlined" style={{ color: '#10B981', fontSize: '20px', fontWeight: 'bold', fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
           </div>
 
+          {/* Bottom Quote Anchor */}
+          <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: '16px', marginTop: '8px' }}>
+            <p style={{ margin: 0, fontSize: '0.78rem', fontStyle: 'italic', color: 'var(--saas-text-secondary)', textAlign: 'center', lineHeight: '1.5' }}>
+              {locale === 'zh' 
+                ? '“只需一杯咖啡的价格，省去你 10+ 小时在 Discord 调参的时间。”'
+                : '"Unlock instantly for the price of a coffee, saving 10+ hours of tweaking settings on Discord."'}
+            </p>
+          </div>
         </div>
+
       </div>
     )
   }
 
-  // 3. Prompt Only mode — Option B: Elegant Fade-out with Floating Glass Crystal Button
+  // 3. Prompt Only mode — Option B: Elegant Fade-out with Floating Crystal Button
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', width: '100%' }}>
       {/* Children rendered with limited max-height and fading gradient mask */}
       <div style={{ position: 'relative', maxHeight: '180px', overflow: 'hidden', borderRadius: '16px' }}>
         {children}
@@ -227,7 +231,7 @@ export function PaywallGuard({ children, isSubscribed, tenantId, paywallMode, wa
           }}
           onMouseOver={e => {
             const btn = e.currentTarget as HTMLButtonElement
-            btn.style.setProperty('transform', 'scale(1.03)')
+            btn.style.setProperty('transform', 'scale(1.03) translateY(-1px)')
             btn.style.setProperty('border-color', 'rgba(83, 58, 253, 0.4)')
           }}
           onMouseOut={e => {
@@ -237,14 +241,14 @@ export function PaywallGuard({ children, isSubscribed, tenantId, paywallMode, wa
           }}
         >
           <span className="material-symbols-outlined" style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1" }}>workspace_premium</span>
-          一键解锁完整提示词与变量
+          <span>{locale === 'zh' ? '一键解锁完整提示词与变量' : 'Unlock Full Prompt'}</span>
         </button>
         <div style={{ marginTop: '8px', fontSize: '0.75rem', fontWeight: 500 }}>
           <a 
             href={`/login?redirect=/${encodeURIComponent(`@${tenantId}`)}`} 
             style={{ color: 'var(--saas-text-secondary)', textDecoration: 'underline' }}
           >
-            已订阅？登录即可解锁 →
+            {locale === 'zh' ? '已订阅？登录即可解锁 →' : 'Already subscribed? Log in to unlock →'}
           </a>
         </div>
       </div>
