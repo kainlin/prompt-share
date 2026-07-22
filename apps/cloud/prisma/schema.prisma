@@ -27,6 +27,7 @@ model User {
   sessions        Session[]
   accounts        Account[]
   orders          Order[]   @relation("BuyerOrders")
+  likes           PromptCaseLike[]
 
   @@map("ps_user")
   @@schema("public")
@@ -121,6 +122,12 @@ model PromptCase {
   allowCopy        Boolean  @default(true)   @map("allow_copy")
   freePreviewCount Int      @default(0)      @map("free_preview_count")
   watermarkEnabled Boolean  @default(false)  @map("watermark_enabled")
+  // Engagement counters
+  viewCount        Int      @default(0)      @map("view_count")
+  likeCount        Int      @default(0)      @map("like_count")
+  // Relations
+  likes            PromptCaseLike[]
+  views            PromptCaseView[]
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -167,5 +174,37 @@ model Order {
 
   @@index([creatorRevenue], map: "idx_order_creator_revenue")
   @@map("ps_order")
+  @@schema("public")
+}
+
+model PromptCaseLike {
+  id        String     @id @default(uuid())
+  userId    String
+  caseId    String
+  createdAt DateTime   @default(now())
+
+  case      PromptCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, caseId])
+  @@index([caseId])
+  @@map("ps_prompt_case_like")
+  @@schema("public")
+}
+
+model PromptCaseView {
+  id        String   @id @default(uuid())
+  caseId    String
+  userId    String?
+  ipHash    String
+  userAgent String
+  createdAt DateTime @default(now())
+
+  case      PromptCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId, createdAt])
+  @@index([userId, caseId, createdAt])
+  @@index([ipHash, caseId, createdAt])
+  @@map("ps_prompt_case_view")
   @@schema("public")
 }
