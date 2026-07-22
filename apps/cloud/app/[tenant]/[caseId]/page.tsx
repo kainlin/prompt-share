@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { headers, cookies } from 'next/headers'
-import { CaseHeader, PromptBlock, ImageGallery, VideoPlayer, IframeSandbox } from '@prompt-share/ui'
+import { CaseHeader, PromptBlock, ImageGallery, VideoPlayer, IframeSandbox, ColorPalette } from '@prompt-share/ui'
 import { db } from '@/lib/db'
 import { auth } from '@/lib/auth'
 import { getDictionary } from '@prompt-share/i18n'
@@ -146,6 +146,13 @@ export default async function CasePage({ params }: Props) {
               </div>
             )}
           </div>
+
+          {/* Color Palette extracted from cover image */}
+          {promptCase.coverImageUrl && (
+            <div style={{ marginTop: '20px' }}>
+              <ColorPalette imageUrl={promptCase.coverImageUrl} />
+            </div>
+          )}
         </div>
 
         {/* RIGHT COLUMN: Metadata details, statistics, and Prompt Editor */}

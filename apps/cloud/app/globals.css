@@ -29,6 +29,23 @@
   --saas-shadow-focus: 0 0 0 4px rgba(83, 58, 253, 0.08);
 }
 
+.dark {
+  --saas-bg: #141413;
+  --saas-panel: #1C1C1B;
+  --saas-sidebar: #1C1C1B;
+  --saas-text-primary: #EDEBE6;
+  --saas-text-secondary: #A09E99;
+  --saas-border: rgba(255, 255, 255, 0.08);
+  --saas-accent: #7B61FF;
+  --saas-accent-hover: #9B88FF;
+  --saas-error: #FF6B6B;
+  --saas-sky: #0D3B4F;
+  --saas-rose: #3D1A2C;
+  --saas-mint: #0D2E1A;
+  --saas-apricot: #3D2A1A;
+  --saas-shadow-focus: 0 0 0 4px rgba(123, 97, 255, 0.15);
+}
+
 body {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   color: var(--saas-text-primary);

@@ -6,6 +6,7 @@ import { db } from '@/lib/db'
 import { getDictionary } from '@prompt-share/i18n'
 import { TenantSidebar } from './tenant-sidebar'
 import { SearchBar } from './search-bar'
+import { ThemeToggle } from '@/components/theme-toggle'
 import styles from './tenant-layout.module.css'
 
 interface Props {
@@ -45,18 +46,21 @@ export default async function TenantStoreLayout({ children, params }: Props) {
         {/* Dynamic Search Bar exactly matching Nextra */}
         <SearchBar placeholder={dict.search || '搜索提示词...'} />
 
-        <a
-          href={`/login?redirect=${encodeURIComponent(`/${rawTenant}`)}`}
-          style={{
-            fontSize: '0.8rem',
-            color: 'var(--feishu-text-secondary)',
-            textDecoration: 'none',
-            fontWeight: 500,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {locale === 'en' ? 'Sign in' : '登录'} →
-        </a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <ThemeToggle />
+          <a
+            href={`/login?redirect=${encodeURIComponent(`/${rawTenant}`)}`}
+            style={{
+              fontSize: '0.8rem',
+              color: 'var(--feishu-text-secondary)',
+              textDecoration: 'none',
+              fontWeight: 500,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {locale === 'en' ? 'Sign in' : '登录'} →
+          </a>
+        </div>
       </header>
 
       {/* Main Layout containing Left Sidebar and Workspace */}
