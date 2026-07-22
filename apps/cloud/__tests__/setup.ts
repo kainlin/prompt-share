@@ -14,8 +14,21 @@ vi.mock('@/lib/db', () => ({
       findUnique: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
+      updateMany: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn(),
+    },
+    promptCaseLike: {
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
       delete: vi.fn(),
     },
+    promptCaseView: {
+      findFirst: vi.fn(),
+      create: vi.fn(),
+    },
+    $transaction: vi.fn((ops: any[]) => Promise.all(ops)),
     subscription: {
       create: vi.fn(),
       upsert: vi.fn(),
