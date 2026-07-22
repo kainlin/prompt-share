@@ -116,8 +116,24 @@ export default async function CasePage({ params }: Props) {
             />
           ) : promptCase.previewType === 'web' && promptCase.previewSource ? (
             <IframeSandbox sourceUrl={promptCase.previewSource} />
-          ) : (
+          ) : promptCase.images && promptCase.images.length > 0 ? (
             <ImageGallery images={promptCase.images} alt={promptCase.title} />
+          ) : promptCase.coverImageUrl ? (
+            /* Fallback: cover image as full URL — ImageGallery expects filenames, not URLs */
+            <img
+              src={promptCase.coverImageUrl}
+              alt={promptCase.title}
+              style={{ width: '100%', borderRadius: '12px', objectFit: 'cover' }}
+            />
+          ) : (
+            <div style={{
+              width: '100%', aspectRatio: '16/10', borderRadius: '12px',
+              background: 'var(--saas-card-bg, #f5f5f5)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--saas-text-secondary)', fontSize: '0.9rem',
+            }}>
+              📷 No preview available
+            </div>
           )}
         </div>
 
